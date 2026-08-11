@@ -3,7 +3,14 @@ import { ChoiceList } from '../../components/common/ChoiceList'
 import { MobileShell } from '../../components/common/MobileShell'
 import { ProductMedia } from '../../components/domain/ProductMedia'
 import { EVENT_NAMES } from '../../constants/events'
-import { STAGE_C_SCREEN_IDS, type StageCHubScreenId } from '../../constants/stageC'
+import {
+  STAGE_C_PRODUCT_DETAIL_ROUTE_KEYS,
+  STAGE_C_PRODUCT_DETAIL_ROUTES,
+  STAGE_C_SCREEN_IDS,
+  stageCComingSoonPath,
+  stageCPath,
+  type StageCHubScreenId,
+} from '../../constants/stageC'
 import { useStageCProduct } from '../../features/product-explore/useStageCProduct'
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes'
 import { useSession } from '../../features/session/useSession'
@@ -36,19 +43,27 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
     }
 
     dispatch({ type: SESSION_ACTIONS.recordSubhubSelect, sub: choice.id })
-    navigate(`/stage-c/${sku}/coming-soon/${choice.destination}`)
+    const detailRouteKey = STAGE_C_PRODUCT_DETAIL_ROUTE_KEYS[
+      choice.id as keyof typeof STAGE_C_PRODUCT_DETAIL_ROUTE_KEYS
+    ]
+
+    if (detailRouteKey) {
+      navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES[detailRouteKey], sku))
+      return
+    }
+    navigate(stageCComingSoonPath(sku, choice.destination))
   }
 
   const requestPurchase = () => {
     dispatch({ type: SESSION_ACTIONS.recordSubhubSelect, sub: STAGE_C_SCREEN_IDS.c33 })
-    navigate(`/stage-c/${sku}/coming-soon/${STAGE_C_SCREEN_IDS.c33}`)
+    navigate(stageCComingSoonPath(sku, STAGE_C_SCREEN_IDS.c33))
   }
 
   const exitProduct = () => {
     const exitCount = state.events.filter((event) => event.name === EVENT_NAMES.productExit).length
     dispatch({ type: SESSION_ACTIONS.recordProductExit, sku })
     const destination = exitCount === 0 ? STAGE_C_SCREEN_IDS.stageD1 : STAGE_C_SCREEN_IDS.stageB1
-    navigate(`/stage-c/${sku}/coming-soon/${destination}`)
+    navigate(stageCComingSoonPath(sku, destination))
   }
 
   return (

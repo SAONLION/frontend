@@ -5,6 +5,8 @@ export const EVENT_NAMES = {
   productExit: 'product_exit',
   purchaseInquiry: 'purchase_inquiry',
   subhubSelect: 'subhub_select',
+  tabView: 'tab_view',
+  saCall: 'sa_call',
 } as const
 
 export const EVENT_ID_PREFIX = 'event-'
@@ -30,3 +32,5 @@ export type SessionEvent =
   | (EventBase<typeof EVENT_NAMES.productExit> & { sku: string })
   | (EventBase<typeof EVENT_NAMES.purchaseInquiry> & { sku: string })
   | (EventBase<typeof EVENT_NAMES.subhubSelect> & { sub: string })
+  | (EventBase<typeof EVENT_NAMES.tabView> & { topic: 'craft' | 'heritage' | 'styling'; sku: string })
+  | (EventBase<typeof EVENT_NAMES.saCall> & { type: 'info'; sku: string })
