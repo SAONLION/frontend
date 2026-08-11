@@ -1,11 +1,19 @@
+import { BrowserRouter } from 'react-router'
+import { AppRoutes } from './app/routes'
+import { SessionProvider } from './features/session/SessionProvider'
+import { mockProductContentProvider } from './mocks/providers/mockProductContentProvider'
+import { ProductContentProvider } from './services/product-content/ProductContentProvider'
 import './App.css'
 
 function App() {
   return (
-    <main className="app">
-      <h1>SAONLION</h1>
-      <p>React + TypeScript + Vite 환경 설정이 완료되었습니다.</p>
-    </main>
+    <BrowserRouter>
+      <ProductContentProvider value={mockProductContentProvider}>
+        <SessionProvider>
+          <AppRoutes />
+        </SessionProvider>
+      </ProductContentProvider>
+    </BrowserRouter>
   )
 }
 

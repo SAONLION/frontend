@@ -21,3 +21,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local project context and experiments
+/AGENTS.md
+/docs/
+/ex/
+/tobackend/

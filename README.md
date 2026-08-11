@@ -1,6 +1,14 @@
 # SAONLION Frontend
 
-React, TypeScript, Vite 기반의 프론트엔드 프로젝트입니다.
+MCM 오프라인 매장의 익명 잠재 고객을 위한 AI SA 도슨트 프론트엔드입니다.
+
+## 기술 스택
+
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Oxlint
 
 ## 실행 방법
 
