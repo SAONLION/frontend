@@ -31,6 +31,9 @@ export const STAGE_C_PRODUCT_DETAIL_ROUTES = {
   fitTryOnPending: '/stage-c/:sku/fit/try-on/pending',
   fitTryOnCompleted: '/stage-c/:sku/fit/try-on/completed',
   fitPurchaseInquiryCompleted: '/stage-c/:sku/fit/purchase-inquiry/completed',
+  priceInquiry: '/stage-c/:sku/purchase/price',
+  priceInquiryPending: '/stage-c/:sku/purchase/price/pending',
+  priceInquiryCompleted: '/stage-c/:sku/purchase/price/completed',
 } as const
 
 export const STAGE_C_PRODUCT_DETAIL_ROUTE_KEYS = {
@@ -40,6 +43,7 @@ export const STAGE_C_PRODUCT_DETAIL_ROUTE_KEYS = {
   [STAGE_C_SCREEN_IDS.c31]: 'fitSize',
   [STAGE_C_SCREEN_IDS.c32]: 'fitColor',
   [STAGE_C_SCREEN_IDS.c33]: 'fitTryOn',
+  [STAGE_C_SCREEN_IDS.c41]: 'priceInquiry',
 } as const
 
 export type StageCProductDetailRouteKey =

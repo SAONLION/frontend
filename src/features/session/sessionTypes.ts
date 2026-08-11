@@ -6,6 +6,7 @@ export const SESSION_ACTIONS = {
   recordHubSelect: 'record_hub_select',
   recordNfcTag: 'record_nfc_tag',
   recordProductExit: 'record_product_exit',
+  recordPriceInquiryRequest: 'record_price_inquiry_request',
   recordPurchaseInquiry: 'record_purchase_inquiry',
   recordSizeCheck: 'record_size_check',
   recordColorSwitch: 'record_color_switch',
@@ -27,6 +28,7 @@ export type SessionAction =
   | { type: typeof SESSION_ACTIONS.recordHubSelect; hubType: HubType }
   | { type: typeof SESSION_ACTIONS.recordNfcTag; sku: string }
   | { type: typeof SESSION_ACTIONS.recordProductExit; sku: string }
+  | { type: typeof SESSION_ACTIONS.recordPriceInquiryRequest; sku: string }
   | { type: typeof SESSION_ACTIONS.recordPurchaseInquiry; sku: string }
   | { type: typeof SESSION_ACTIONS.recordSizeCheck; sku: string; size: string }
   | { type: typeof SESSION_ACTIONS.recordColorSwitch; sku: string; from: string; to: string }

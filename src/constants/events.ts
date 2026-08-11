@@ -3,6 +3,7 @@ export const EVENT_NAMES = {
   hubSelect: 'hub_select',
   nfcTag: 'nfc_tag',
   productExit: 'product_exit',
+  priceInquiryRequest: 'price_inquiry_request',
   purchaseInquiry: 'purchase_inquiry',
   sizeCheck: 'size_check',
   colorSwitch: 'color_switch',
@@ -33,6 +34,7 @@ export type SessionEvent =
   | (EventBase<typeof EVENT_NAMES.hubSelect> & { type: HubType })
   | (EventBase<typeof EVENT_NAMES.nfcTag> & { sku: string })
   | (EventBase<typeof EVENT_NAMES.productExit> & { sku: string })
+  | (EventBase<typeof EVENT_NAMES.priceInquiryRequest> & { sku: string })
   | (EventBase<typeof EVENT_NAMES.purchaseInquiry> & { sku: string })
   | (EventBase<typeof EVENT_NAMES.sizeCheck> & { sku: string; size: string })
   | (EventBase<typeof EVENT_NAMES.colorSwitch> & { sku: string; from: string; to: string })
