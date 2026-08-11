@@ -1,7 +1,7 @@
-import A2NicknameSetup from './pages/StageA/A2NicknameSetup'
+import B2TagRecognizing from './pages/StageB/B2TagRecognizing'
 
 function App() {
-  return <A2NicknameSetup onSubmit={(nickname) => console.log('nickname:', nickname)} />
+  return <B2TagRecognizing onRecognized={() => console.log('tag recognized')} />
 }
 
 export default App
