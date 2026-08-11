@@ -1,12 +1,7 @@
-import './App.css'
+import A2NicknameSetup from './pages/StageA/A2NicknameSetup'
 
 function App() {
-  return (
-    <main className="app">
-      <h1>SAONLION</h1>
-      <p>React + TypeScript + Vite 환경 설정이 완료되었습니다.</p>
-    </main>
-  )
+  return <A2NicknameSetup onSubmit={(nickname) => console.log('nickname:', nickname)} />
 }
 
 export default App
