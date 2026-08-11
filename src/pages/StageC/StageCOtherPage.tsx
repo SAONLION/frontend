@@ -1,96 +1,62 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { MobileShell } from '../../components/common/MobileShell'
-import { EVENT_NAMES, FREE_QUERY_TOPICS } from '../../constants/events'
-import { STAGE_C_SCREEN_IDS } from '../../constants/stageC'
+import { GlassBottomActionDock, GlassChoiceChip, GlassInfoCard, GlassTopBar, StageCDetailShell } from '../../components/domain/StageCDetailShell'
+import { FREE_QUERY_TOPICS, type FreeQueryTopic } from '../../constants/events'
+import { STAGE_C_PRODUCT_DETAIL_ROUTES, STAGE_C_ROUTES, stageCPath } from '../../constants/stageC'
+import { useProductExit } from '../../features/product-explore/useProductExit'
 import { useStageCProduct } from '../../features/product-explore/useStageCProduct'
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes'
 import { useSession } from '../../features/session/useSession'
 import { StageCState } from './StageCHubPage'
-import { quickQueryTopics, stageCHubDefinitions } from './stageCDefinitions'
+import { quickQueryTopics } from './stageCDefinitions'
+
+const piiPattern = /(?:\b[\w.+-]+@[\w-]+\.[\w.-]+\b)|(?:\b(?:\+?82[- ]?)?0?1[0-9][ -]?\d{3,4}[ -]?\d{4}\b)/
 
 export function StageCOtherPage() {
   const { sku = '' } = useParams()
   const navigate = useNavigate()
-  const { dispatch, state } = useSession()
+  const { dispatch } = useSession()
   const product = useStageCProduct(sku)
+  const exitProduct = useProductExit(sku)
   const [query, setQuery] = useState('')
+  const [topic, setTopic] = useState<FreeQueryTopic>(FREE_QUERY_TOPICS.other)
   const [error, setError] = useState('')
-  const screen = stageCHubDefinitions[STAGE_C_SCREEN_IDS.c5]
+  const [submitting, setSubmitting] = useState(false)
 
-  if (product === undefined) {
-    return <StageCState title="제품 정보를 불러오는 중이에요" description="잠시만 기다려 주세요." />
-  }
-
-  if (product === null) {
-    return <StageCState title="상품을 찾을 수 없어요" description="태그한 상품의 주소를 다시 확인해 주세요." />
-  }
+  if (product === undefined) return <StageCState title="제품 정보를 불러오는 중이에요" description="잠시만 기다려 주세요." />
+  if (product === null) return <StageCState title="상품을 찾을 수 없어요" description="태그한 상품의 주소를 다시 확인해 주세요." />
 
   const submitQuery = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const text = query.trim()
-
-    if (!text) {
-      setError('궁금한 내용을 입력하거나 퀵칩을 선택해 주세요.')
-      return
-    }
-
-    dispatch({ type: SESSION_ACTIONS.recordFreeQuery, topic: FREE_QUERY_TOPICS.other, text })
-    navigate(`/stage-c/${sku}/coming-soon/${STAGE_C_SCREEN_IDS.c51}`)
-  }
-
-  const requestPurchase = () => {
-    dispatch({ type: SESSION_ACTIONS.recordSubhubSelect, sub: STAGE_C_SCREEN_IDS.c33 })
-    navigate(`/stage-c/${sku}/coming-soon/${STAGE_C_SCREEN_IDS.c33}`)
-  }
-
-  const exitProduct = () => {
-    const exitCount = state.events.filter((event) => event.name === EVENT_NAMES.productExit).length
-    dispatch({ type: SESSION_ACTIONS.recordProductExit, sku })
-    const destination = exitCount === 0 ? STAGE_C_SCREEN_IDS.stageD1 : STAGE_C_SCREEN_IDS.stageB1
-    navigate(`/stage-c/${sku}/coming-soon/${destination}`)
+    if (!text) return setError('궁금한 내용을 입력하거나 퀵칩을 선택해 주세요.')
+    if (piiPattern.test(text)) return setError('개인정보 없이 질문해 주세요.')
+    if (submitting) return
+    setSubmitting(true)
+    dispatch({ type: SESSION_ACTIONS.recordFreeQuery, sku, topic, text })
+    navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.otherAnswer, sku))
   }
 
   return (
-    <MobileShell>
-      <section className="stage-c-page stage-c-page--other" aria-labelledby="stage-c-other-heading">
-        <div className="stage-c-product-context-pill">비세토스 스타크 백팩</div>
-        <div className="stage-c-other-spacer" aria-hidden="true" />
-        <div className="stage-c-hub-content stage-c-hub-content--other">
-          <h1 id="stage-c-other-heading">{screen.heading}</h1>
-          <p className="stage-c-intro">{screen.intro}</p>
-          <form className="stage-c-query-form" onSubmit={submitQuery}>
-            <label className="stage-c-visually-hidden" htmlFor="stage-c-free-query">궁금한 내용</label>
-            <textarea
-              aria-describedby={error ? 'stage-c-free-query-error' : undefined}
-              id="stage-c-free-query"
-              onChange={(event) => {
-                setQuery(event.target.value)
-                if (error) setError('')
-              }}
-              placeholder="예) 비 오는 날 들어도 괜찮을까요?"
-              value={query}
-            />
-            <div aria-label="자주 묻는 질문" className="stage-c-quick-chips">
-              {quickQueryTopics.map((topic) => (
-                <button key={topic} onClick={() => setQuery(topic)} type="button">
-                  {topic}
-                </button>
-              ))}
-            </div>
-            {error && <p className="stage-c-form-error" id="stage-c-free-query-error" role="alert">{error}</p>}
-            <button className="stage-c-send-button" type="submit">보내기</button>
-          </form>
-        </div>
-        <div className="stage-c-bottom-action-bar" aria-label="제품 탐색 액션">
-          <button className="stage-c-action-button" onClick={requestPurchase} type="button">
-            {screen.purchaseActionLabel}
-          </button>
-          <button className="stage-c-action-button" onClick={exitProduct} type="button">
-            다른 제품 보기 <span aria-hidden="true">→</span>
-          </button>
-        </div>
-      </section>
-    </MobileShell>
+    <StageCDetailShell>
+      <GlassTopBar action={<button onClick={() => navigate(stageCPath(STAGE_C_ROUTES.c1, sku))} type="button">닫기</button>} context="기타 질문" />
+      <GlassInfoCard>
+        <h1>선택지에 없는 게 궁금하시면</h1>
+        <p>아래에 편하게 적어주세요.</p>
+        <form className="stage-c-query-form stage-c-glass-query-form" onSubmit={submitQuery}>
+          <label className="stage-c-visually-hidden" htmlFor="stage-c-free-query">궁금한 내용</label>
+          <textarea aria-describedby={error ? 'stage-c-free-query-error' : undefined} id="stage-c-free-query" onChange={(event) => { setQuery(event.target.value); setTopic(FREE_QUERY_TOPICS.other); setError('') }} placeholder="예) 비 오는 날 들어도 괜찮을까요?" value={query} />
+          <div aria-label="자주 묻는 질문" className="stage-c-quick-chips">
+            {quickQueryTopics.map((item) => <GlassChoiceChip key={item.label} label={item.label} onClick={() => { setQuery(item.question); setTopic(item.topic); setError('') }} selected={topic === item.topic && query === item.question} />)}
+          </div>
+          {error && <p className="stage-c-form-error" id="stage-c-free-query-error" role="alert">{error}</p>}
+          <button className="stage-c-send-button" disabled={submitting} type="submit">{submitting ? '보내는 중…' : '보내기'}</button>
+        </form>
+      </GlassInfoCard>
+      <GlassBottomActionDock>
+        <button onClick={() => navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn, sku))} type="button">착용 및 구매 문의하기</button>
+        <button onClick={exitProduct} type="button">다른 제품 보기 →</button>
+      </GlassBottomActionDock>
+    </StageCDetailShell>
   )
 }

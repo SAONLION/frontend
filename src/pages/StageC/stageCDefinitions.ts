@@ -1,5 +1,5 @@
 import { STAGE_C_SCREEN_IDS, type StageCComingSoonScreenId, type StageCHubScreenId } from '../../constants/stageC'
-import type { HubType } from '../../constants/events'
+import { FREE_QUERY_TOPICS, type FreeQueryTopic, type HubType } from '../../constants/events'
 
 type HubRouteSegment = 'product' | 'fit' | 'purchase' | 'other'
 
@@ -71,4 +71,9 @@ export const stageCHubDefinitions: Record<StageCHubScreenId, HubScreenDefinition
   },
 }
 
-export const quickQueryTopics = ['A/S · 수선', '세탁 · 관리', '선물 포장', '면세 · 환급'] as const
+export const quickQueryTopics: readonly { label: string; question: string; topic: FreeQueryTopic }[] = [
+  { label: 'A/S · 수선', question: 'A/S · 수선이 가능한가요?', topic: FREE_QUERY_TOPICS.repair },
+  { label: '세탁 · 관리', question: '세탁 · 관리 방법이 궁금해요.', topic: FREE_QUERY_TOPICS.care },
+  { label: '선물 포장', question: '선물 포장이 가능한가요?', topic: FREE_QUERY_TOPICS.giftWrap },
+  { label: '면세 · 환급', question: '면세 · 환급이 가능한가요?', topic: FREE_QUERY_TOPICS.taxRefund },
+]

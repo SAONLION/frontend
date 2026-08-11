@@ -1,8 +1,9 @@
-import type { HubType, SessionEvent } from '../../constants/events'
+import type { FreeQueryTopic, HubType, SessionEvent, StaffCallType } from '../../constants/events'
 import type { StageCComingSoonScreenId } from '../../constants/stageC'
 
 export const SESSION_ACTIONS = {
   recordFreeQuery: 'record_free_query',
+  recordAiAnswer: 'record_ai_answer',
   recordHubSelect: 'record_hub_select',
   recordNfcTag: 'record_nfc_tag',
   recordProductExit: 'record_product_exit',
@@ -20,11 +21,14 @@ export type SessionState = {
   currentSku: string | null
   taggedSkus: readonly string[]
   events: readonly SessionEvent[]
+  freeQueryContexts: Readonly<Record<string, { sku: string }>>
+  aiAnswerContexts: Readonly<Record<string, { queryId: string; sku: string }>>
   intentScore: number
 }
 
 export type SessionAction =
-  | { type: typeof SESSION_ACTIONS.recordFreeQuery; topic: string; text: string }
+  | { type: typeof SESSION_ACTIONS.recordFreeQuery; sku: string; topic: FreeQueryTopic; text: string }
+  | { type: typeof SESSION_ACTIONS.recordAiAnswer; queryId: string; sku: string; topic: FreeQueryTopic; resolved: boolean }
   | { type: typeof SESSION_ACTIONS.recordHubSelect; hubType: HubType }
   | { type: typeof SESSION_ACTIONS.recordNfcTag; sku: string }
   | { type: typeof SESSION_ACTIONS.recordProductExit; sku: string }
@@ -36,4 +40,4 @@ export type SessionAction =
   | { type: typeof SESSION_ACTIONS.recordSubhubSelect; sub: StageCComingSoonScreenId }
   | { type: typeof SESSION_ACTIONS.setCurrentSku; sku: string }
   | { type: typeof SESSION_ACTIONS.recordTabView; topic: 'craft' | 'heritage' | 'styling'; sku: string }
-  | { type: typeof SESSION_ACTIONS.recordSaCall; sku: string }
+  | { type: typeof SESSION_ACTIONS.recordSaCall; sku: string; callType: StaffCallType; queryId?: string }
