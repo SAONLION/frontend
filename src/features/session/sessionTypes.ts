@@ -9,6 +9,7 @@ export const SESSION_ACTIONS = {
   recordPurchaseInquiry: 'record_purchase_inquiry',
   recordSubhubSelect: 'record_subhub_select',
   setCurrentSku: 'set_current_sku',
+  recordTabView: 'record_tab_view', recordSaCall: 'record_sa_call',
 } as const
 
 export type SessionState = {
@@ -26,3 +27,5 @@ export type SessionAction =
   | { type: typeof SESSION_ACTIONS.recordPurchaseInquiry; sku: string }
   | { type: typeof SESSION_ACTIONS.recordSubhubSelect; sub: StageCComingSoonScreenId }
   | { type: typeof SESSION_ACTIONS.setCurrentSku; sku: string }
+  | { type: typeof SESSION_ACTIONS.recordTabView; topic: 'craft' | 'heritage' | 'styling'; sku: string }
+  | { type: typeof SESSION_ACTIONS.recordSaCall; sku: string }

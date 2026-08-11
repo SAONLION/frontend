@@ -327,3 +327,274 @@
     max-height: 11rem;
   }
 }
+
+.stage-c-shell {
+  --stage-c-glass-surface: rgb(28 31 38 / 68%);
+  --stage-c-glass-surface-strong: rgb(38 42 51 / 82%);
+  --stage-c-glass-border: rgb(255 255 255 / 18%);
+  --stage-c-glass-highlight: rgb(255 255 255 / 27%);
+  --stage-c-glass-shadow: 0 1rem 2.5rem rgb(0 0 0 / 32%);
+  --stage-c-glass-blur: blur(0.875rem);
+  --stage-c-glass-saturate: saturate(1.15);
+  --stage-c-glass-text: #f8fafc;
+  --stage-c-glass-text-muted: #cbd2dd;
+  --stage-c-glass-accent: #b87420;
+}
+
+.stage-c-detail-shell {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.75rem, 2.8dvh, 1rem);
+  min-height: 100dvh;
+  padding: max(1rem, env(safe-area-inset-top)) 1rem max(1.25rem, env(safe-area-inset-bottom));
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 75% 4%, rgb(130 88 39 / 68%), transparent 36%),
+    linear-gradient(160deg, #171a22 0%, #0b0d12 62%, #08090c 100%);
+}
+
+.stage-c-glass-topbar,
+.stage-c-glass-card,
+.stage-c-glass-speech,
+.stage-c-glass-action-dock,
+.stage-c-glass-media-frame {
+  border: 1px solid var(--stage-c-glass-border);
+  box-shadow: inset 0 1px 0 var(--stage-c-glass-highlight), var(--stage-c-glass-shadow);
+}
+
+.stage-c-glass-topbar,
+.stage-c-glass-action-dock {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.625rem;
+  padding: 0.625rem;
+  border-radius: 1.25rem;
+  background: var(--stage-c-glass-surface);
+  color: var(--stage-c-glass-text);
+  backdrop-filter: var(--stage-c-glass-blur) var(--stage-c-glass-saturate);
+}
+
+.stage-c-glass-topbar span {
+  padding-inline: 0.5rem;
+  color: var(--stage-c-glass-text-muted);
+  font-size: 0.8125rem;
+}
+
+.stage-c-glass-topbar button,
+.stage-c-glass-action-dock button,
+.stage-c-glass-speech button,
+.stage-c-glass-link-button {
+  border: 1px solid transparent;
+  border-radius: 1rem;
+  padding: 0.625rem 0.75rem;
+  color: inherit;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.stage-c-glass-topbar button,
+.stage-c-glass-link-button,
+.stage-c-glass-action-dock button {
+  background: rgb(255 255 255 / 12%);
+}
+
+.stage-c-glass-media-frame {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  min-height: clamp(13rem, 36dvh, 20rem);
+  overflow: hidden;
+  border-radius: 1.25rem;
+  background: var(--stage-c-glass-surface);
+}
+
+.stage-c-glass-card {
+  padding: 1rem;
+  border-radius: 1.125rem;
+  background: var(--stage-c-glass-surface-strong);
+  color: var(--stage-c-glass-text);
+  backdrop-filter: var(--stage-c-glass-blur) var(--stage-c-glass-saturate);
+}
+
+.stage-c-glass-card h1 {
+  margin: 0 0 0.625rem;
+  font-size: clamp(1.125rem, 5vw, 1.375rem);
+}
+
+.stage-c-glass-card p {
+  margin: 0.375rem 0;
+  color: var(--stage-c-glass-text-muted);
+  line-height: 1.5;
+}
+
+.stage-c-glass-speech {
+  overflow: hidden;
+  border-radius: 1.5rem;
+  background: var(--stage-c-glass-surface-strong);
+  color: var(--stage-c-glass-text);
+  backdrop-filter: var(--stage-c-glass-blur) var(--stage-c-glass-saturate);
+}
+
+.stage-c-glass-speech button {
+  width: 100%;
+  background: transparent;
+  text-align: left;
+}
+
+.stage-c-glass-action-dock {
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-bottom: max(0.625rem, env(safe-area-inset-bottom));
+}
+
+.stage-c-glass-action-dock button,
+.stage-c-glass-action-dock .stage-c-glass-link-button {
+  flex: 1 1 7rem;
+  min-width: 0;
+  text-align: center;
+}
+
+.stage-c-glass-action-dock button:first-child,
+.stage-c-glass-link-button--accent {
+  background: var(--stage-c-glass-accent);
+}
+
+.stage-c-docent-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.stage-c-docent-layer canvas {
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none;
+}
+
+.stage-c-docent-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 1rem;
+  color: var(--stage-c-glass-text-muted);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.stage-c-gallery {
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  width: min(62%, 15rem);
+  height: min(70%, 13rem);
+  min-height: 0;
+  margin: auto auto 0.875rem 0.875rem;
+  overflow: hidden;
+  border: 1px solid var(--stage-c-glass-highlight);
+  border-radius: 1rem;
+  background: rgb(8 10 14 / 42%);
+  box-shadow: 0 0.75rem 1.5rem rgb(0 0 0 / 22%);
+}
+
+.stage-c-gallery-track {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.stage-c-gallery-track::-webkit-scrollbar {
+  display: none;
+}
+
+.stage-c-gallery-track img {
+  flex: 0 0 100%;
+  width: 100%;
+  min-width: 0;
+  object-fit: cover;
+  scroll-snap-align: center;
+}
+
+.stage-c-gallery-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 0.25rem;
+  padding: 0.375rem;
+  background: rgb(8 10 14 / 78%);
+  color: var(--stage-c-glass-text);
+  font-size: 0.75rem;
+}
+
+.stage-c-gallery-controls button {
+  border: 0;
+  border-radius: 0.75rem;
+  padding: 0.375rem 0.5rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.stage-c-staff-media {
+  min-height: clamp(11rem, 28dvh, 16rem);
+}
+
+.stage-c-glass-topbar button:hover,
+.stage-c-glass-action-dock button:hover,
+.stage-c-glass-speech button:hover,
+.stage-c-glass-link-button:hover,
+.stage-c-gallery-controls button:hover {
+  border-color: var(--stage-c-glass-highlight);
+  background-color: rgb(255 255 255 / 19%);
+}
+
+.stage-c-glass-topbar button:active,
+.stage-c-glass-action-dock button:active,
+.stage-c-glass-speech button:active,
+.stage-c-glass-link-button:active,
+.stage-c-gallery-controls button:active {
+  transform: scale(0.98);
+}
+
+.stage-c-glass-topbar button:focus-visible,
+.stage-c-glass-action-dock button:focus-visible,
+.stage-c-glass-speech button:focus-visible,
+.stage-c-glass-link-button:focus-visible,
+.stage-c-gallery-track:focus-visible,
+.stage-c-gallery-controls button:focus-visible {
+  outline: 0.125rem solid #fff;
+  outline-offset: 0.125rem;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .stage-c-glass-topbar,
+  .stage-c-glass-card,
+  .stage-c-glass-speech,
+  .stage-c-glass-action-dock,
+  .stage-c-glass-media-frame {
+    background: #252b35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-c-gallery-track {
+    scroll-behavior: auto;
+  }
+
+  .stage-c-glass-topbar button:active,
+  .stage-c-glass-action-dock button:active,
+  .stage-c-glass-speech button:active,
+  .stage-c-glass-link-button:active,
+  .stage-c-gallery-controls button:active {
+    transform: none;
+  }
+}
