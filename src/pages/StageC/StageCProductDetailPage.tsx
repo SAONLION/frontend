@@ -11,8 +11,6 @@ import {
 import {
   STAGE_C_PRODUCT_DETAIL_ROUTES,
   STAGE_C_ROUTES,
-  STAGE_C_SCREEN_IDS,
-  stageCComingSoonPath,
   stageCPath,
 } from '../../constants/stageC'
 import { useProductExit } from '../../features/product-explore/useProductExit'
@@ -111,7 +109,7 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
   }
 
   const openPurchaseInquiry = () => {
-    navigate(stageCComingSoonPath(sku, STAGE_C_SCREEN_IDS.c33))
+    navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn, sku))
   }
 
   return (

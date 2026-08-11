@@ -25,12 +25,21 @@ export const STAGE_C_PRODUCT_DETAIL_ROUTES = {
   styling: '/stage-c/:sku/product/styling',
   staffPending: '/stage-c/:sku/product/staff-call/pending',
   staffCompleted: '/stage-c/:sku/product/staff-call/completed',
+  fitSize: '/stage-c/:sku/fit/size',
+  fitColor: '/stage-c/:sku/fit/color',
+  fitTryOn: '/stage-c/:sku/fit/try-on',
+  fitTryOnPending: '/stage-c/:sku/fit/try-on/pending',
+  fitTryOnCompleted: '/stage-c/:sku/fit/try-on/completed',
+  fitPurchaseInquiryCompleted: '/stage-c/:sku/fit/purchase-inquiry/completed',
 } as const
 
 export const STAGE_C_PRODUCT_DETAIL_ROUTE_KEYS = {
   [STAGE_C_SCREEN_IDS.c21]: 'craft',
   [STAGE_C_SCREEN_IDS.c22]: 'heritage',
   [STAGE_C_SCREEN_IDS.c23]: 'styling',
+  [STAGE_C_SCREEN_IDS.c31]: 'fitSize',
+  [STAGE_C_SCREEN_IDS.c32]: 'fitColor',
+  [STAGE_C_SCREEN_IDS.c33]: 'fitTryOn',
 } as const
 
 export type StageCProductDetailRouteKey =

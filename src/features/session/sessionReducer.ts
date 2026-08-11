@@ -54,6 +54,23 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
         events: [...state.events, { id, name: EVENT_NAMES.purchaseInquiry, sku: action.sku, createdAt }],
         intentScore: state.intentScore + 35,
       }
+    case SESSION_ACTIONS.recordSizeCheck:
+      return {
+        ...state,
+        events: [...state.events, { id, name: EVENT_NAMES.sizeCheck, sku: action.sku, size: action.size, createdAt }],
+        intentScore: state.intentScore + 15,
+      }
+    case SESSION_ACTIONS.recordColorSwitch:
+      return {
+        ...state,
+        events: [...state.events, { id, name: EVENT_NAMES.colorSwitch, sku: action.sku, from: action.from, to: action.to, createdAt }],
+      }
+    case SESSION_ACTIONS.recordTryonRequest:
+      return {
+        ...state,
+        events: [...state.events, { id, name: EVENT_NAMES.tryonRequest, sku: action.sku, size: action.size, color: action.color, createdAt }],
+        intentScore: state.intentScore + 30,
+      }
     case SESSION_ACTIONS.recordProductExit:
       return {
         ...state,

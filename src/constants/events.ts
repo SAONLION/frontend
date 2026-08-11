@@ -4,6 +4,9 @@ export const EVENT_NAMES = {
   nfcTag: 'nfc_tag',
   productExit: 'product_exit',
   purchaseInquiry: 'purchase_inquiry',
+  sizeCheck: 'size_check',
+  colorSwitch: 'color_switch',
+  tryonRequest: 'tryon_request',
   subhubSelect: 'subhub_select',
   tabView: 'tab_view',
   saCall: 'sa_call',
@@ -31,6 +34,9 @@ export type SessionEvent =
   | (EventBase<typeof EVENT_NAMES.nfcTag> & { sku: string })
   | (EventBase<typeof EVENT_NAMES.productExit> & { sku: string })
   | (EventBase<typeof EVENT_NAMES.purchaseInquiry> & { sku: string })
+  | (EventBase<typeof EVENT_NAMES.sizeCheck> & { sku: string; size: string })
+  | (EventBase<typeof EVENT_NAMES.colorSwitch> & { sku: string; from: string; to: string })
+  | (EventBase<typeof EVENT_NAMES.tryonRequest> & { sku: string; size: string; color: string })
   | (EventBase<typeof EVENT_NAMES.subhubSelect> & { sub: string })
   | (EventBase<typeof EVENT_NAMES.tabView> & { topic: 'craft' | 'heritage' | 'styling'; sku: string })
   | (EventBase<typeof EVENT_NAMES.saCall> & { type: 'info'; sku: string })

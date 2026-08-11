@@ -10,6 +10,7 @@ import { StageCHubPage } from '../pages/StageC/StageCHubPage'
 import { StageCOtherPage } from '../pages/StageC/StageCOtherPage'
 import { StageCProductDetailPage } from '../pages/StageC/StageCProductDetailPage'
 import { StaffCallPage } from '../pages/StageC/StaffCallPage'
+import { StageCFitPage } from '../pages/StageC/StageCFitPages'
 
 const defaultSku = 'MMKEAVE15CO001'
 
@@ -27,6 +28,12 @@ export function AppRoutes() {
       <Route element={<StageCProductDetailPage topic="styling" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.styling} />
       <Route element={<StaffCallPage />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.staffPending} />
       <Route element={<StaffCallPage completed />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.staffCompleted} />
+      <Route element={<StageCFitPage kind="size" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.fitSize} />
+      <Route element={<StageCFitPage kind="color" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.fitColor} />
+      <Route element={<StageCFitPage kind="try-on" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn} />
+      <Route element={<StageCFitPage kind="pending" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOnPending} />
+      <Route element={<StageCFitPage kind="completed" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOnCompleted} />
+      <Route element={<StageCFitPage kind="purchase-completed" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.fitPurchaseInquiryCompleted} />
       <Route element={<ComingSoonPage />} path={STAGE_C_ROUTES.comingSoon} />
       {/* STAGE A/B routes are added above this fallback as their branches are integrated. */}
       <Route element={<NotFoundPage />} path="*" />

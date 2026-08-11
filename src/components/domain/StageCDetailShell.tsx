@@ -41,3 +41,33 @@ export function GlassBottomActionDock({ children }: PropsWithChildren) {
     </footer>
   )
 }
+
+type GlassChoiceChipProps = {
+  label: string
+  selected: boolean
+  onClick: () => void
+  swatch?: string
+}
+
+export function GlassChoiceChip({ label, selected, onClick, swatch }: GlassChoiceChipProps) {
+  return (
+    <button
+      aria-pressed={selected}
+      className="stage-c-glass-choice-chip"
+      onClick={onClick}
+      type="button"
+    >
+      {swatch && <span aria-hidden="true" className="stage-c-choice-swatch" style={{ backgroundColor: swatch }} />}
+      <span>{label}</span>
+    </button>
+  )
+}
+
+type GlassSegmentedControlProps = {
+  label: string
+  children: ReactNode
+}
+
+export function GlassSegmentedControl({ label, children }: GlassSegmentedControlProps) {
+  return <div aria-label={label} className="stage-c-glass-segmented" role="group">{children}</div>
+}
