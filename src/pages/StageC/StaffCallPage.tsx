@@ -11,8 +11,6 @@ import { EVENT_NAMES } from '../../constants/events'
 import {
   STAGE_C_PRODUCT_DETAIL_ROUTES,
   STAGE_C_ROUTES,
-  STAGE_C_SCREEN_IDS,
-  stageCComingSoonPath,
   stageCPath,
 } from '../../constants/stageC'
 import { useProductExit } from '../../features/product-explore/useProductExit'
@@ -36,7 +34,7 @@ export function StaffCallPage({ completed = false }: StaffCallPageProps) {
   const pendingRequestRef = useRef<PendingStaffRequest | null>(null)
   const exitProduct = useProductExit(sku)
   const productHubPath = stageCPath(STAGE_C_ROUTES.c2, sku)
-  const purchaseInquiryPath = stageCComingSoonPath(sku, STAGE_C_SCREEN_IDS.c33)
+  const purchaseInquiryPath = stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn, sku)
   const hasRequestContext = state.events.some(
     (event) => event.name === EVENT_NAMES.saCall && event.sku === sku,
   )

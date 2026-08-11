@@ -56,7 +56,7 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
 
   const requestPurchase = () => {
     dispatch({ type: SESSION_ACTIONS.recordSubhubSelect, sub: STAGE_C_SCREEN_IDS.c33 })
-    navigate(stageCComingSoonPath(sku, STAGE_C_SCREEN_IDS.c33))
+    navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn, sku))
   }
 
   const exitProduct = () => {
