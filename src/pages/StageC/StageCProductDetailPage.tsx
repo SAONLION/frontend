@@ -104,7 +104,7 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
   }
 
   const openStaffCall = () => {
-    dispatch({ type: SESSION_ACTIONS.recordSaCall, sku })
+    dispatch({ type: SESSION_ACTIONS.recordSaCall, sku, callType: 'info' })
     navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.staffPending, sku))
   }
 

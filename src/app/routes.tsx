@@ -12,6 +12,7 @@ import { StageCProductDetailPage } from '../pages/StageC/StageCProductDetailPage
 import { StaffCallPage } from '../pages/StageC/StaffCallPage'
 import { StageCFitPage } from '../pages/StageC/StageCFitPages'
 import { StageCPriceInquiryPage } from '../pages/StageC/StageCPriceInquiryPage'
+import { StageCAiAnswerPage } from '../pages/StageC/StageCAiAnswerPage'
 
 const defaultSku = 'MMKEAVE15CO001'
 
@@ -24,11 +25,14 @@ export function AppRoutes() {
       <Route element={<StageCHubPage screenId={STAGE_C_SCREEN_IDS.c3} />} path={STAGE_C_ROUTES.c3} />
       <Route element={<StageCHubPage screenId={STAGE_C_SCREEN_IDS.c4} />} path={STAGE_C_ROUTES.c4} />
       <Route element={<StageCOtherPage />} path={STAGE_C_ROUTES.c5} />
+      <Route element={<StageCAiAnswerPage />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.otherAnswer} />
       <Route element={<StageCProductDetailPage topic="craft" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.craft} />
       <Route element={<StageCProductDetailPage topic="heritage" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.heritage} />
       <Route element={<StageCProductDetailPage topic="styling" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.styling} />
       <Route element={<StaffCallPage />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.staffPending} />
       <Route element={<StaffCallPage completed />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.staffCompleted} />
+      <Route element={<StaffCallPage callType="other" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.otherStaffPending} />
+      <Route element={<StaffCallPage callType="other" completed />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.otherStaffCompleted} />
       <Route element={<StageCFitPage kind="size" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.fitSize} />
       <Route element={<StageCFitPage kind="color" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.fitColor} />
       <Route element={<StageCFitPage kind="try-on" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn} />

@@ -1,10 +1,13 @@
 import { EVENT_ID_PREFIX, EVENT_NAMES } from '../../constants/events'
+import { findLatestFreeQueryForSku } from './freeQueryContext'
 import { SESSION_ACTIONS, type SessionAction, type SessionState } from './sessionTypes'
 
 export const initialSessionState: SessionState = {
   currentSku: null,
   taggedSkus: [],
   events: [],
+  freeQueryContexts: {},
+  aiAnswerContexts: {},
   intentScore: 0,
 }
 
@@ -47,7 +50,31 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
       return {
         ...state,
         events: [...state.events, { id, name: EVENT_NAMES.freeQuery, topic: action.topic, text: action.text, createdAt }],
+        freeQueryContexts: { ...state.freeQueryContexts, [id]: { sku: action.sku } },
+    }
+    case SESSION_ACTIONS.recordAiAnswer: {
+      const query = state.events.find((event) => event.id === action.queryId)
+      const latestQueryForSku = findLatestFreeQueryForSku(state, action.sku)
+      const alreadyAnswered = Object.values(state.aiAnswerContexts).some(
+        (context) => context.queryId === action.queryId && context.sku === action.sku,
+      )
+
+      if (
+        query?.name !== EVENT_NAMES.freeQuery
+        || state.freeQueryContexts[action.queryId]?.sku !== action.sku
+        || latestQueryForSku?.event.id !== action.queryId
+        || query.topic !== action.topic
+        || alreadyAnswered
+      ) {
+        return state
       }
+
+      return {
+        ...state,
+        events: [...state.events, { id, name: EVENT_NAMES.aiAnswer, topic: action.topic, resolved: action.resolved, createdAt }],
+        aiAnswerContexts: { ...state.aiAnswerContexts, [id]: { queryId: action.queryId, sku: action.sku } },
+      }
+    }
     case SESSION_ACTIONS.recordPurchaseInquiry:
       return {
         ...state,
@@ -85,7 +112,24 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
       }
     case SESSION_ACTIONS.recordTabView:
       return { ...state, events: [...state.events, { id, name: EVENT_NAMES.tabView, topic: action.topic, sku: action.sku, createdAt }] }
-    case SESSION_ACTIONS.recordSaCall:
-      return { ...state, events: [...state.events, { id, name: EVENT_NAMES.saCall, type: 'info', sku: action.sku, createdAt }] }
+    case SESSION_ACTIONS.recordSaCall: {
+      if (action.queryId) {
+        const queryIndex = state.events.findIndex((event) => event.id === action.queryId)
+        const queryEvent = state.events[queryIndex]
+        const queryContext = state.freeQueryContexts[action.queryId]
+        const latestQueryForSku = findLatestFreeQueryForSku(state, action.sku)
+        const hasCallForQuery = state.events.slice(queryIndex + 1).some(
+          (event) => event.name === EVENT_NAMES.saCall && event.type === action.callType && event.sku === action.sku,
+        )
+        if (
+          queryIndex < 0
+          || queryEvent?.name !== EVENT_NAMES.freeQuery
+          || queryContext?.sku !== action.sku
+          || latestQueryForSku?.event.id !== action.queryId
+          || hasCallForQuery
+        ) return state
+      }
+      return { ...state, events: [...state.events, { id, name: EVENT_NAMES.saCall, type: action.callType, sku: action.sku, createdAt }] }
+    }
   }
 }

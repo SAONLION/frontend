@@ -9,13 +9,16 @@ import { TryOnRequestProvider } from './features/try-on/TryOnRequestContext'
 import { mockTryOnRequestService } from './mocks/providers/mockTryOnRequestService'
 import { PriceInquiryRequestProvider } from './features/price-inquiry/PriceInquiryRequestContext'
 import { mockPriceInquiryRequestService } from './mocks/providers/mockPriceInquiryRequestService'
+import { AiAnswerProvider } from './features/ai-answer/AiAnswerContext'
+import { mockAiAnswerService } from './mocks/providers/mockAiAnswerService'
 import './App.css'
 
 function App() {
   return (
     <BrowserRouter>
       <ProductContentProvider value={mockProductContentProvider}>
-        <StaffCallProvider value={mockStaffCallService}>
+        <AiAnswerProvider value={mockAiAnswerService}>
+          <StaffCallProvider value={mockStaffCallService}>
           <PriceInquiryRequestProvider value={mockPriceInquiryRequestService}>
             <TryOnRequestProvider value={mockTryOnRequestService}>
               <SessionProvider>
@@ -23,7 +26,8 @@ function App() {
               </SessionProvider>
             </TryOnRequestProvider>
           </PriceInquiryRequestProvider>
-        </StaffCallProvider>
+          </StaffCallProvider>
+        </AiAnswerProvider>
       </ProductContentProvider>
     </BrowserRouter>
   )
