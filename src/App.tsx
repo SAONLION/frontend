@@ -7,6 +7,8 @@ import { StaffCallProvider } from './features/sa-call/StaffCallContext'
 import { mockStaffCallService } from './mocks/providers/mockStaffCallService'
 import { TryOnRequestProvider } from './features/try-on/TryOnRequestContext'
 import { mockTryOnRequestService } from './mocks/providers/mockTryOnRequestService'
+import { PriceInquiryRequestProvider } from './features/price-inquiry/PriceInquiryRequestContext'
+import { mockPriceInquiryRequestService } from './mocks/providers/mockPriceInquiryRequestService'
 import './App.css'
 
 function App() {
@@ -14,11 +16,13 @@ function App() {
     <BrowserRouter>
       <ProductContentProvider value={mockProductContentProvider}>
         <StaffCallProvider value={mockStaffCallService}>
-          <TryOnRequestProvider value={mockTryOnRequestService}>
-            <SessionProvider>
-              <AppRoutes />
-            </SessionProvider>
-          </TryOnRequestProvider>
+          <PriceInquiryRequestProvider value={mockPriceInquiryRequestService}>
+            <TryOnRequestProvider value={mockTryOnRequestService}>
+              <SessionProvider>
+                <AppRoutes />
+              </SessionProvider>
+            </TryOnRequestProvider>
+          </PriceInquiryRequestProvider>
         </StaffCallProvider>
       </ProductContentProvider>
     </BrowserRouter>

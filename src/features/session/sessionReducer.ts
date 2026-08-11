@@ -77,6 +77,12 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
         events: [...state.events, { id, name: EVENT_NAMES.productExit, sku: action.sku, createdAt }],
         intentScore: state.intentScore - 5,
       }
+    case SESSION_ACTIONS.recordPriceInquiryRequest:
+      return {
+        ...state,
+        events: [...state.events, { id, name: EVENT_NAMES.priceInquiryRequest, sku: action.sku, createdAt }],
+        intentScore: state.intentScore + 15,
+      }
     case SESSION_ACTIONS.recordTabView:
       return { ...state, events: [...state.events, { id, name: EVENT_NAMES.tabView, topic: action.topic, sku: action.sku, createdAt }] }
     case SESSION_ACTIONS.recordSaCall:
