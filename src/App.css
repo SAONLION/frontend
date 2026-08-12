@@ -542,6 +542,13 @@
   font-size: 0.875rem;
   text-align: center;
   text-decoration: none;
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.stage-c-action-button:active,
+.stage-c-fit-proceed-button:active,
+.stage-c-send-button:active {
+  transform: translateY(0.125rem);
 }
 
 .stage-c-action-button--primary,
@@ -723,7 +730,7 @@
   flex-direction: column;
   gap: clamp(0.75rem, 2.8dvh, 1rem);
   min-height: 100dvh;
-  padding: max(1rem, env(safe-area-inset-top)) 1rem max(1.25rem, env(safe-area-inset-bottom));
+  padding: max(4.875rem, env(safe-area-inset-top)) var(--stage-c-page-space) max(1.875rem, env(safe-area-inset-bottom));
   overflow-x: hidden;
   background: transparent;
 }
@@ -1368,6 +1375,405 @@
   min-width: 0;
 }
 
+.stage-c-product-detail-shell {
+  position: relative;
+  gap: 0;
+  padding-inline: var(--stage-c-page-space);
+  padding-bottom: max(1.875rem, env(safe-area-inset-bottom));
+  overflow: visible;
+}
+
+.stage-c-product-detail-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.stage-c-product-detail-topbar > span {
+  padding: 0.375rem 0.875rem;
+  border-radius: 0.625rem;
+  background: var(--stage-c-surface);
+  color: var(--stage-c-text);
+  font-size: 0.8125rem;
+}
+
+.stage-c-product-detail-topbar > button {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  padding: 0 0 0.1875rem;
+  border: 1px solid var(--stage-c-glass-border);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 12%);
+  box-shadow: inset 0 1px 0 var(--stage-c-glass-highlight), var(--stage-c-glass-shadow);
+  color: var(--stage-c-glass-text);
+  font: inherit;
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+  transform: translateX(1.375rem);
+  backdrop-filter: var(--stage-c-glass-blur) var(--stage-c-glass-saturate);
+}
+
+.stage-c-product-detail-media {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: clamp(15rem, 39dvh, 20rem);
+  padding: 1rem 0;
+}
+
+.stage-c-product-detail-media > img {
+  display: block;
+  width: min(100%, 20rem);
+  max-height: min(20rem, 42dvh);
+  object-fit: contain;
+}
+
+.stage-c-product-detail-media--styling {
+  flex: 0 1 auto;
+  min-height: 0;
+  padding-top: clamp(3rem, 9dvh, 5rem);
+}
+
+.stage-c-product-detail-media--styling .stage-c-gallery {
+  position: relative;
+  display: block;
+  width: min(100%, 21.25rem);
+  height: clamp(18rem, 40dvh, 22rem);
+  margin: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0.75rem;
+  background: #f7f7f7;
+  box-shadow: none;
+}
+
+.stage-c-product-detail-media--styling .stage-c-gallery-track {
+  width: 100%;
+  height: 100%;
+}
+
+.stage-c-product-detail-media--styling .stage-c-gallery-track img {
+  object-fit: cover;
+}
+
+.stage-c-product-detail-media--styling .stage-c-gallery-controls {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.5rem;
+  left: 0.75rem;
+  justify-content: space-between;
+  padding: 0;
+  background: transparent;
+}
+
+.stage-c-product-detail-media--styling .stage-c-gallery-controls button {
+  display: grid;
+  width: 1.125rem;
+  height: 1.125rem;
+  place-items: center;
+  padding: 0 0 0.125rem;
+  border: 1px solid rgb(0 0 0 / 24%);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 78%);
+  color: rgb(0 0 0 / 48%);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.stage-c-gallery-indicators {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.stage-c-gallery-indicators i {
+  width: 0.25rem;
+  height: 0.25rem;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 26%);
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.stage-c-gallery-indicators i.is-active {
+  background: rgb(0 0 0 / 68%);
+  transform: scale(1.2);
+}
+
+.stage-c-product-detail-summary {
+  width: 100%;
+  margin-bottom: clamp(2rem, 7dvh, 5rem);
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--stage-c-glass-border);
+  border-radius: 1.125rem;
+  background: rgb(54 49 42 / 74%);
+  box-shadow: inset 0 1px 0 var(--stage-c-glass-highlight), var(--stage-c-glass-shadow);
+  color: var(--stage-c-glass-text);
+  backdrop-filter: var(--stage-c-glass-blur) var(--stage-c-glass-saturate);
+  animation: stage-c-surface-reveal 440ms cubic-bezier(0.22, 0.9, 0.32, 1) both;
+}
+
+.stage-c-product-detail-summary p {
+  margin: 0.1875rem 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.stage-c-product-detail-actions {
+  display: flex;
+  gap: 0.625rem;
+  margin-top: auto;
+}
+
+.stage-c-product-detail-actions .stage-c-action-button {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.stage-c-fit-reference-shell {
+  position: relative;
+  gap: 0;
+  padding-inline: var(--stage-c-page-space);
+  padding-bottom: max(1.875rem, env(safe-area-inset-bottom));
+}
+
+.stage-c-fit-reference-pill {
+  align-self: flex-start;
+  padding: 0.375rem 0.875rem;
+  border-radius: 0.625rem;
+  background: var(--stage-c-surface);
+  color: var(--stage-c-text);
+  font-size: 0.8125rem;
+}
+
+.stage-c-fit-reference-media {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: clamp(15rem, 38dvh, 20rem);
+  padding: 1rem 0;
+}
+
+.stage-c-fit-reference-media img {
+  display: block;
+  width: min(100%, 20rem);
+  max-height: min(20rem, 39dvh);
+  object-fit: contain;
+  filter: drop-shadow(0 0.8rem 1.25rem rgb(0 0 0 / 35%));
+}
+
+.stage-c-fit-reference-shell--size .stage-c-fit-reference-media,
+.stage-c-fit-reference-shell--color .stage-c-fit-reference-media {
+  flex: 0 1 auto;
+  min-height: clamp(12rem, 30dvh, 17rem);
+}
+
+.stage-c-fit-reference-shell--size .stage-c-fit-reference-media img,
+.stage-c-fit-reference-shell--color .stage-c-fit-reference-media img {
+  width: min(58%, 13rem);
+  max-height: clamp(10rem, 27dvh, 15rem);
+}
+
+.stage-c-fit-reference-shell--size .stage-c-fit-reference-actions,
+.stage-c-fit-reference-shell--color .stage-c-fit-reference-actions {
+  margin-top: auto;
+}
+
+.stage-c-fit-reference-shell--color .stage-c-fit-reference-options--color {
+  flex: 0 1 auto;
+  margin-top: 1.5rem;
+}
+
+.stage-c-fit-reference-options h2 {
+  margin: 0 0 0.5rem;
+  color: rgb(255 255 255 / 64%);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.stage-c-fit-size-selector {
+  position: relative;
+  display: flex;
+  width: 100%;
+  padding: 0.25rem;
+  border-radius: 2rem;
+  background: #000;
+}
+
+.stage-c-fit-size-selector button {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 2.875rem;
+  border: 0;
+  border-radius: 1.75rem;
+  background: transparent;
+  color: rgb(255 255 255 / 62%);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.stage-c-fit-size-selector button[aria-pressed='true'] {
+  color: var(--stage-c-text);
+}
+
+.stage-c-fit-size-selector__indicator {
+  position: absolute;
+  top: 0.25rem;
+  bottom: 0.25rem;
+  left: 0.25rem;
+  width: calc((100% - 0.5rem) / 3);
+  border-radius: 1.75rem;
+  background: var(--stage-c-accent);
+  transition: transform 320ms cubic-bezier(0.22, 0.9, 0.32, 1);
+}
+
+.stage-c-fit-size-selector__indicator--1 {
+  transform: translateX(100%);
+}
+
+.stage-c-fit-size-selector__indicator--2 {
+  transform: translateX(200%);
+}
+
+.stage-c-fit-reference-facts {
+  display: grid;
+  gap: 0.875rem;
+  margin: 2.25rem 0 0;
+}
+
+.stage-c-fit-reference-facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.stage-c-fit-reference-facts dt {
+  color: rgb(255 255 255 / 52%);
+  font-size: 0.875rem;
+}
+
+.stage-c-fit-reference-facts dd {
+  margin: 0;
+  color: var(--stage-c-text);
+  font-size: 0.875rem;
+  text-align: right;
+}
+
+.stage-c-fit-reference-options--color {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+}
+
+.stage-c-fit-color-selector {
+  display: flex;
+  justify-content: center;
+  gap: clamp(2rem, 10vw, 3.5rem);
+}
+
+.stage-c-fit-color-selector button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  border: 0;
+  background: transparent;
+  color: rgb(255 255 255 / 52%);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: color 200ms ease;
+}
+
+.stage-c-fit-color-selector i {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid rgb(255 255 255 / 70%);
+  border-radius: 50%;
+  transition: outline-color 200ms ease, outline-offset 200ms ease, transform 200ms ease;
+}
+
+.stage-c-fit-color-selector button[aria-pressed='true'] {
+  color: var(--stage-c-accent);
+}
+
+.stage-c-fit-color-selector button[aria-pressed='true'] i {
+  outline: 0.1875rem solid var(--stage-c-accent);
+  outline-offset: 0.1875rem;
+  transform: scale(1.04);
+}
+
+.stage-c-fit-reference-actions {
+  display: flex;
+  gap: 0.625rem;
+  margin-top: auto;
+}
+
+.stage-c-fit-reference-actions .stage-c-action-button {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.stage-c-fit-try-on-options {
+  display: grid;
+  gap: 1.875rem;
+}
+
+.stage-c-fit-reference-shell--try-on .stage-c-fit-reference-media {
+  flex: 0 1 auto;
+  min-height: 0;
+  padding-top: clamp(3rem, 8dvh, 5rem);
+  padding-bottom: 2.5rem;
+}
+
+.stage-c-fit-reference-shell--try-on .stage-c-fit-reference-media img {
+  width: min(100%, 15rem);
+  max-height: min(14rem, 28dvh);
+}
+
+.stage-c-fit-reference-shell--try-on .stage-c-fit-reference-options--color {
+  display: block;
+}
+
+.stage-c-fit-reference-shell--try-on .stage-c-fit-color-selector {
+  justify-content: flex-start;
+}
+
+.stage-c-fit-proceed-button {
+  width: 100%;
+  min-height: 3.375rem;
+  margin-top: auto;
+  border: 0;
+  border-radius: var(--stage-c-control-radius);
+  background: var(--stage-c-accent);
+  box-shadow: inset 0 -0.125rem 0.25rem rgb(255 255 255 / 24%);
+  color: var(--stage-c-text);
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+@keyframes stage-c-surface-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(0.375rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .stage-c-fit-media {
   align-items: center;
   justify-content: flex-end;
@@ -1406,6 +1812,7 @@
   color: var(--stage-c-glass-text);
   font: inherit;
   cursor: pointer;
+  transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease;
 }
 
 .stage-c-glass-choice-chip[aria-pressed='true'] {
@@ -1529,6 +1936,24 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .stage-c-action-button,
+  .stage-c-fit-proceed-button,
+  .stage-c-send-button,
+  .stage-c-glass-choice-chip,
+  .stage-c-fit-color-selector button,
+  .stage-c-fit-color-selector i,
+  .stage-c-gallery-indicators i {
+    transition: none;
+  }
+
+  .stage-c-product-detail-summary {
+    animation: none;
+  }
+
+  .stage-c-fit-size-selector__indicator {
+    transition: none;
+  }
+
   .stage-c-gallery-track {
     scroll-behavior: auto;
   }
