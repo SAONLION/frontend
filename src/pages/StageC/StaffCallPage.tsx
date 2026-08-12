@@ -2,9 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { DocentStage } from '../../components/domain/DocentStage'
 import {
-  GlassBottomActionDock,
   GlassInfoCard,
-  GlassTopBar,
   StageCDetailShell,
 } from '../../components/domain/StageCDetailShell'
 import { EVENT_NAMES } from '../../constants/events'
@@ -122,47 +120,23 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
   }
 
   return (
-    <StageCDetailShell>
-      <GlassTopBar
-        action={
-          <Link className="stage-c-glass-link-button" to={returnPath}>
-            ← 기타 질문
-          </Link>
-        }
-        context="직원 연결"
-      />
-
-      <section className="stage-c-glass-media-frame stage-c-staff-media" aria-label="도슨트 안내">
-        <DocentStage cue={completed ? 'greet' : 'idle'} />
-      </section>
-
-      <GlassInfoCard>
-        <h1>
-          {completed
-            ? '제가 직원분께 궁금해하시는 부분을 잘 전달했어요!'
-            : '더 자세히 설명드리기 위해 직원에게 알림을 보내는 중이에요!'}
-        </h1>
-      </GlassInfoCard>
-
-      {completed ? (
-        <GlassBottomActionDock>
-          <Link className="stage-c-glass-link-button" to={returnPath}>
-            다른 것도 물어보기
-          </Link>
-          <Link className="stage-c-glass-link-button stage-c-glass-link-button--accent" to={purchaseInquiryPath}>
-            착용 및 구매 문의하기
-          </Link>
-          <button onClick={exitProduct} type="button">
-            다른 제품 보기 →
-          </button>
-        </GlassBottomActionDock>
-      ) : (
-        <GlassBottomActionDock>
-          <Link className="stage-c-glass-link-button" to={returnPath}>
-            기타 질문으로 돌아가기
-          </Link>
-        </GlassBottomActionDock>
-      )}
+    <StageCDetailShell className="stage-c-c5-response-shell">
+      <header className="stage-c-c5-response-topbar">
+        <Link aria-label="기타 질문 닫기" to={returnPath}>×</Link>
+      </header>
+      <div className="stage-c-c5-staff-content">
+        <section aria-label="나이비스 AI 도슨트" className="stage-c-c5-staff-docent"><DocentStage cue="idle" /></section>
+        <h1>직원에게 궁금한 사항에 대해<br />문의 알림을 보냈어요!</h1>
+        <p>더 자세한 상담을 받아보세요</p>
+      </div>
+      <div className="stage-c-c5-response-actions">
+        <Link className="stage-c-action-button" to={returnPath}>다른 것도 물어보기</Link>
+        <div>
+          <Link className="stage-c-action-button" to={returnPath}>직원에게 문의하기</Link>
+          <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
+        </div>
+      </div>
     </StageCDetailShell>
   )
+
 }

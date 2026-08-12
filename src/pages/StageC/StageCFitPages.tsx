@@ -23,6 +23,8 @@ import { fitSearchPath, getFitSelection, type FitSelection } from './stageCFitSe
 
 type FitPageKind = 'size' | 'color' | 'try-on' | 'pending' | 'completed' | 'purchase-completed'
 
+const FIT_REQUEST_TRANSITION_DELAY_MS = 2_000
+
 export function StageCFitPage({ kind }: { kind: FitPageKind }) {
   const { sku = '' } = useParams()
   const location = useLocation()
@@ -83,7 +85,11 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
         }
 
     requestRef.current = request
-    void request.completion.then(() => {
+    const minimumDisplayTime = new Promise<void>((resolve) => {
+      window.setTimeout(resolve, FIT_REQUEST_TRANSITION_DELAY_MS)
+    })
+
+    void Promise.all([request.completion, minimumDisplayTime]).then(() => {
       if (active) {
         navigate(fitSearchPath(paths.completed, selection), { replace: true })
       }
@@ -172,33 +178,53 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
   }
 
   if (kind === 'pending') {
-    return <FitShell kind={kind} selection={selection} sku={sku}>
-      <SelectionSummary {...getSummaryProps(selection)} />
-      <GlassInfoCard><h1>직원이 제품을 준비하는 중이에요.</h1><p>잠시 후 선택한 착장 정보를 전달해 드릴게요.</p></GlassInfoCard>
-      <GlassBottomActionDock><Link className="stage-c-glass-link-button" to={stageCPath(STAGE_C_ROUTES.c3, sku)}>다른 정보 보기</Link></GlassBottomActionDock>
-    </FitShell>
+    return <FitStatusScreen status="pending" />
   }
 
   if (kind === 'completed') {
-    return <FitShell kind={kind} selection={selection} sku={sku}>
-      <SelectionSummary {...getSummaryProps(selection)} />
-      <GlassInfoCard><h1>착장 정보를 직원에게 전달했어요.</h1><p>선택한 옵션을 확인하고 도와드릴 예정이에요.</p></GlassInfoCard>
-      <GlassBottomActionDock>
-        <Link className="stage-c-glass-link-button" to={stageCPath(STAGE_C_ROUTES.c3, sku)}>다른 정보 보기</Link>
-        <button onClick={requestPurchase} type="button">구매 문의하기</button>
-        <button onClick={exitProduct} type="button">다른 제품 보기 →</button>
-      </GlassBottomActionDock>
-    </FitShell>
+    return <FitStatusScreen onExitProduct={exitProduct} onPurchaseInquiry={requestPurchase} status="completed" />
   }
 
-  return <FitShell kind={kind} selection={selection} sku={sku}>
-    <SelectionSummary {...getSummaryProps(selection)} />
-    <GlassInfoCard><h1>구매 안내 요청이 접수되었어요.</h1><p>가격과 구매 관련 안내는 직원이 직접 도와드릴 예정이에요.</p></GlassInfoCard>
-    <GlassBottomActionDock>
-      <Link className="stage-c-glass-link-button" to={stageCPath(STAGE_C_ROUTES.c3, sku)}>다른 정보 보기</Link>
-      <button onClick={exitProduct} type="button">다른 제품 보기 →</button>
-    </GlassBottomActionDock>
-  </FitShell>
+  return <FitStatusScreen onExitProduct={exitProduct} status="purchase-completed" />
+}
+
+type FitStatus = 'pending' | 'completed' | 'purchase-completed'
+
+function FitStatusScreen({
+  onExitProduct,
+  onPurchaseInquiry,
+  status,
+}: {
+  onExitProduct?: () => void
+  onPurchaseInquiry?: () => void
+  status: FitStatus
+}) {
+  const content = {
+    pending: { title: '직원이 제품을 준비해서\n가는 중이에요!' },
+    completed: { title: '직원에게 충분한 정보를 전달했어요!', description: '착샷 촬영도 요청해보세요.' },
+    'purchase-completed': { title: '직원에게 구매 안내 요청을 보냈어요!', description: '가격과 관련 정보들을 곧 안내해 드릴게요!' },
+  }[status]
+
+  return (
+    <StageCDetailShell className="stage-c-fit-status-shell">
+      <div className="stage-c-fit-status-content">
+        <section aria-label="나이비스 AI 도슨트" className="stage-c-fit-status-docent"><DocentStage cue="idle" /></section>
+        <h1 className={status === 'pending' ? undefined : 'stage-c-fit-status-title--single-line'}>{content.title}</h1>
+        {content.description && <p>{content.description}</p>}
+      </div>
+      {status === 'completed' && onPurchaseInquiry && onExitProduct && (
+        <div className="stage-c-fit-status-actions">
+          <button className="stage-c-action-button stage-c-action-button--primary" onClick={onPurchaseInquiry} type="button">구매 문의</button>
+          <button className="stage-c-action-button" onClick={onExitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
+        </div>
+      )}
+      {status === 'purchase-completed' && onExitProduct && (
+        <div className="stage-c-fit-status-actions">
+          <button className="stage-c-action-button" onClick={onExitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
+        </div>
+      )}
+    </StageCDetailShell>
+  )
 }
 
 function FitShell({ children, kind, selection, sku }: { children: ReactNode; kind: FitPageKind; selection: FitSelection; sku: string }) {

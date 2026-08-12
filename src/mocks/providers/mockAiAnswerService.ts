@@ -1,23 +1,22 @@
 import type { AiAnswerRequest, AiAnswerResult, AiAnswerService } from '../../features/ai-answer/AiAnswerService'
 
 const answerCache = new Map<string, Promise<AiAnswerResult>>()
-const careKeywords = /비|젖|오염|얼룩|보관|세탁|비누|솔벤트|관리/
+const AI_ANSWER_DEMO_QUESTION = 'A/S · 수선이 가능한가요?'
 
 function normalizedKey({ sku, topic, text }: AiAnswerRequest) {
   return `${sku}:${topic}:${text.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ko-KR')}`
 }
 
 function resolveAnswer(request: AiAnswerRequest): AiAnswerResult {
-  const isCareQuestion = request.topic === 'care' || careKeywords.test(request.text)
-  if (request.sku === 'MMKEAVE15CO001' && isCareQuestion) {
+  const isDemoQuestion = request.text.trim() === AI_ANSWER_DEMO_QUESTION
+  if (request.sku === 'MMKEAVE15CO001' && isDemoQuestion) {
     return {
       resolved: true,
-      title: '관리 방법을 안내해 드릴게요.',
+      title: '“비 오는 날”에 대해서는\n이렇게 안내드릴 수 있어요',
       answerLines: [
-        '공식 관리 안내상 제품이 젖거나 얼룩지지 않도록 주의해 주세요.',
-        '젖거나 오염되면 보풀이 없는 밝은색 흡수성 천으로 닦아 말려 주세요.',
-        '비누와 솔벤트는 사용하지 말아 주세요.',
-        '보호용 더스트 백에 넣어 직사광선을 피해 서늘하고 건조한 곳에 보관해 주세요.',
+        '방수 코팅이 적용되어 가벼운 비에는 문제 없어요',
+        '장시간 노출 시에는 마른 천으로 닦아 그늘에 말려주세요',
+        '전용 방수 커버는 별도 판매되고 있어요',
       ],
     }
   }

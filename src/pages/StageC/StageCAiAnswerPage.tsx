@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
-import { DocentStage } from '../../components/domain/DocentStage'
-import { GlassBottomActionDock, GlassInfoCard, GlassSpeechBubble, GlassTopBar, StageCDetailShell } from '../../components/domain/StageCDetailShell'
+import { GlassInfoCard, StageCDetailShell } from '../../components/domain/StageCDetailShell'
 import type { AiAnswerResult } from '../../features/ai-answer/AiAnswerService'
 import { useAiAnswerService } from '../../features/ai-answer/useAiAnswerService'
 import { useProductExit } from '../../features/product-explore/useProductExit'
@@ -40,7 +39,6 @@ export function StageCAiAnswerPage() {
   const staffRequested = useRef(false)
   const otherPath = stageCPath(STAGE_C_ROUTES.c5, sku)
   const staffPendingPath = stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.otherStaffPending, sku)
-  const tryOnPath = stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn, sku)
   const view = answerView.contextKey === contextKey ? answerView : initialAnswerView(contextKey)
 
   const requestStaff = useCallback(() => {
@@ -96,22 +94,27 @@ export function StageCAiAnswerPage() {
     setRetryAttempt((attempt) => attempt + 1)
   }
 
-  return <StageCDetailShell>
-    <GlassTopBar action={<Link className="stage-c-glass-link-button" to={otherPath}>닫기</Link>} context="AI 답변" />
-    <section aria-label="도슨트 안내" className="stage-c-glass-media-frame"><DocentStage cue={view.status === 'resolved' ? 'greet' : 'idle'} /></section>
-    <GlassInfoCard>
+  return <StageCDetailShell className="stage-c-c5-response-shell">
+    <header className="stage-c-c5-response-topbar">
+      <Link aria-label="기타 질문 닫기" to={otherPath}>×</Link>
+    </header>
+    <div className="stage-c-c5-ai-content">
       <h1>{view.title}</h1>
-      {view.status === 'loading' && <p aria-live="polite">잠시만 기다려 주세요.</p>}
+      {view.status === 'loading' && <p aria-live="polite">답변을 준비하고 있어요.</p>}
       {view.status === 'error' && <p>잠시 후 다시 시도하거나 직원에게 문의해 주세요.</p>}
-      {view.status === 'resolved' && view.lines.map((line) => <p key={line}>{line}</p>)}
-    </GlassInfoCard>
-    {view.status === 'resolved' && <GlassSpeechBubble><button onClick={requestStaff} type="button">직원에게 더 자세히 문의하기 ›</button></GlassSpeechBubble>}
-    <GlassBottomActionDock>
-      {view.status === 'error' ? <button onClick={retry} type="button">다시 시도하기</button> : <Link className="stage-c-glass-link-button" to={otherPath}>다른 것도 물어보기</Link>}
-      {view.status === 'error' && <button onClick={requestStaff} type="button">직원에게 문의하기</button>}
-      <Link className="stage-c-glass-link-button stage-c-glass-link-button--accent" to={tryOnPath}>착용 및 구매 문의하기</Link>
-      <button onClick={exitProduct} type="button">다른 제품 보기 →</button>
-    </GlassBottomActionDock>
+      {view.status === 'resolved' && (
+        <section className="stage-c-c5-answer-card" aria-label="AI 답변">
+          {view.lines.map((line) => <p key={line}>· {line}</p>)}
+        </section>
+      )}
+    </div>
+    <div className="stage-c-c5-response-actions">
+      {view.status === 'error' ? <button className="stage-c-action-button" onClick={retry} type="button">다시 시도하기</button> : <Link className="stage-c-action-button" to={otherPath}>다른 것도 물어보기</Link>}
+      <div>
+        <button className="stage-c-action-button" onClick={requestStaff} type="button">직원에게 문의하기</button>
+        <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
+      </div>
+    </div>
   </StageCDetailShell>
 }
 

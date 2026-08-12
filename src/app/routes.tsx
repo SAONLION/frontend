@@ -13,6 +13,7 @@ import { StageCProductDetailPage } from '../pages/StageC/StageCProductDetailPage
 import { StaffCallPage } from '../pages/StageC/StaffCallPage'
 import { StageCFitPage } from '../pages/StageC/StageCFitPages'
 import { StageCPriceInquiryPage } from '../pages/StageC/StageCPriceInquiryPage'
+import { StageCPurchaseStatusPage } from '../pages/StageC/StageCPurchaseStatusPage'
 import { StageCAiAnswerPage } from '../pages/StageC/StageCAiAnswerPage'
 import { StageAIntroPage, StageANicknamePage } from '../pages/StageA/StageAFlowPages'
 import { StageBNfcPromptPage, StageBRecognizingPage } from '../pages/StageB/StageBFlowPages'
@@ -44,9 +45,10 @@ export function AppRoutes() {
       <Route element={<StageCFitPage kind="pending" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOnPending} />
       <Route element={<StageCFitPage kind="completed" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOnCompleted} />
       <Route element={<StageCFitPage kind="purchase-completed" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.fitPurchaseInquiryCompleted} />
-      <Route element={<StageCPriceInquiryPage state="request" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiry} />
+      <Route element={<StageCPurchaseStatusPage kind="price" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiry} />
       <Route element={<StageCPriceInquiryPage state="pending" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryPending} />
-      <Route element={<StageCPriceInquiryPage state="completed" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryCompleted} />
+      <Route element={<StageCPurchaseStatusPage kind="price" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryCompleted} />
+      <Route element={<StageCPurchaseStatusPage kind="stock" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.stockInquiry} />
       <Route element={<ComingSoonPage />} path={STAGE_C_ROUTES.comingSoon} />
       <Route element={<NotFoundPage />} path="*" />
     </Routes>
