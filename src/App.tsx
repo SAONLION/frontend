@@ -11,24 +11,30 @@ import { PriceInquiryRequestProvider } from './features/price-inquiry/PriceInqui
 import { mockPriceInquiryRequestService } from './mocks/providers/mockPriceInquiryRequestService'
 import { AiAnswerProvider } from './features/ai-answer/AiAnswerContext'
 import { mockAiAnswerService } from './mocks/providers/mockAiAnswerService'
+import { AmbientBronzeBackground } from './components/common/AmbientBronzeBackground'
 import './App.css'
 
 function App() {
   return (
     <BrowserRouter>
-      <ProductContentProvider value={mockProductContentProvider}>
-        <AiAnswerProvider value={mockAiAnswerService}>
-          <StaffCallProvider value={mockStaffCallService}>
-          <PriceInquiryRequestProvider value={mockPriceInquiryRequestService}>
-            <TryOnRequestProvider value={mockTryOnRequestService}>
-              <SessionProvider>
-                <AppRoutes />
-              </SessionProvider>
-            </TryOnRequestProvider>
-          </PriceInquiryRequestProvider>
-          </StaffCallProvider>
-        </AiAnswerProvider>
-      </ProductContentProvider>
+      <div className="app-shell">
+        <AmbientBronzeBackground />
+        <div className="app-shell__content">
+          <ProductContentProvider value={mockProductContentProvider}>
+            <AiAnswerProvider value={mockAiAnswerService}>
+              <StaffCallProvider value={mockStaffCallService}>
+                <PriceInquiryRequestProvider value={mockPriceInquiryRequestService}>
+                  <TryOnRequestProvider value={mockTryOnRequestService}>
+                    <SessionProvider>
+                      <AppRoutes />
+                    </SessionProvider>
+                  </TryOnRequestProvider>
+                </PriceInquiryRequestProvider>
+              </StaffCallProvider>
+            </AiAnswerProvider>
+          </ProductContentProvider>
+        </div>
+      </div>
     </BrowserRouter>
   )
 }

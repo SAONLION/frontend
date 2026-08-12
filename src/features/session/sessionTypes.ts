@@ -14,11 +14,13 @@ export const SESSION_ACTIONS = {
   recordTryonRequest: 'record_tryon_request',
   recordSubhubSelect: 'record_subhub_select',
   setCurrentSku: 'set_current_sku',
+  setNickname: 'set_nickname',
   recordTabView: 'record_tab_view', recordSaCall: 'record_sa_call',
 } as const
 
 export type SessionState = {
   currentSku: string | null
+  nickname: string | null
   taggedSkus: readonly string[]
   events: readonly SessionEvent[]
   freeQueryContexts: Readonly<Record<string, { sku: string }>>
@@ -39,5 +41,6 @@ export type SessionAction =
   | { type: typeof SESSION_ACTIONS.recordTryonRequest; sku: string; size: string; color: string }
   | { type: typeof SESSION_ACTIONS.recordSubhubSelect; sub: StageCComingSoonScreenId }
   | { type: typeof SESSION_ACTIONS.setCurrentSku; sku: string }
+  | { type: typeof SESSION_ACTIONS.setNickname; nickname: string }
   | { type: typeof SESSION_ACTIONS.recordTabView; topic: 'craft' | 'heritage' | 'styling'; sku: string }
   | { type: typeof SESSION_ACTIONS.recordSaCall; sku: string; callType: StaffCallType; queryId?: string }

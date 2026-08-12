@@ -17,6 +17,7 @@ export const STAGE_C_SCREEN_IDS = {
   c52: 'C5-2',
   stageB1: 'STAGE-B1',
   stageD1: 'STAGE-D1',
+  stageE1: 'STAGE-E1',
 } as const
 
 export const STAGE_C_PRODUCT_DETAIL_ROUTES = {

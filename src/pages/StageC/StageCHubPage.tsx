@@ -2,7 +2,6 @@ import { useNavigate, useParams } from 'react-router'
 import { ChoiceList } from '../../components/common/ChoiceList'
 import { MobileShell } from '../../components/common/MobileShell'
 import { ProductMedia } from '../../components/domain/ProductMedia'
-import { EVENT_NAMES } from '../../constants/events'
 import {
   STAGE_C_PRODUCT_DETAIL_ROUTE_KEYS,
   STAGE_C_PRODUCT_DETAIL_ROUTES,
@@ -12,6 +11,7 @@ import {
   type StageCHubScreenId,
 } from '../../constants/stageC'
 import { useStageCProduct } from '../../features/product-explore/useStageCProduct'
+import { useProductExit } from '../../features/product-explore/useProductExit'
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes'
 import { useSession } from '../../features/session/useSession'
 import { stageCHubDefinitions } from './stageCDefinitions'
@@ -23,7 +23,8 @@ type StageCHubPageProps = {
 export function StageCHubPage({ screenId }: StageCHubPageProps) {
   const { sku = '' } = useParams()
   const navigate = useNavigate()
-  const { dispatch, state } = useSession()
+  const { dispatch } = useSession()
+  const exitProduct = useProductExit(sku)
   const product = useStageCProduct(sku)
   const screen = stageCHubDefinitions[screenId]
 
@@ -57,13 +58,6 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
   const requestPurchase = () => {
     dispatch({ type: SESSION_ACTIONS.recordSubhubSelect, sub: STAGE_C_SCREEN_IDS.c33 })
     navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn, sku))
-  }
-
-  const exitProduct = () => {
-    const exitCount = state.events.filter((event) => event.name === EVENT_NAMES.productExit).length
-    dispatch({ type: SESSION_ACTIONS.recordProductExit, sku })
-    const destination = exitCount === 0 ? STAGE_C_SCREEN_IDS.stageD1 : STAGE_C_SCREEN_IDS.stageB1
-    navigate(stageCComingSoonPath(sku, destination))
   }
 
   return (

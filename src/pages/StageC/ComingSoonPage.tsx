@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router'
 import { MobileShell } from '../../components/common/MobileShell'
+import { STAGE_B_ROUTES } from '../../constants/appRoutes'
 import { STAGE_C_SCREEN_IDS } from '../../constants/stageC'
 
 const hubFallbackByScreenId: Record<string, { label: string; path: (sku: string) => string }> = {
@@ -14,8 +15,9 @@ const hubFallbackByScreenId: Record<string, { label: string; path: (sku: string)
   [STAGE_C_SCREEN_IDS.c43]: { label: '구매 조건으로 돌아가기', path: (sku) => `/stage-c/${sku}/purchase` },
   [STAGE_C_SCREEN_IDS.c51]: { label: '기타 질문으로 돌아가기', path: (sku) => `/stage-c/${sku}/other` },
   [STAGE_C_SCREEN_IDS.c52]: { label: '기타 질문으로 돌아가기', path: (sku) => `/stage-c/${sku}/other` },
-  [STAGE_C_SCREEN_IDS.stageB1]: { label: '제품 상세 허브로 돌아가기', path: (sku) => `/stage-c/${sku}` },
+  [STAGE_C_SCREEN_IDS.stageB1]: { label: '다른 제품 태그하기', path: () => STAGE_B_ROUTES.nfcPrompt },
   [STAGE_C_SCREEN_IDS.stageD1]: { label: '제품 상세 허브로 돌아가기', path: (sku) => `/stage-c/${sku}` },
+  [STAGE_C_SCREEN_IDS.stageE1]: { label: '제품 태그 안내로 돌아가기', path: () => STAGE_B_ROUTES.nfcPrompt },
 }
 
 export function ComingSoonPage() {
