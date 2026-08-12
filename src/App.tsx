@@ -1,13 +1,7 @@
-import G4SendComplete from './pages/StageG/G4SendComplete'
+import DemoFlow from './flows/DemoFlow'
 
 function App() {
-  return (
-    <G4SendComplete
-      productName="비세토스 트롤리"
-      onReturnToStart={() => console.log('return to B1')}
-      onEndSession={() => console.log('end session')}
-    />
-  )
+  return <DemoFlow />
 }
 
 export default App
