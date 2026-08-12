@@ -1,13 +1,11 @@
-import F2AlternativeSkuRecommendation from './pages/StageF/F2AlternativeSkuRecommendation'
+import G4SendComplete from './pages/StageG/G4SendComplete'
 
 function App() {
   return (
-    <F2AlternativeSkuRecommendation
-      purpose="여행"
-      priorityFactor="수납 공간"
-      onViewProductDetail={() => console.log('view product detail')}
-      onReserveOriginal={() => console.log('reserve original')}
-      onGoBack={() => console.log('go back')}
+    <G4SendComplete
+      productName="비세토스 트롤리"
+      onReturnToStart={() => console.log('return to B1')}
+      onEndSession={() => console.log('end session')}
     />
   )
 }

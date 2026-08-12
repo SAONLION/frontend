@@ -2,7 +2,6 @@ import { useState } from 'react';
 import backgroundImage from '../../assets/images/stage-a-background.png';
 import closeIcon from '../../assets/images/icon-close.svg';
 import ScreenHeadline from '../../components/common/ScreenHeadline';
-import OptionChip from '../../components/common/OptionChip';
 import SecondaryButton from '../../components/common/SecondaryButton';
 import CircleIconButton from '../../components/common/CircleIconButton';
 
@@ -57,11 +56,12 @@ export default function E1StaffCallTray({
           {[0, 1].map((row) => (
             <div key={row} className="flex gap-2.5">
               {requestOptions.slice(row * 2, row * 2 + 2).map((option) => (
-                <OptionChip
+                <SecondaryButton
                   key={option}
                   label={option}
                   selected={selectedRequests.includes(option)}
                   onClick={() => toggleRequest(option)}
+                  fullWidth={false}
                 />
               ))}
             </div>

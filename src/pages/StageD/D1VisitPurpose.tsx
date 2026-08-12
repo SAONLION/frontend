@@ -3,7 +3,7 @@ import backgroundImage from '../../assets/images/stage-a-background.png';
 import emblemImage from '../../assets/images/mcm-emblem.png';
 import ImageFrame from '../../components/common/ImageFrame';
 import ScreenHeadline from '../../components/common/ScreenHeadline';
-import OptionChip from '../../components/common/OptionChip';
+import SecondaryButton from '../../components/common/SecondaryButton';
 import PrimaryButton from '../../components/common/PrimaryButton';
 
 const DEFAULT_PURPOSE_OPTIONS = ['여행', '선물', '구경', '기타'];
@@ -47,11 +47,12 @@ export default function D1VisitPurpose({
             {[0, 1].map((row) => (
               <div key={row} className="flex gap-2.5">
                 {purposeOptions.slice(row * 2, row * 2 + 2).map((option) => (
-                  <OptionChip
+                  <SecondaryButton
                     key={option}
                     label={option}
                     selected={selectedPurpose === option}
                     onClick={() => handleSelect(option)}
+                    fullWidth={false}
                   />
                 ))}
               </div>
