@@ -1,7 +1,35 @@
-import DemoFlow from './flows/DemoFlow'
+import { BrowserRouter } from 'react-router'
+import { AppRoutes } from './app/routes'
+import { SessionProvider } from './features/session/SessionProvider'
+import { ProductContentProvider } from './services/product-content/ProductContentProvider'
+import { mockProductContentProvider } from './mocks/providers/mockProductContentProvider'
+import { StaffCallProvider } from './features/sa-call/StaffCallContext'
+import { mockStaffCallService } from './mocks/providers/mockStaffCallService'
+import { PriceInquiryRequestProvider } from './features/price-inquiry/PriceInquiryRequestContext'
+import { mockPriceInquiryRequestService } from './mocks/providers/mockPriceInquiryRequestService'
+import { TryOnRequestProvider } from './features/try-on/TryOnRequestContext'
+import { mockTryOnRequestService } from './mocks/providers/mockTryOnRequestService'
+import { AiAnswerProvider } from './features/ai-answer/AiAnswerContext'
+import { mockAiAnswerService } from './mocks/providers/mockAiAnswerService'
 
 function App() {
-  return <DemoFlow />
+  return (
+    <BrowserRouter>
+      <ProductContentProvider value={mockProductContentProvider}>
+        <AiAnswerProvider value={mockAiAnswerService}>
+          <StaffCallProvider value={mockStaffCallService}>
+            <PriceInquiryRequestProvider value={mockPriceInquiryRequestService}>
+              <TryOnRequestProvider value={mockTryOnRequestService}>
+                <SessionProvider>
+                  <AppRoutes />
+                </SessionProvider>
+              </TryOnRequestProvider>
+            </PriceInquiryRequestProvider>
+          </StaffCallProvider>
+        </AiAnswerProvider>
+      </ProductContentProvider>
+    </BrowserRouter>
+  )
 }
 
 export default App
