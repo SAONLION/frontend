@@ -2,7 +2,7 @@ import backgroundImage from '../../assets/images/stage-a-background.png';
 import emblemImage from '../../assets/images/mcm-emblem.png';
 import ImageFrame from '../../components/common/ImageFrame';
 import ScreenHeadline from '../../components/common/ScreenHeadline';
-import ProductCard from '../../components/common/ProductCard';
+import InfoCard from '../../components/common/InfoCard';
 import SecondaryButton from '../../components/common/SecondaryButton';
 
 interface SelectedProduct {
@@ -36,7 +36,7 @@ export default function D21ProductLocationGuide({
           className="mx-auto aspect-325/203 w-[80.85%] max-w-81.25"
         />
         <ScreenHeadline headline={headline} subtext={subtext} variant="md" className="mt-7.5" />
-        <ProductCard
+        <InfoCard
           image={selectedProduct.image}
           name={selectedProduct.name}
           description={selectedProduct.description}

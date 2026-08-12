@@ -3,7 +3,7 @@ import travelPouchImage from '../../assets/images/product-travel-pouch-set.jpg';
 import weekenderImage from '../../assets/images/product-visetos-weekender.png';
 import trolleyImage from '../../assets/images/product-visetos-trolley.png';
 import ScreenHeadline from '../../components/common/ScreenHeadline';
-import ProductCard from '../../components/common/ProductCard';
+import InfoCard from '../../components/common/InfoCard';
 import SecondaryButton from '../../components/common/SecondaryButton';
 import PrimaryButton from '../../components/common/PrimaryButton';
 
@@ -74,7 +74,7 @@ export default function D2ProductRecommendation({
         <ScreenHeadline headline={getHeadlineForPurpose(purpose)} variant="md" />
         <div className="mt-20 flex w-full flex-col gap-2.75">
           {products.map((product) => (
-            <ProductCard
+            <InfoCard
               key={product.id}
               image={product.image}
               name={product.name}
