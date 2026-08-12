@@ -30,6 +30,8 @@ type PendingStaffRequest = {
   completion: Promise<'completed'>
 }
 
+const STAFF_CALL_INFO_TRANSITION_DELAY_MS = 2_000
+
 export function StaffCallPage({ completed = false, callType = 'info' }: StaffCallPageProps) {
   const { sku = '' } = useParams()
   const navigate = useNavigate()
@@ -66,7 +68,11 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
 
     pendingRequestRef.current = request
 
-    void request.completion.then(() => {
+    const minimumDisplayTime = new Promise<void>((resolve) => {
+      window.setTimeout(resolve, callType === 'info' ? STAFF_CALL_INFO_TRANSITION_DELAY_MS : 0)
+    })
+
+    void Promise.all([request.completion, minimumDisplayTime]).then(() => {
       if (active) {
         navigate(completedPath, { replace: true })
       }
@@ -88,12 +94,39 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
     )
   }
 
+  if (callType === 'info') {
+    return (
+      <StageCDetailShell className="stage-c-staff-call-shell">
+        <div className="stage-c-staff-call-content">
+          <section aria-label="나이비스 AI 도슨트" className="stage-c-staff-call-docent">
+            <DocentStage cue="idle" />
+          </section>
+          <h1>
+            {completed
+              ? '제가 직원분께 궁금해 하시는\n부분을 잘 전달했어요!'
+              : '더 자세히 설명드리기 위해\n직원에게 알림을 보내는 중이에요!'}
+          </h1>
+        </div>
+
+        {completed && (
+          <div className="stage-c-staff-call-actions" aria-label="직원 문의 후 액션">
+            <Link className="stage-c-action-button" to={returnPath}>← 다른 정보 보기</Link>
+            <div>
+              <Link className="stage-c-action-button stage-c-action-button--primary" to={purchaseInquiryPath}>구매 문의</Link>
+              <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
+            </div>
+          </div>
+        )}
+      </StageCDetailShell>
+    )
+  }
+
   return (
     <StageCDetailShell>
       <GlassTopBar
         action={
           <Link className="stage-c-glass-link-button" to={returnPath}>
-            ← {callType === 'info' ? '제품 이해' : '기타 질문'}
+            ← 기타 질문
           </Link>
         }
         context="직원 연결"
@@ -114,7 +147,7 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
       {completed ? (
         <GlassBottomActionDock>
           <Link className="stage-c-glass-link-button" to={returnPath}>
-            {callType === 'info' ? '다른 정보 보기' : '다른 것도 물어보기'}
+            다른 것도 물어보기
           </Link>
           <Link className="stage-c-glass-link-button stage-c-glass-link-button--accent" to={purchaseInquiryPath}>
             착용 및 구매 문의하기
@@ -126,7 +159,7 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
       ) : (
         <GlassBottomActionDock>
           <Link className="stage-c-glass-link-button" to={returnPath}>
-            {callType === 'info' ? '제품 이해로 돌아가기' : '기타 질문으로 돌아가기'}
+            기타 질문으로 돌아가기
           </Link>
         </GlassBottomActionDock>
       )}

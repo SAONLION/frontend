@@ -1,6 +1,5 @@
-import CircleButton from '../../components/common/CircleButton'
+import type { KeyboardEvent } from 'react'
 import ScreenHeadline from '../../components/common/ScreenHeadline'
-import { DocentStage } from '../../components/domain/DocentStage'
 
 type A1DocentIntroProps = {
   headline?: string
@@ -13,14 +12,24 @@ export default function A1DocentIntro({
   onContinue,
   subtext = 'MCM의 나이비스 AI 도슨트입니다',
 }: A1DocentIntroProps) {
+  const continueOnKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return
+    event.preventDefault()
+    onContinue()
+  }
+
   return (
-    <main className="stage-entry-page">
+    <main
+      aria-label="화면을 누르면 닉네임 설정으로 이동"
+      className="stage-entry-page stage-entry-page--tap-to-continue"
+      onClick={onContinue}
+      onKeyDown={continueOnKeyDown}
+      role="button"
+      tabIndex={0}
+    >
       <div className="stage-entry-content stage-entry-content--intro">
-        <section aria-label="나이비스 AI 도슨트" className="stage-entry-docent stage-entry-docent--wide">
-          <DocentStage cue="idle" />
-        </section>
+        <div aria-hidden="true" className="stage-entry-docent stage-entry-docent--wide" />
         <ScreenHeadline className="stage-entry-intro-headline" headline={headline} subtext={subtext} />
-        <CircleButton ariaLabel="닉네임 설정으로 이동" className="stage-entry-next-button" onClick={onContinue} />
       </div>
     </main>
   )

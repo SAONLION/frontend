@@ -1,4 +1,5 @@
 export type Choice = {
+  className?: string
   id: string
   label: string
 }
@@ -12,7 +13,7 @@ export function ChoiceList<T extends Choice>({ choices, onSelect }: ChoiceListPr
   return (
     <div className="stage-c-choice-list">
       {choices.map((choice) => (
-        <button className="stage-c-choice-button" key={choice.id} onClick={() => onSelect(choice)} type="button">
+        <button className={`stage-c-choice-button ${choice.className ?? ''}`.trim()} key={choice.id} onClick={() => onSelect(choice)} type="button">
           {choice.label}
         </button>
       ))}

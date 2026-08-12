@@ -27,6 +27,12 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
   const exitProduct = useProductExit(sku)
   const product = useStageCProduct(sku)
   const screen = stageCHubDefinitions[screenId]
+  const isProductIntro = screenId === STAGE_C_SCREEN_IDS.c1
+  const headingClassName = isProductIntro
+    ? 'stage-c-heading--intro'
+    : screenId === STAGE_C_SCREEN_IDS.c3
+      ? 'stage-c-heading--compact'
+      : undefined
 
   if (product === undefined) {
     return <StageCState title="제품 정보를 불러오는 중이에요" description="잠시만 기다려 주세요." />
@@ -63,11 +69,18 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
   return (
     <MobileShell>
       <section className="stage-c-page" aria-labelledby="stage-c-heading">
-        <div className="stage-c-product-context-pill">비세토스 스타크 백팩</div>
+        <div className="stage-c-product-context-pill">{product.name}</div>
         <ProductMedia product={product} />
         <div className="stage-c-hub-content">
           {screen.intro && <p className="stage-c-intro">{screen.intro}</p>}
-          <h1 className={screenId === STAGE_C_SCREEN_IDS.c1 ? 'stage-c-heading--intro' : undefined} id="stage-c-heading">{screen.heading}</h1>
+          <h1 className={headingClassName} id="stage-c-heading">
+            {isProductIntro ? (
+              <>
+                <span title={`MCM의 대표 제품 ${product.name}이네요`}>MCM의 대표 제품 {product.name}이네요</span>
+                <span>어떤 점이 궁금하신가요?</span>
+              </>
+            ) : screen.heading}
+          </h1>
           <ChoiceList choices={screen.choices} onSelect={selectChoice} />
         </div>
         <div className="stage-c-bottom-action-bar" aria-label="제품 탐색 액션">

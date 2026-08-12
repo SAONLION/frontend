@@ -71,7 +71,7 @@ function Model({ cue }: { cue: DocentCue }) {
 
 export default function DocentCanvas({ cue }: { cue: DocentCue }) {
   return (
-    <Canvas aria-hidden camera={{ fov: 36, position: [0, 0, 9] }} dpr={[1, 1.5]} gl={{ alpha: true }}>
+    <Canvas aria-hidden camera={{ fov: 36, position: [0, 0, 9.75] }} dpr={[1, 1.5]} gl={{ alpha: true }}>
       <ambientLight intensity={2} />
       <directionalLight intensity={3} position={[3, 4, 4]} />
       <Model cue={cue} />
