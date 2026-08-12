@@ -1,6 +1,6 @@
 interface ScreenHeadlineProps {
   headline: string | string[];
-  subtext: string;
+  subtext?: string;
   align?: 'left' | 'center';
   variant?: 'lg' | 'md';
   className?: string;
@@ -35,7 +35,7 @@ export default function ScreenHeadline({
           </span>
         ))}
       </h1>
-      <p className={`font-medium text-[#d1d1d1] ${SUBTEXT_STYLES[variant]}`}>{subtext}</p>
+      {subtext && <p className={`font-medium text-[#d1d1d1] ${SUBTEXT_STYLES[variant]}`}>{subtext}</p>}
     </div>
   );
 }

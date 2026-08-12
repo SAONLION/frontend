@@ -1,7 +1,12 @@
-import B2TagRecognizing from './pages/StageB/B2TagRecognizing'
+import E2RequestReceived from './pages/StageE/E2RequestReceived'
 
 function App() {
-  return <B2TagRecognizing onRecognized={() => console.log('tag recognized')} />
+  return (
+    <E2RequestReceived
+      selectedRequests={['가격 확인', '재고 문의']}
+      onClose={() => console.log('close')}
+    />
+  )
 }
 
 export default App

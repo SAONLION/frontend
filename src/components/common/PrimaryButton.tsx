@@ -1,3 +1,5 @@
+import { PRIMARY_BG, PRIMARY_INSET_HIGHLIGHT } from '../../styles/tokens';
+
 interface PrimaryButtonProps {
   label: string;
   onClick?: () => void;
@@ -9,7 +11,7 @@ export default function PrimaryButton({ label, onClick, className = '' }: Primar
     <button
       type="button"
       onClick={onClick}
-      className={`relative flex h-13 items-center justify-center rounded-[30px] bg-[#8a5111] text-[16px] font-medium text-white shadow-[inset_0px_-2px_4px_0px_rgba(255,255,255,0.25)] ${className}`}
+      className={`relative flex h-13 items-center justify-center rounded-[30px] ${PRIMARY_BG} text-[16px] font-medium text-white ${PRIMARY_INSET_HIGHLIGHT} ${className}`}
     >
       {label}
     </button>

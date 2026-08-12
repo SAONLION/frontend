@@ -3,7 +3,8 @@ import backgroundImage from '../../assets/images/stage-a-background.png';
 import emblemImage from '../../assets/images/mcm-emblem.png';
 import ImageFrame from '../../components/common/ImageFrame';
 import TextInput from '../../components/common/TextInput';
-import CircleButton from '../../components/common/CircleButton';
+import CircleIconButton from '../../components/common/CircleIconButton';
+import arrowUpIcon from '../../assets/images/icon-arrow-up.svg';
 
 interface A2NicknameSetupProps {
   headline?: string;
@@ -36,7 +37,12 @@ export default function A2NicknameSetup({
           placeholder={placeholder}
           className="mt-17.5 w-[84.6%] max-w-85"
         />
-        <CircleButton onClick={() => onSubmit?.(nickname)} className="mt-17.5" />
+        <CircleIconButton
+          icon={arrowUpIcon}
+          ariaLabel="다음"
+          onClick={() => onSubmit?.(nickname)}
+          className="mt-17.5"
+        />
       </div>
     </div>
   );
