@@ -39,23 +39,23 @@ export function StageCOtherPage() {
 
   return (
     <StageCDetailShell>
-      <GlassTopBar action={<button onClick={() => navigate(stageCPath(STAGE_C_ROUTES.c1, sku))} type="button">닫기</button>} context="기타 질문" />
-      <GlassInfoCard>
+      <GlassTopBar action={<button aria-label="기타 질문 닫기" onClick={() => navigate(stageCPath(STAGE_C_ROUTES.c1, sku))} type="button">×</button>} context="" />
+      <GlassInfoCard className="stage-c-other-card">
         <h1>선택지에 없는 게 궁금하시면</h1>
         <p>아래에 편하게 적어주세요.</p>
-        <form className="stage-c-query-form stage-c-glass-query-form" onSubmit={submitQuery}>
+        <form className="stage-c-query-form stage-c-glass-query-form" id="stage-c-free-query-form" onSubmit={submitQuery}>
           <label className="stage-c-visually-hidden" htmlFor="stage-c-free-query">궁금한 내용</label>
           <textarea aria-describedby={error ? 'stage-c-free-query-error' : undefined} id="stage-c-free-query" onChange={(event) => { setQuery(event.target.value); setTopic(FREE_QUERY_TOPICS.other); setError('') }} placeholder="예) 비 오는 날 들어도 괜찮을까요?" value={query} />
           <div aria-label="자주 묻는 질문" className="stage-c-quick-chips">
             {quickQueryTopics.map((item) => <GlassChoiceChip key={item.label} label={item.label} onClick={() => { setQuery(item.question); setTopic(item.topic); setError('') }} selected={topic === item.topic && query === item.question} />)}
           </div>
           {error && <p className="stage-c-form-error" id="stage-c-free-query-error" role="alert">{error}</p>}
-          <button className="stage-c-send-button" disabled={submitting} type="submit">{submitting ? '보내는 중…' : '보내기'}</button>
         </form>
+        <button className="stage-c-send-button" disabled={submitting} form="stage-c-free-query-form" type="submit">{submitting ? '보내는 중…' : '보내기'}</button>
       </GlassInfoCard>
-      <GlassBottomActionDock>
-        <button onClick={() => navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn, sku))} type="button">착용 및 구매 문의하기</button>
-        <button onClick={exitProduct} type="button">다른 제품 보기 →</button>
+      <GlassBottomActionDock className="stage-c-other-actions">
+        <button className="stage-c-action-button" onClick={() => navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn, sku))} type="button">착용 및 구매 문의</button>
+        <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
       </GlassBottomActionDock>
     </StageCDetailShell>
   )

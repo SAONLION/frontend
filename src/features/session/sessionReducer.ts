@@ -4,6 +4,7 @@ import { SESSION_ACTIONS, type SessionAction, type SessionState } from './sessio
 
 export const initialSessionState: SessionState = {
   currentSku: null,
+  nickname: null,
   taggedSkus: [],
   events: [],
   freeQueryContexts: {},
@@ -26,6 +27,8 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
   switch (action.type) {
     case SESSION_ACTIONS.setCurrentSku:
       return { ...state, currentSku: action.sku }
+    case SESSION_ACTIONS.setNickname:
+      return { ...state, nickname: action.nickname }
     case SESSION_ACTIONS.recordNfcTag:
       return {
         ...state,

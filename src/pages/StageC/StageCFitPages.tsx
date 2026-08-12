@@ -1,15 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { DocentStage } from '../../components/domain/DocentStage'
-import {
-  GlassBottomActionDock,
-  GlassChoiceChip,
-  GlassInfoCard,
-  GlassSegmentedControl,
-  GlassTopBar,
-  StageCDetailShell,
-} from '../../components/domain/StageCDetailShell'
-import { SelectionSummary } from '../../components/domain/SelectionSummary'
+import { GlassInfoCard, StageCDetailShell } from '../../components/domain/StageCDetailShell'
 import { EVENT_NAMES, type SessionEvent } from '../../constants/events'
 import { STAGE_C_PRODUCT_DETAIL_ROUTES, STAGE_C_ROUTES, stageCPath } from '../../constants/stageC'
 import { useProductExit } from '../../features/product-explore/useProductExit'
@@ -22,6 +14,8 @@ import { StageCState } from './StageCHubPage'
 import { fitSearchPath, getFitSelection, type FitSelection } from './stageCFitSelection'
 
 type FitPageKind = 'size' | 'color' | 'try-on' | 'pending' | 'completed' | 'purchase-completed'
+
+const FIT_REQUEST_TRANSITION_DELAY_MS = 2_000
 
 export function StageCFitPage({ kind }: { kind: FitPageKind }) {
   const { sku = '' } = useParams()
@@ -83,7 +77,11 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
         }
 
     requestRef.current = request
-    void request.completion.then(() => {
+    const minimumDisplayTime = new Promise<void>((resolve) => {
+      window.setTimeout(resolve, FIT_REQUEST_TRANSITION_DELAY_MS)
+    })
+
+    void Promise.all([request.completion, minimumDisplayTime]).then(() => {
       if (active) {
         navigate(fitSearchPath(paths.completed, selection), { replace: true })
       }
@@ -138,102 +136,136 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
 
   if (kind === 'size') {
     return <FitShell kind={kind} selection={selection} sku={sku}>
-      <SizeCard onSelect={setSize} product={product} selection={selection} />
-      <GlassBottomActionDock>
-        <button onClick={confirmSize} type="button">선택 확인하기</button>
-        <button onClick={exitProduct} type="button">다른 제품 보기 →</button>
-      </GlassBottomActionDock>
+      <SizeOptions onSelect={setSize} product={product} selection={selection} />
+      <dl className="stage-c-fit-reference-facts">
+        <div><dt>사이즈</dt><dd>미디엄 (W30 × H40 × D14 cm)</dd></div>
+        <div><dt>용량</dt><dd>15L · 노트북 14인치 수납</dd></div>
+        <div><dt>무게</dt><dd>780 g</dd></div>
+        <div><dt>기내 반입</dt><dd>가능 · TSA 규격 대응</dd></div>
+      </dl>
+      <FitActionRow onExitProduct={exitProduct} onPrimaryAction={confirmSize} />
     </FitShell>
   }
 
   if (kind === 'color') {
     return <FitShell kind={kind} selection={selection} sku={sku}>
-      <ColorCard onSelect={setColor} product={product} selection={selection} />
-      <GlassBottomActionDock>
-        <Link className="stage-c-glass-link-button stage-c-glass-link-button--accent" to={fitSearchPath(paths.tryOn, selection)}>선택 확인하기</Link>
-        <button onClick={exitProduct} type="button">다른 제품 보기 →</button>
-      </GlassBottomActionDock>
+      <ColorOptions onSelect={setColor} product={product} selection={selection} />
+      <FitActionRow onExitProduct={exitProduct} onPrimaryAction={() => navigate(fitSearchPath(paths.tryOn, selection))} />
     </FitShell>
   }
 
   if (kind === 'try-on') {
     return <FitShell kind={kind} selection={selection} sku={sku}>
-      <SelectionSummary {...getSummaryProps(selection)} />
-      <SizeCard compact onSelect={setSize} product={product} selection={selection} />
-      <ColorCard compact onSelect={setColor} product={product} selection={selection} />
-      <GlassInfoCard>
-        <h1>착장 정보를 직원에게 전달할까요?</h1>
-        <p>선택한 옵션을 바탕으로 직원이 제품 준비를 도와드릴게요.</p>
-      </GlassInfoCard>
-      <GlassBottomActionDock>
-        <button onClick={requestTryOn} type="button">착장 요청하기</button>
-      </GlassBottomActionDock>
+      <div className="stage-c-fit-try-on-options">
+        <SizeOptions label="사이즈" onSelect={setSize} product={product} selection={selection} />
+        <ColorOptions label="컬러" onSelect={setColor} product={product} selection={selection} />
+      </div>
+      <button className="stage-c-fit-proceed-button" onClick={requestTryOn} type="button">위 제품으로 진행 <span aria-hidden="true">→</span></button>
     </FitShell>
   }
 
   if (kind === 'pending') {
-    return <FitShell kind={kind} selection={selection} sku={sku}>
-      <SelectionSummary {...getSummaryProps(selection)} />
-      <GlassInfoCard><h1>직원이 제품을 준비하는 중이에요.</h1><p>잠시 후 선택한 착장 정보를 전달해 드릴게요.</p></GlassInfoCard>
-      <GlassBottomActionDock><Link className="stage-c-glass-link-button" to={stageCPath(STAGE_C_ROUTES.c3, sku)}>다른 정보 보기</Link></GlassBottomActionDock>
-    </FitShell>
+    return <FitStatusScreen status="pending" />
   }
 
   if (kind === 'completed') {
-    return <FitShell kind={kind} selection={selection} sku={sku}>
-      <SelectionSummary {...getSummaryProps(selection)} />
-      <GlassInfoCard><h1>착장 정보를 직원에게 전달했어요.</h1><p>선택한 옵션을 확인하고 도와드릴 예정이에요.</p></GlassInfoCard>
-      <GlassBottomActionDock>
-        <Link className="stage-c-glass-link-button" to={stageCPath(STAGE_C_ROUTES.c3, sku)}>다른 정보 보기</Link>
-        <button onClick={requestPurchase} type="button">구매 문의하기</button>
-        <button onClick={exitProduct} type="button">다른 제품 보기 →</button>
-      </GlassBottomActionDock>
-    </FitShell>
+    return <FitStatusScreen onExitProduct={exitProduct} onPurchaseInquiry={requestPurchase} status="completed" />
   }
 
-  return <FitShell kind={kind} selection={selection} sku={sku}>
-    <SelectionSummary {...getSummaryProps(selection)} />
-    <GlassInfoCard><h1>구매 안내 요청이 접수되었어요.</h1><p>가격과 구매 관련 안내는 직원이 직접 도와드릴 예정이에요.</p></GlassInfoCard>
-    <GlassBottomActionDock>
-      <Link className="stage-c-glass-link-button" to={stageCPath(STAGE_C_ROUTES.c3, sku)}>다른 정보 보기</Link>
-      <button onClick={exitProduct} type="button">다른 제품 보기 →</button>
-    </GlassBottomActionDock>
-  </FitShell>
+  return <FitStatusScreen onExitProduct={exitProduct} status="purchase-completed" />
 }
 
-function FitShell({ children, kind, selection, sku }: { children: ReactNode; kind: FitPageKind; selection: FitSelection; sku: string }) {
-  const fitHubPath = stageCPath(STAGE_C_ROUTES.c3, sku)
-  const cue = kind === 'completed' || kind === 'purchase-completed' ? 'greet' : 'idle'
+type FitStatus = 'pending' | 'completed' | 'purchase-completed'
 
-  return <StageCDetailShell>
-    <GlassTopBar context="핏 · 취향" action={<Link className="stage-c-glass-link-button" to={fitHubPath}>← 핏 · 취향</Link>} />
-    <section className="stage-c-glass-media-frame stage-c-fit-media">
-      <DocentStage cue={cue} />
+function FitStatusScreen({
+  onExitProduct,
+  onPurchaseInquiry,
+  status,
+}: {
+  onExitProduct?: () => void
+  onPurchaseInquiry?: () => void
+  status: FitStatus
+}) {
+  const content = {
+    pending: { title: '직원이 제품을 준비해서\n가는 중이에요!' },
+    completed: { title: '직원에게 충분한 정보를 전달했어요!', description: '착샷 촬영도 요청해보세요.' },
+    'purchase-completed': { title: '직원에게 구매 안내 요청을 보냈어요!', description: '가격과 관련 정보들을 곧 안내해 드릴게요!' },
+  }[status]
+
+  return (
+    <StageCDetailShell className="stage-c-fit-status-shell">
+      <div className="stage-c-fit-status-content">
+        <section aria-label="나이비스 AI 도슨트" className="stage-c-fit-status-docent"><DocentStage cue="idle" /></section>
+        <h1 className={status === 'pending' ? undefined : 'stage-c-fit-status-title--single-line'}>{content.title}</h1>
+        {content.description && <p>{content.description}</p>}
+      </div>
+      {status === 'completed' && onPurchaseInquiry && onExitProduct && (
+        <div className="stage-c-fit-status-actions">
+          <button className="stage-c-action-button stage-c-action-button--primary" onClick={onPurchaseInquiry} type="button">구매 문의</button>
+          <button className="stage-c-action-button" onClick={onExitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
+        </div>
+      )}
+      {status === 'purchase-completed' && onExitProduct && (
+        <div className="stage-c-fit-status-actions">
+          <button className="stage-c-action-button" onClick={onExitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
+        </div>
+      )}
+    </StageCDetailShell>
+  )
+}
+
+function FitShell({ children, kind, selection }: { children: ReactNode; kind: FitPageKind; selection: FitSelection; sku: string }) {
+  const labels: Record<'size' | 'color' | 'try-on', string> = { size: '사이즈 · 용량', color: '컬러', 'try-on': '착장 요청' }
+
+  return <StageCDetailShell className={`stage-c-fit-reference-shell stage-c-fit-reference-shell--${kind}`}>
+    <div className="stage-c-fit-reference-pill">{labels[kind as 'size' | 'color' | 'try-on']}</div>
+    <section className="stage-c-fit-reference-media">
       <img alt={`${selection.color.label} 컬러 대표 이미지`} src={selection.color.imageUrl} />
     </section>
     {children}
   </StageCDetailShell>
 }
 
-function SizeCard({ compact = false, onSelect, product, selection }: { compact?: boolean; onSelect: (option: SizeOption) => void; product: Product; selection: FitSelection }) {
-  return <GlassInfoCard>
-    <h1>{compact ? '사이즈' : '사이즈를 살펴보세요'}</h1>
-    {!compact && <p>치수와 확인된 제품 특징을 비교할 수 있어요.</p>}
-    <GlassSegmentedControl label="사이즈 선택">
-      {product.sizeOptions?.map((option) => <GlassChoiceChip key={option.code} label={option.label} onClick={() => onSelect(option)} selected={option.code === selection.size.code} />)}
-    </GlassSegmentedControl>
-    {!compact && <dl className="stage-c-fit-facts"><div><dt>치수</dt><dd>{selection.size.dimensions}</dd></div><div><dt>스트랩</dt><dd>{product.fitDetail?.strap}</dd></div><div><dt>수납</dt><dd>{product.fitDetail?.storage}</dd></div></dl>}
-  </GlassInfoCard>
+function SizeOptions({ label, onSelect, product, selection }: { label?: string; onSelect: (option: SizeOption) => void; product: Product; selection: FitSelection }) {
+  const referenceLabels: Record<string, string> = { MNI: '스몰', SML: '미디엄', SMD: '라지' }
+  const options = product.sizeOptions?.slice(0, 3) ?? []
+  const selectedIndex = Math.max(0, options.findIndex((option) => option.code === selection.size.code))
+
+  return <section className="stage-c-fit-reference-options">
+    {label && <h2>{label}</h2>}
+    <div aria-label="사이즈 선택" className="stage-c-fit-size-selector" role="group">
+      <span aria-hidden="true" className={`stage-c-fit-size-selector__indicator stage-c-fit-size-selector__indicator--${selectedIndex}`} />
+      {options.map((option) => (
+        <button aria-pressed={option.code === selection.size.code} key={option.code} onClick={() => onSelect(option)} type="button">
+          {referenceLabels[option.code] ?? option.label}
+        </button>
+      ))}
+    </div>
+  </section>
 }
 
-function ColorCard({ compact = false, onSelect, product, selection }: { compact?: boolean; onSelect: (option: ColorOption) => void; product: Product; selection: FitSelection }) {
-  return <GlassInfoCard>
-    <h1>{compact ? '컬러' : '컬러를 선택하세요'}</h1>
-    {!compact && <p>선택한 컬러의 대표 이미지를 보여드려요.</p>}
-    <GlassSegmentedControl label="컬러 선택">
-      {product.colorOptions?.map((option) => <GlassChoiceChip key={option.code} label={option.label} onClick={() => onSelect(option)} selected={option.code === selection.color.code} swatch={option.swatch} />)}
-    </GlassSegmentedControl>
-  </GlassInfoCard>
+function ColorOptions({ label, onSelect, product, selection }: { label?: string; onSelect: (option: ColorOption) => void; product: Product; selection: FitSelection }) {
+  const referenceColors = product.colorOptions?.filter((option) => ['cognac', 'black', 'white'].includes(option.code)) ?? []
+  const referenceLabels: Record<string, string> = { cognac: '코냑', black: '블랙', white: '화이트' }
+
+  return <section className="stage-c-fit-reference-options stage-c-fit-reference-options--color">
+    {label && <h2>{label}</h2>}
+    <div aria-label="컬러 선택" className="stage-c-fit-color-selector" role="group">
+      {referenceColors.map((option) => (
+        <button aria-pressed={option.code === selection.color.code} key={option.code} onClick={() => onSelect(option)} type="button">
+          <i aria-hidden="true" style={{ backgroundColor: option.swatch }} />
+          <span>{referenceLabels[option.code] ?? option.label}</span>
+        </button>
+      ))}
+    </div>
+  </section>
+}
+
+function FitActionRow({ onExitProduct, onPrimaryAction }: { onExitProduct: () => void; onPrimaryAction: () => void }) {
+  return <div className="stage-c-fit-reference-actions">
+    <button className="stage-c-action-button stage-c-action-button--primary" onClick={onPrimaryAction} type="button">착용 및 구매 문의</button>
+    <button className="stage-c-action-button" onClick={onExitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
+  </div>
 }
 
 function getFitPaths(sku: string) {
@@ -245,10 +277,6 @@ function getFitPaths(sku: string) {
     completed: stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOnCompleted, sku),
     purchaseCompleted: stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitPurchaseInquiryCompleted, sku),
   }
-}
-
-function getSummaryProps(selection: FitSelection) {
-  return { productName: selection.size.productName, sizeLabel: selection.size.label, colorLabel: selection.color.label, dimensions: selection.size.dimensions, imageUrl: selection.color.imageUrl }
 }
 
 function hasMatchingTryOnRequest(events: readonly SessionEvent[], sku: string, selection: FitSelection): boolean {

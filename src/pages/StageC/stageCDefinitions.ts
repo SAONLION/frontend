@@ -4,6 +4,7 @@ import { FREE_QUERY_TOPICS, type FreeQueryTopic, type HubType } from '../../cons
 type HubRouteSegment = 'product' | 'fit' | 'purchase' | 'other'
 
 type PrimaryHubChoice = {
+  className?: string
   id: HubType
   label: string
   destination: HubRouteSegment
@@ -11,6 +12,7 @@ type PrimaryHubChoice = {
 }
 
 type DetailHubChoice = {
+  className?: string
   id: StageCComingSoonScreenId
   label: string
   destination: StageCComingSoonScreenId
@@ -32,7 +34,7 @@ export const stageCHubDefinitions: Record<StageCHubScreenId, HubScreenDefinition
       { id: 'product', label: '제품 자체가 궁금해요', destination: 'product', hubType: 'product' },
       { id: 'fit', label: '나에게 맞는지 보고 싶어요', destination: 'fit', hubType: 'fit' },
       { id: 'purchase', label: '구매 조건이 궁금해요', destination: 'purchase', hubType: 'purchase' },
-      { id: 'other', label: '그 외 궁금한 점이 있어요', destination: 'other', hubType: 'other' },
+      { id: 'other', label: '그 외 궁금한 점이 있어요', destination: 'other', hubType: 'other', className: 'stage-c-choice-button--muted' },
     ],
     purchaseActionLabel: '구매 문의',
   },

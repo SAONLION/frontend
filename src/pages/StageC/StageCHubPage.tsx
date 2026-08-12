@@ -2,7 +2,6 @@ import { useNavigate, useParams } from 'react-router'
 import { ChoiceList } from '../../components/common/ChoiceList'
 import { MobileShell } from '../../components/common/MobileShell'
 import { ProductMedia } from '../../components/domain/ProductMedia'
-import { EVENT_NAMES } from '../../constants/events'
 import {
   STAGE_C_PRODUCT_DETAIL_ROUTE_KEYS,
   STAGE_C_PRODUCT_DETAIL_ROUTES,
@@ -12,6 +11,7 @@ import {
   type StageCHubScreenId,
 } from '../../constants/stageC'
 import { useStageCProduct } from '../../features/product-explore/useStageCProduct'
+import { useProductExit } from '../../features/product-explore/useProductExit'
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes'
 import { useSession } from '../../features/session/useSession'
 import { stageCHubDefinitions } from './stageCDefinitions'
@@ -23,9 +23,16 @@ type StageCHubPageProps = {
 export function StageCHubPage({ screenId }: StageCHubPageProps) {
   const { sku = '' } = useParams()
   const navigate = useNavigate()
-  const { dispatch, state } = useSession()
+  const { dispatch } = useSession()
+  const exitProduct = useProductExit(sku)
   const product = useStageCProduct(sku)
   const screen = stageCHubDefinitions[screenId]
+  const isProductIntro = screenId === STAGE_C_SCREEN_IDS.c1
+  const headingClassName = isProductIntro
+    ? 'stage-c-heading--intro'
+    : screenId === STAGE_C_SCREEN_IDS.c3
+      ? 'stage-c-heading--compact'
+      : undefined
 
   if (product === undefined) {
     return <StageCState title="제품 정보를 불러오는 중이에요" description="잠시만 기다려 주세요." />
@@ -59,21 +66,21 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
     navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn, sku))
   }
 
-  const exitProduct = () => {
-    const exitCount = state.events.filter((event) => event.name === EVENT_NAMES.productExit).length
-    dispatch({ type: SESSION_ACTIONS.recordProductExit, sku })
-    const destination = exitCount === 0 ? STAGE_C_SCREEN_IDS.stageD1 : STAGE_C_SCREEN_IDS.stageB1
-    navigate(stageCComingSoonPath(sku, destination))
-  }
-
   return (
     <MobileShell>
       <section className="stage-c-page" aria-labelledby="stage-c-heading">
-        <div className="stage-c-product-context-pill">비세토스 스타크 백팩</div>
+        <div className="stage-c-product-context-pill">{product.name}</div>
         <ProductMedia product={product} />
         <div className="stage-c-hub-content">
           {screen.intro && <p className="stage-c-intro">{screen.intro}</p>}
-          <h1 className={screenId === STAGE_C_SCREEN_IDS.c1 ? 'stage-c-heading--intro' : undefined} id="stage-c-heading">{screen.heading}</h1>
+          <h1 className={headingClassName} id="stage-c-heading">
+            {isProductIntro ? (
+              <>
+                <span title={`MCM의 대표 제품 ${product.name}이네요`}>MCM의 대표 제품 {product.name}이네요</span>
+                <span>어떤 점이 궁금하신가요?</span>
+              </>
+            ) : screen.heading}
+          </h1>
           <ChoiceList choices={screen.choices} onSelect={selectChoice} />
         </div>
         <div className="stage-c-bottom-action-bar" aria-label="제품 탐색 액션">

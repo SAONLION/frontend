@@ -1,26 +1,26 @@
 import type { PropsWithChildren, ReactNode } from 'react'
 import { MobileShell } from '../common/MobileShell'
 
-export function StageCDetailShell({ children }: PropsWithChildren) {
+export function StageCDetailShell({ children, className = '' }: PropsWithChildren<{ className?: string }>) {
   return (
     <MobileShell>
-      <section className="stage-c-detail-shell">{children}</section>
+      <section className={`stage-c-detail-shell ${className}`.trim()}>{children}</section>
     </MobileShell>
   )
 }
 
-export function GlassTopBar({ context, action }: { context: string; action: ReactNode }) {
+export function GlassTopBar({ context, action, className = '' }: { context: string; action: ReactNode; className?: string }) {
   return (
-    <header className="stage-c-glass-topbar">
-      <span>{context}</span>
+    <header className={`stage-c-glass-topbar ${className}`.trim()}>
+      {context && <span>{context}</span>}
       {action}
     </header>
   )
 }
 
-export function GlassInfoCard({ children }: PropsWithChildren) {
+export function GlassInfoCard({ children, className = '' }: PropsWithChildren<{ className?: string }>) {
   return (
-    <section className="stage-c-glass-card">
+    <section className={`stage-c-glass-card ${className}`.trim()}>
       {children}
     </section>
   )
@@ -34,9 +34,9 @@ export function GlassSpeechBubble({ children }: PropsWithChildren) {
   )
 }
 
-export function GlassBottomActionDock({ children }: PropsWithChildren) {
+export function GlassBottomActionDock({ children, className = '' }: PropsWithChildren<{ className?: string }>) {
   return (
-    <footer className="stage-c-glass-action-dock">
+    <footer className={`stage-c-glass-action-dock ${className}`.trim()}>
       {children}
     </footer>
   )
