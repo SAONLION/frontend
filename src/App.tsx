@@ -13,6 +13,7 @@ import { AiAnswerProvider } from './features/ai-answer/AiAnswerContext'
 import { mockAiAnswerService } from './mocks/providers/mockAiAnswerService'
 import { AmbientBronzeBackground } from './components/common/AmbientBronzeBackground'
 import { DocentStage } from './components/domain/DocentStage'
+import type { DocentCue } from './components/domain/DocentStage'
 import './App.css'
 
 function PersistentEntryDocent() {
@@ -22,35 +23,49 @@ function PersistentEntryDocent() {
     return null
   }
 
+  const cue: DocentCue = pathname === '/stage-a/intro'
+    ? 'greet'
+    : pathname === '/stage-a/nickname'
+      ? 'listen'
+      : pathname === '/stage-b/nfc'
+        ? 'guide'
+        : 'scan'
+
   return (
     <section aria-label="나이비스 AI 도슨트" className="stage-entry-persistent-docent">
-      <DocentStage cue="idle" />
+      <DocentStage cue={cue} />
     </section>
+  )
+}
+
+function AppContent() {
+  return (
+    <div className="app-shell">
+      <AmbientBronzeBackground />
+      <div className="app-shell__content">
+        <PersistentEntryDocent />
+        <ProductContentProvider value={mockProductContentProvider}>
+          <AiAnswerProvider value={mockAiAnswerService}>
+            <StaffCallProvider value={mockStaffCallService}>
+              <PriceInquiryRequestProvider value={mockPriceInquiryRequestService}>
+                <TryOnRequestProvider value={mockTryOnRequestService}>
+                  <SessionProvider>
+                    <AppRoutes />
+                  </SessionProvider>
+                </TryOnRequestProvider>
+              </PriceInquiryRequestProvider>
+            </StaffCallProvider>
+          </AiAnswerProvider>
+        </ProductContentProvider>
+      </div>
+    </div>
   )
 }
 
 function App() {
   return (
     <BrowserRouter>
-      <div className="app-shell">
-        <AmbientBronzeBackground />
-        <div className="app-shell__content">
-          <PersistentEntryDocent />
-          <ProductContentProvider value={mockProductContentProvider}>
-            <AiAnswerProvider value={mockAiAnswerService}>
-              <StaffCallProvider value={mockStaffCallService}>
-                <PriceInquiryRequestProvider value={mockPriceInquiryRequestService}>
-                  <TryOnRequestProvider value={mockTryOnRequestService}>
-                    <SessionProvider>
-                      <AppRoutes />
-                    </SessionProvider>
-                  </TryOnRequestProvider>
-                </PriceInquiryRequestProvider>
-              </StaffCallProvider>
-            </AiAnswerProvider>
-          </ProductContentProvider>
-        </div>
-      </div>
+      <AppContent />
     </BrowserRouter>
   )
 }

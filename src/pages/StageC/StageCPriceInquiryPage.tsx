@@ -90,7 +90,7 @@ function PriceInquiryContent({ pageState, productName, productImageUrl, sku }: P
     <StageCDetailShell>
       <GlassTopBar context="구매 조건" action={<Link className="stage-c-glass-link-button" to={purchaseHubPath}>← 구매 조건</Link>} />
       <section className="stage-c-glass-media-frame stage-c-fit-media" aria-label="제품과 도슨트 안내">
-        <DocentStage cue={pageState === 'completed' ? 'greet' : 'idle'} />
+        <DocentStage continuityKey="price-inquiry" cue={pageState === 'request' ? 'present' : pageState === 'pending' ? 'sending' : 'success'} />
         <img alt={productName} src={productImageUrl} />
       </section>
       {pageState === 'request' && (

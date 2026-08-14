@@ -7,10 +7,11 @@ import {
   type ErrorInfo,
   type ReactNode,
 } from 'react'
+import type { DocentCue } from '../../features/docent/docentCue'
 
 const DocentCanvas = lazy(() => import('./DocentCanvas'))
 
-export type DocentCue = 'idle' | 'greet'
+export type { DocentCue } from '../../features/docent/docentCue'
 
 class DocentErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false }
@@ -30,7 +31,7 @@ class DocentErrorBoundary extends Component<{ children: ReactNode }, { failed: b
   }
 }
 
-export function DocentStage({ cue }: { cue: DocentCue }) {
+export function DocentStage({ cue, continuityKey }: { cue: DocentCue; continuityKey?: string }) {
   const [supported, setSupported] = useState(true)
 
   useEffect(() => {
@@ -38,13 +39,13 @@ export function DocentStage({ cue }: { cue: DocentCue }) {
   }, [])
 
   return (
-    <div className="stage-c-docent-layer">
+    <div className={`stage-c-docent-layer stage-c-docent-layer--${cue}`}>
       {!supported ? (
         <div className="stage-c-docent-fallback">도슨트 안내가 준비되어 있어요.</div>
       ) : (
         <DocentErrorBoundary>
           <Suspense fallback={<div className="stage-c-docent-fallback">도슨트를 불러오는 중이에요.</div>}>
-            <DocentCanvas cue={cue} />
+            <DocentCanvas continuityKey={continuityKey} cue={cue} />
           </Suspense>
         </DocentErrorBoundary>
       )}

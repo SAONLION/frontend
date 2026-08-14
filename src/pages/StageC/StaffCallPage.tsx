@@ -97,7 +97,7 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
       <StageCDetailShell className="stage-c-staff-call-shell">
         <div className="stage-c-staff-call-content">
           <section aria-label="나이비스 AI 도슨트" className="stage-c-staff-call-docent">
-            <DocentStage cue="idle" />
+            <DocentStage continuityKey={`staff-call-${callType}`} cue={completed ? 'success' : 'sending'} />
           </section>
           <h1>
             {completed
@@ -125,7 +125,7 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
         <Link aria-label="기타 질문 닫기" to={returnPath}>×</Link>
       </header>
       <div className="stage-c-c5-staff-content">
-        <section aria-label="나이비스 AI 도슨트" className="stage-c-c5-staff-docent"><DocentStage cue="idle" /></section>
+        <section aria-label="나이비스 AI 도슨트" className="stage-c-c5-staff-docent"><DocentStage continuityKey={`staff-call-${callType}`} cue={completed ? 'success' : 'sending'} /></section>
         <h1>직원에게 궁금한 사항에 대해<br />문의 알림을 보냈어요!</h1>
         <p>더 자세한 상담을 받아보세요</p>
       </div>

@@ -36,6 +36,7 @@ export function AmbientBronzeBackground() {
 
   return (
     <div aria-hidden="true" className="ambient-bronze-background">
+      <span className="ambient-bronze-background__center-glow" />
       {glowStyles.map((style, index) => <span className="ambient-bronze-background__glow" key={index} style={style} />)}
     </div>
   )

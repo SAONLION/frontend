@@ -36,7 +36,7 @@ export function StageCPurchaseStatusPage({ kind }: { kind: PurchaseStatusKind })
   return (
     <StageCDetailShell className="stage-c-purchase-status-shell">
       <div className="stage-c-purchase-status-content">
-        <section aria-label="나이비스 AI 도슨트" className="stage-c-purchase-status-docent"><DocentStage cue="idle" /></section>
+        <section aria-label="나이비스 AI 도슨트" className="stage-c-purchase-status-docent"><DocentStage continuityKey={kind === 'price' ? 'price-inquiry' : undefined} cue={kind === 'price' ? 'success' : 'present'} /></section>
         <h1 className={kind === 'price' ? 'stage-c-purchase-status-title--single-line' : undefined}>{content.title}</h1>
         {content.description && <p>{content.description}</p>}
       </div>

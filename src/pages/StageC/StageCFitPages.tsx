@@ -195,7 +195,7 @@ function FitStatusScreen({
   return (
     <StageCDetailShell className="stage-c-fit-status-shell">
       <div className="stage-c-fit-status-content">
-        <section aria-label="나이비스 AI 도슨트" className="stage-c-fit-status-docent"><DocentStage cue="idle" /></section>
+        <section aria-label="나이비스 AI 도슨트" className="stage-c-fit-status-docent"><DocentStage continuityKey="fit-status" cue={status === 'pending' ? 'waiting' : 'success'} /></section>
         <h1 className={status === 'pending' ? undefined : 'stage-c-fit-status-title--single-line'}>{content.title}</h1>
         {content.description && <p>{content.description}</p>}
       </div>
