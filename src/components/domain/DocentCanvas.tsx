@@ -265,6 +265,144 @@ function Model({ cue, continuityKey, reducedMotion }: { cue: DocentCue; continui
           <ListeningQuestion reducedMotion={reducedMotion} />
         </Suspense>
       ) : null}
+      {cue === 'nfc-guide' ? <NfcGuideSignal reducedMotion={reducedMotion} /> : null}
+      {cue === 'scan' ? <ProductScanSignal reducedMotion={reducedMotion} /> : null}
+      {cue === 'success' ? <SuccessSparkles reducedMotion={reducedMotion} /> : null}
+    </group>
+  )
+}
+
+function SuccessSparkles({ reducedMotion }: { reducedMotion: boolean }) {
+  const group = useRef<THREE.Group>(null)
+  const materials = useRef<THREE.MeshBasicMaterial[]>([])
+  const startedAt = useRef(performance.now())
+  const origins = [
+    new THREE.Vector3(-0.78, 0.5, 0.35),
+    new THREE.Vector3(-0.35, 1.05, 0.42),
+    new THREE.Vector3(0.36, 1.1, 0.38),
+    new THREE.Vector3(0.8, 0.38, 0.3),
+    new THREE.Vector3(0, 1.48, 0.32),
+  ]
+
+  useFrame(() => {
+    const sparkles = group.current
+    if (!sparkles) return
+
+    const elapsed = (performance.now() - startedAt.current) / 1000
+    const progress = reducedMotion ? 0.5 : Math.min(elapsed / 1.35, 1)
+    const burst = Math.sin(progress * Math.PI)
+
+    sparkles.children.forEach((child, index) => {
+      const origin = origins[index]
+      if (!origin) return
+      const direction = index % 2 === 0 ? 1 : -1
+      child.position.set(
+        origin.x + direction * burst * 0.17,
+        origin.y + burst * 0.2,
+        origin.z,
+      )
+      child.scale.setScalar(reducedMotion ? 0.65 : 0.4 + burst * 0.8)
+      const material = materials.current[index]
+      if (material) material.opacity = reducedMotion ? 0.34 : burst * 0.72
+    })
+  })
+
+  return (
+    <group ref={group}>
+      {origins.map((origin, index) => (
+        <mesh key={index} position={origin}>
+          <sphereGeometry args={[0.075, 16, 16]} />
+          <meshBasicMaterial
+            ref={(material) => {
+              if (material) materials.current[index] = material
+            }}
+            color="#ffe6a3"
+            transparent
+            opacity={0}
+            depthWrite={false}
+          />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
+function NfcGuideSignal({ reducedMotion }: { reducedMotion: boolean }) {
+  const group = useRef<THREE.Group>(null)
+  const materials = useRef<THREE.MeshBasicMaterial[]>([])
+
+  useFrame(({ clock }) => {
+    const signal = group.current
+    if (!signal) return
+
+    const phase = reducedMotion ? 0.5 : (clock.elapsedTime % 2.2) / 2.2
+    signal.position.y = -0.28 + (reducedMotion ? 0 : Math.sin(clock.elapsedTime * 2.85) * 0.025)
+
+    signal.children.forEach((child, index) => {
+      const offset = (phase + index / signal.children.length) % 1
+      const scale = 0.72 + offset * 0.76
+      child.scale.setScalar(scale)
+      const material = materials.current[index]
+      if (material) material.opacity = reducedMotion ? 0.3 : (1 - offset) * 0.36
+    })
+  })
+
+  return (
+    <group ref={group} position={[0.98, -0.28, 0.45]} rotation={[0, 0, -0.36]}>
+      {[0, 1, 2].map((index) => (
+        <mesh key={index}>
+          <ringGeometry args={[0.33, 0.37, 48]} />
+          <meshBasicMaterial
+            ref={(material) => {
+              if (material) materials.current[index] = material
+            }}
+            color="#ffe3a0"
+            transparent
+            opacity={0.3}
+            depthWrite={false}
+          />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
+function ProductScanSignal({ reducedMotion }: { reducedMotion: boolean }) {
+  const group = useRef<THREE.Group>(null)
+  const materials = useRef<THREE.MeshBasicMaterial[]>([])
+
+  useFrame(({ clock }) => {
+    const signal = group.current
+    if (!signal) return
+
+    const phase = reducedMotion ? 0.35 : (clock.elapsedTime % 1.9) / 1.9
+    signal.position.y = -0.16 + (reducedMotion ? 0 : phase * 0.36)
+
+    signal.children.forEach((child, index) => {
+      const offset = (phase + index / signal.children.length) % 1
+      const scale = 0.85 + offset * 1.15
+      child.scale.set(scale, scale * 0.7, 1)
+      const material = materials.current[index]
+      if (material) material.opacity = reducedMotion ? 0.24 : (1 - offset) * 0.42
+    })
+  })
+
+  return (
+    <group ref={group} position={[0, -0.16, 1.35]}>
+      {[0, 1, 2].map((index) => (
+        <mesh key={index}>
+          <ringGeometry args={[0.62, 0.66, 64]} />
+          <meshBasicMaterial
+            ref={(material) => {
+              if (material) materials.current[index] = material
+            }}
+            color="#f5c862"
+            transparent
+            opacity={0.34}
+            depthWrite={false}
+          />
+        </mesh>
+      ))}
     </group>
   )
 }

@@ -36,6 +36,9 @@ export function writeDocentMotion(cue: DocentCue, elapsed: number, clockTime: nu
     case 'listen':
       listenMotion(elapsed, output)
       return
+    case 'nfc-guide':
+      nfcGuideMotion(elapsed, output)
+      return
     case 'guide':
       guideMotion(elapsed, output)
       return
@@ -124,48 +127,86 @@ function listenMotion(time: number, output: DocentMotion) {
   output.rightWingLift = Math.sin(time * 0.43 + 2) * 0.035 * settle
 }
 
+function nfcGuideMotion(time: number, output: DocentMotion) {
+  const local = time % 5.6
+  const gesture = local < 1.7 ? Math.sin((local / 1.7) * Math.PI) : 0
+  const followThrough = local > 1.7 && local < 2.2
+    ? Math.sin(((local - 1.7) / 0.5) * Math.PI) * 0.22
+    : 0
+
+  // B1에서는 날개를 위로 치켜들지 않고 전방으로 내밀어, 몸체·관절 간섭을 피한다.
+  output.positionX = -gesture * 0.1
+  output.positionY += gesture * 0.055
+  output.positionZ = gesture * -0.13
+  output.rotationX = gesture * 0.075
+  output.rotationY = gesture * 0.16 - followThrough * 0.08
+  output.rotationZ = gesture * -0.052
+  output.leftWingBow = gesture * 0.24
+  output.leftWingLift = -gesture * 0.07
+  output.rightWingBow = gesture * 0.085
+  output.rightWingLift = gesture * 0.035
+}
+
 function guideMotion(time: number, output: DocentMotion) {
-  const local = time % 6.4
-  const sweep = local < 1.25 ? Math.sin((local / 1.25) * Math.PI) : 0
-  output.positionZ = sweep * -0.06
-  output.rotationX = sweep * 0.045
-  output.rotationY = sweep * 0.05
-  output.leftWingBow = sweep * 0.05
-  output.leftWingLift = -sweep * 0.13
-  output.rightWingBow = sweep * 0.035
-  output.rightWingLift = sweep * 0.085
+  const local = time % 5.6
+  const gesture = local < 1.5 ? Math.sin((local / 1.5) * Math.PI) : 0
+  output.positionY += gesture * 0.035
+  output.positionZ = gesture * -0.08
+  output.rotationY = gesture * 0.09
+  output.rotationZ = gesture * -0.035
+  output.leftWingBow = gesture * 0.075
+  output.leftWingLift = -gesture * 0.18
+  output.rightWingBow = gesture * 0.04
+  output.rightWingLift = gesture * 0.07
 }
 
 function scanMotion(time: number, output: DocentMotion) {
-  const local = time % 3.2
-  const pulse = local < 0.78 ? Math.sin((local / 0.78) * Math.PI * 2) * 0.07 : 0
-  const secondPulse = local > 0.95 && local < 1.64 ? Math.sin(((local - 0.95) / 0.69) * Math.PI * 2) * 0.06 : 0
-  output.rotationY = Math.sin(local * 2.5) * 0.07
-  output.leftWingLift = -(pulse + secondPulse)
-  output.rightWingLift = pulse + secondPulse
+  const local = time % 3.8
+  const scanSweep = Math.sin((local / 3.8) * Math.PI * 2)
+  const pulse = local < 0.92 ? Math.sin((local / 0.92) * Math.PI) : 0
+  const confirm = local > 2.72 ? Math.sin(((local - 2.72) / 1.08) * Math.PI) : 0
+
+  // B2는 짧게 좌우로 살핀 후, 한 번 끄덕여 인식 진행 상태를 전달한다.
+  output.positionX = scanSweep * 0.07
+  output.positionZ = -pulse * 0.085
+  output.rotationX = pulse * 0.07 - confirm * 0.1
+  output.rotationY = scanSweep * 0.13
+  output.rotationZ = scanSweep * 0.026
+  output.leftWingBow = pulse * 0.09 + confirm * 0.06
+  output.leftWingLift = -pulse * 0.15
+  output.rightWingBow = pulse * 0.09 + confirm * 0.06
+  output.rightWingLift = pulse * 0.15
 }
 
 function sendingMotion(time: number, output: DocentMotion) {
-  const local = time % 4.4
-  const pulse = local < 0.92 ? Math.sin((local / 0.92) * Math.PI * 2) * 0.09 : 0
-  const secondPulse = local > 1.04 && local < 1.76 ? Math.sin(((local - 1.04) / 0.72) * Math.PI * 2) * 0.06 : 0
-  const combinedPulse = pulse + secondPulse
-  const push = local < 1.9 ? Math.sin((local / 1.9) * Math.PI) : 0
-  output.positionZ = -push * 0.1
-  output.rotationX = push * 0.05
-  output.leftWingBow = combinedPulse * 0.3
-  output.leftWingLift = -combinedPulse
-  output.rightWingBow = combinedPulse * 0.3
-  output.rightWingLift = combinedPulse
+  const local = time % 3.9
+  const reach = local < 1.4 ? Math.sin((local / 1.4) * Math.PI) : 0
+  const dispatch = local > 1.05 && local < 2.25 ? Math.sin(((local - 1.05) / 1.2) * Math.PI) : 0
+
+  // C2·C4·C5의 요청은 "확인 후 전달"이 읽히도록 몸을 앞으로 보내고 양 날개를 전방으로 모은다.
+  output.positionY += reach * 0.045
+  output.positionZ = -(reach * 0.13 + dispatch * 0.08)
+  output.rotationX = reach * 0.085
+  output.rotationY = Math.sin(local * 3.2) * 0.035 * dispatch
+  output.leftWingBow = reach * 0.17 + dispatch * 0.12
+  output.leftWingLift = -(reach * 0.075 + dispatch * 0.04)
+  output.rightWingBow = reach * 0.17 + dispatch * 0.12
+  output.rightWingLift = reach * 0.075 + dispatch * 0.04
 }
 
 function waitingMotion(time: number, output: DocentMotion) {
-  output.positionX = Math.sin(time * 0.36) * 0.035
-  output.rotationZ = Math.sin(time * 0.31 + 0.7) * 0.018
-  output.leftWingBow = Math.sin(time * 0.32) * 0.025
-  output.leftWingLift = Math.sin(time * 0.26 + 0.6) * -0.034
-  output.rightWingBow = Math.sin(time * 0.28 + 1.5) * 0.022
-  output.rightWingLift = Math.sin(time * 0.34 + 0.1) * 0.03
+  const check = Math.sin(time * 0.52)
+  const breathe = (Math.sin(time * 0.74) + 1) / 2
+
+  // C3 대기는 멈춘 로딩 대신, 진행 상황을 살피며 기다리는 차분한 자세를 유지한다.
+  output.positionX = check * 0.052
+  output.positionY += breathe * 0.026
+  output.rotationY = check * 0.065
+  output.rotationZ = Math.sin(time * 0.31 + 0.7) * 0.024
+  output.leftWingBow = breathe * 0.05
+  output.leftWingLift = -breathe * 0.04
+  output.rightWingBow = breathe * 0.05
+  output.rightWingLift = breathe * 0.04
 }
 
 function successMotion(elapsed: number, output: DocentMotion) {
@@ -173,21 +214,24 @@ function successMotion(elapsed: number, output: DocentMotion) {
   const rise = bell(progress, 0.02, 0.6)
   const open = bell(progress, 0.1, 0.7)
   output.positionY += rise * 0.12
-  output.rotationZ = Math.sin(progress * Math.PI) * 0.025
-  output.leftWingBow = open * 0.12
-  output.leftWingLift = -open * 0.19
-  output.rightWingBow = open * 0.12
-  output.rightWingLift = open * 0.19
+  output.positionZ = -open * 0.06
+  output.rotationZ = Math.sin(progress * Math.PI) * 0.04
+  output.leftWingBow = open * 0.19
+  output.leftWingLift = -open * 0.11
+  output.rightWingBow = open * 0.19
+  output.rightWingLift = open * 0.11
 }
 
 function presentMotion(elapsed: number, output: DocentMotion) {
   const progress = oneShotProgress(elapsed, 1.45)
   const gesture = bell(progress, 0.08, 0.76)
-  output.rotationY = gesture * 0.11
-  output.rotationZ = gesture * -0.025
-  output.leftWingBow = gesture * 0.03
-  output.leftWingLift = -gesture * 0.15
-  output.rightWingBow = gesture * 0.015
+  output.positionX = -gesture * 0.055
+  output.positionZ = -gesture * 0.08
+  output.rotationY = gesture * 0.16
+  output.rotationZ = gesture * -0.04
+  output.leftWingBow = gesture * 0.18
+  output.leftWingLift = -gesture * 0.09
+  output.rightWingBow = gesture * 0.065
   output.rightWingLift = gesture * 0.035
 }
 
