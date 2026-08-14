@@ -29,10 +29,12 @@ export function DocentStage({
   cue,
   className = '',
   continuityKey,
+  onReady,
 }: {
   cue: DocentCue;
   className?: string;
   continuityKey?: string;
+  onReady?: () => void;
 }) {
   const [supported, setSupported] = useState(true);
 
@@ -47,7 +49,7 @@ export function DocentStage({
       ) : (
         <DocentErrorBoundary>
           <Suspense fallback={<div className={FALLBACK_CLASSNAME}>도슨트를 불러오는 중이에요.</div>}>
-            <DocentCanvas cue={cue} continuityKey={continuityKey} />
+            <DocentCanvas cue={cue} continuityKey={continuityKey} onReady={onReady} />
           </Suspense>
         </DocentErrorBoundary>
       )}

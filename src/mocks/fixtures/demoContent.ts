@@ -1,6 +1,6 @@
-import travelPouchImage from '../../assets/images/product-travel-pouch-set.jpg'
-import weekenderImage from '../../assets/images/product-visetos-weekender.png'
-import trolleyImage from '../../assets/images/product-visetos-trolley.png'
+import travelPouchImage from '../../assets/mock/d2-recommendations/ottomar-travel-pouch-primary.png'
+import weekenderImage from '../../assets/mock/d2-recommendations/ottomar-weekender-primary.png'
+import trolleyImage from '../../assets/mock/d2-recommendations/ottomar-trolley-primary.png'
 import type { BlockerPromptVariant } from '../../features/blocker/blockerTypes'
 
 export type DemoRecommendation = {
@@ -12,7 +12,7 @@ export type DemoRecommendation = {
 
 /** Deterministic pre-API content used by the Stage D recommendation demonstration. */
 export const mockD2Recommendations: readonly DemoRecommendation[] = [
-  { id: 'travel-pouch-set', image: travelPouchImage, name: '트래블 파우치 세트', description: '제품의 세부 구성은 직원에게 확인할 수 있어요.' },
+  { id: 'ottomar-travel-pouch', image: travelPouchImage, name: 'S Ottomar 비세토스 트래블 파우치', description: '제품의 세부 구성은 직원에게 확인할 수 있어요.' },
   { id: 'visetos-weekender', image: weekenderImage, name: '비세토스 위켄더', description: '여행 목적에 맞는 제품으로 함께 살펴볼 수 있어요.' },
   { id: 'visetos-trolley', image: trolleyImage, name: '비세토스 트롤리', description: '크기와 사용 목적은 직원에게 정확히 안내받을 수 있어요.' },
 ]

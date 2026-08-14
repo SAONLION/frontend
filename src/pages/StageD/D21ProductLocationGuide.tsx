@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import backgroundImage from '../../assets/images/stage-a-background.png';
 import { DocentStage } from '../../components/domain/DocentStage';
 import ScreenHeadline from '../../components/common/ScreenHeadline';
@@ -25,23 +26,25 @@ export default function D21ProductLocationGuide({
   buttonLabel = '다른 제품 보기 →',
   onViewOtherProducts,
 }: D21ProductLocationGuideProps) {
+  const [isProductVisible, setIsProductVisible] = useState(false);
+
   return (
     <div className="stage-external-page">
       <img src={backgroundImage} alt="" className="stage-external-page__background" />
       <div className="stage-external-page__content stage-external-page__content--docent stage-external-page__content--d21">
         <div className="stage-external-page__d21-main">
           <DocentStage cue="guide" className="stage-external-page__docent" />
-          <ScreenHeadline headline={headline} subtext={subtext} variant="md" className="stage-external-page__headline" />
-          <InfoCard
+          <ScreenHeadline headline={headline} onRevealComplete={() => setIsProductVisible(true)} reveal subtext={subtext} variant="md" className="stage-external-page__headline" />
+          {isProductVisible && <InfoCard
             image={selectedProduct.image}
             name={selectedProduct.name}
             description={selectedProduct.description}
             className="stage-external-page__headline"
-          />
+          />}
         </div>
-        <div className="stage-external-page__actions">
+        {isProductVisible && <div className="stage-external-page__actions">
           <SecondaryButton label={buttonLabel} onClick={onViewOtherProducts} />
-        </div>
+        </div>}
       </div>
     </div>
   );

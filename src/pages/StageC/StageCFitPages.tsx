@@ -1,6 +1,7 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { DocentStage } from '../../components/domain/DocentStage'
+import { KineticTextReveal } from '../../components/ui/kinetic-text-reveal'
 import { GlassInfoCard, StageCDetailShell } from '../../components/domain/StageCDetailShell'
 import { EVENT_NAMES, type SessionEvent } from '../../constants/events'
 import { STAGE_C_PRODUCT_DETAIL_ROUTES, STAGE_C_ROUTES, stageCPath } from '../../constants/stageC'
@@ -188,6 +189,7 @@ function FitStatusScreen({
   onPurchaseInquiry?: () => void
   status: FitStatus
 }) {
+  const [areActionsVisible, setAreActionsVisible] = useState(false)
   const content = {
     pending: { title: '직원이 제품을 준비해서\n가는 중이에요!' },
     completed: { title: '직원에게 충분한 정보를 전달했어요!', description: '착샷 촬영도 요청해보세요.' },
@@ -198,16 +200,16 @@ function FitStatusScreen({
     <StageCDetailShell className="stage-c-fit-status-shell">
       <div className="stage-c-fit-status-content">
         <section aria-label="나이비스 AI 도슨트" className="stage-c-fit-status-docent"><DocentStage continuityKey="fit-status" cue={status === 'pending' ? 'waiting' : 'success'} /></section>
-        <h1 className={status === 'pending' ? undefined : 'stage-c-fit-status-title--single-line'}>{content.title}</h1>
+        <h1 className={status === 'pending' ? undefined : 'stage-c-fit-status-title--single-line'}><KineticTextReveal autoPlay blur distance={16} onRevealComplete={() => setAreActionsVisible(true)} splitBy="characters" stagger={0.035} text={content.title} /></h1>
         {content.description && <p>{content.description}</p>}
       </div>
-      {status === 'completed' && onPurchaseInquiry && onExitProduct && (
+      {areActionsVisible && status === 'completed' && onPurchaseInquiry && onExitProduct && (
         <div className="stage-c-fit-status-actions">
           <button className="stage-c-action-button stage-c-action-button--primary" onClick={onPurchaseInquiry} type="button">구매 문의</button>
           <button className="stage-c-action-button" onClick={onExitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
         </div>
       )}
-      {status === 'purchase-completed' && onExitProduct && (
+      {areActionsVisible && status === 'purchase-completed' && onExitProduct && (
         <div className="stage-c-fit-status-actions">
           <button className="stage-c-action-button" onClick={onExitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
         </div>
@@ -222,7 +224,7 @@ function FitShell({ children, kind, selection }: { children: ReactNode; kind: Fi
   return <StageCDetailShell className={`stage-c-fit-reference-shell stage-c-fit-reference-shell--${kind}`}>
     <div className="stage-c-fit-reference-pill">{labels[kind as 'size' | 'color' | 'try-on']}</div>
     <section className="stage-c-fit-reference-media">
-      <img alt={`${selection.color.label} 컬러 대표 이미지`} src={selection.color.imageUrl} />
+      <img alt={`${selection.color.label} 컬러 대표 이미지`} className="stage-c-primary-cutout" src={selection.color.imageUrl} />
     </section>
     {children}
   </StageCDetailShell>

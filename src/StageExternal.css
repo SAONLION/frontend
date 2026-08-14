@@ -24,7 +24,6 @@
   min-height: 100dvh;
   margin: 0 auto;
   padding: max(4.875rem, env(safe-area-inset-top)) clamp(1rem, 7.7vw, 1.9375rem) max(1.875rem, env(safe-area-inset-bottom));
-  border-inline: 1px solid rgb(255 255 255 / 18%);
 }
 
 .stage-external-page__content--docent {

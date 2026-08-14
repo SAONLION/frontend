@@ -10,7 +10,6 @@
   min-height: 100dvh;
   margin-inline: auto;
   overflow: hidden;
-  border-inline: 1px solid var(--stage-f-border);
   color: #fff;
   background: radial-gradient(ellipse at 50% 70%, rgb(117 64 5 / 43%), transparent 48%), linear-gradient(155deg, #15110d 0%, #0d0b09 62%, #281600 100%);
   font-family: Pretendard, system-ui, sans-serif;

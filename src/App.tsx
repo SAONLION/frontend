@@ -17,6 +17,7 @@ import { AmbientBronzeBackground } from './components/common/AmbientBronzeBackgr
 import { LiquidGlassFilterDefinitions } from './components/common/LiquidGlassFilterDefinitions'
 import { DocentStage } from './components/domain/DocentStage'
 import type { DocentCue } from './components/domain/DocentStage'
+import { markDocentReady } from './features/docent/docentReadiness'
 import './App.css'
 import './StageExternal.css'
 import './StageF.css'
@@ -44,7 +45,7 @@ function PersistentEntryDocent() {
 
   return (
     <section aria-label="나이비스 AI 도슨트" className="stage-entry-persistent-docent">
-      <DocentStage cue={cue} />
+      <DocentStage cue={cue} onReady={markDocentReady} />
     </section>
   )
 }

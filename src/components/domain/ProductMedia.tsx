@@ -7,7 +7,7 @@ type ProductMediaProps = {
 export function ProductMedia({ product }: ProductMediaProps) {
   return (
     <div className="stage-c-product-media">
-      <img alt={product.name} src={product.imageUrl} />
+      <img alt={product.name} className="stage-c-primary-cutout" src={product.imageUrl} />
     </div>
   )
 }

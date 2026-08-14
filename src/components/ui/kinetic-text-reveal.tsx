@@ -270,7 +270,7 @@ export const KineticTextReveal = forwardRef<
                   segmentClassName,
                 )}
                 onAnimationComplete={
-                  segment.index === animatedTotal - 1
+                  visible && segment.index === animatedTotal - 1
                     ? onRevealComplete
                     : undefined
                 }

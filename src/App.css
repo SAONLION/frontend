@@ -61,7 +61,6 @@
   width: min(100%, 25.125rem);
   min-height: 100dvh;
   margin-inline: auto;
-  border-inline: 1px solid rgb(255 255 255 / 18%);
   overflow: visible;
   background: transparent;
   color: #ffffff;
@@ -104,10 +103,6 @@
 .stage-entry-page--stage-b .stage-entry-text-input,
 .stage-entry-page--stage-b .stage-entry-primary-button {
   backdrop-filter: blur(1.25rem) saturate(1.35) contrast(1.04);
-}
-
-.stage-entry-page--nfc {
-  border-inline: 0;
 }
 
 .ambient-bronze-background {
@@ -456,10 +451,16 @@
   --stage-c-featured-product-width: min(100%, 20rem);
   --stage-c-featured-product-height: min(20rem, 42dvh);
   --stage-c-featured-product-media-height: clamp(15rem, 39dvh, 20rem);
+  --stage-c-product-media-top-space: clamp(0.75rem, 2.25dvh, 1.25rem);
+  --stage-c-primary-cutout-scale: 1.38;
+  --stage-c-close-inline-inset: 0.375rem;
+  --stage-c-close-shift-inline: 1.375rem;
+  --stage-c-close-shift-block: 0;
+  /* The close control shares the topbar pill's visual center line. */
+  --stage-c-close-top: -0.25rem;
   width: min(100%, 25.125rem);
   min-height: 100dvh;
   margin-inline: auto;
-  border-inline: 1px solid rgb(255 255 255 / 18%);
   color: var(--stage-c-text);
   font-family: Pretendard, Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
@@ -529,7 +530,7 @@
   align-items: flex-start;
   justify-content: center;
   min-height: var(--stage-c-featured-product-media-height);
-  padding: clamp(1.5rem, 3.5dvh, 2rem) 1rem 0.25rem;
+  padding: var(--stage-c-product-media-top-space) 1rem 0.125rem;
 }
 
 .stage-c-product-media img {
@@ -539,6 +540,13 @@
   max-height: none;
   object-fit: contain;
   filter: drop-shadow(0 1.25rem 1.25rem rgb(0 0 0 / 28%));
+}
+
+/* The new primary PNGs retain transparent safety space around the product.
+   Scale only those cutouts so their visible silhouette matches the former product framing. */
+.stage-c-primary-cutout {
+  transform: scale(var(--stage-c-primary-cutout-scale));
+  transform-origin: center;
 }
 
 .stage-c-hub-content {
@@ -870,6 +878,20 @@
   padding: max(4.875rem, env(safe-area-inset-top)) var(--stage-c-page-space) max(1.875rem, env(safe-area-inset-bottom));
   overflow-x: hidden;
   background: transparent;
+}
+
+/* Every regular screen with a close control owns its close layer. This keeps the
+   control above page content, canvases, and decorative effects without affecting sheets. */
+.stage-c-detail-shell:has(.stage-c-close-control) {
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+}
+
+/* Screen-entry transforms create sibling stacking contexts. The close control's
+   header must therefore sit above the following media layer, not just the button. */
+.stage-c-detail-shell > header:has(.stage-c-close-control) {
+  z-index: 2147483646;
 }
 
 .not-found-page {
@@ -1429,6 +1451,7 @@
 
 .stage-c-c5-response-shell {
   position: relative;
+  isolation: isolate;
   gap: 0;
   padding-inline: var(--stage-c-page-space);
   padding-bottom: max(1.875rem, env(safe-area-inset-bottom));
@@ -1436,7 +1459,15 @@
 }
 
 .stage-c-c5-response-topbar {
+  position: absolute;
+  z-index: 2000;
+  inset: 0;
   min-height: 0;
+  pointer-events: none;
+}
+
+.stage-c-c5-response-topbar .stage-c-close-control {
+  pointer-events: auto;
 }
 
 .stage-c-close-control {
@@ -1460,9 +1491,11 @@
 .stage-c-other-shell .stage-c-close-control,
 .stage-c-product-detail-shell .stage-c-close-control {
   position: absolute;
-  z-index: 2;
-  top: max(var(--surface-close-inset), env(safe-area-inset-top));
-  right: var(--surface-close-inset);
+  z-index: 2147483647;
+  top: var(--stage-c-close-top);
+  right: max(calc(var(--stage-c-close-inline-inset) - var(--stage-c-page-space)), env(safe-area-inset-right));
+  translate: var(--stage-c-close-shift-inline) var(--stage-c-close-shift-block);
+  pointer-events: auto;
 }
 
 .stage-c-detail-shell.stage-c-other-shell .stage-c-glass-topbar .stage-c-close-control {
@@ -1549,6 +1582,7 @@
 }
 
 .stage-c-product-detail-shell {
+  --stage-c-product-detail-image-top-space: clamp(1.5rem, 3.5dvh, 2rem);
   position: relative;
   gap: 0;
   padding-inline: var(--stage-c-page-space);
@@ -1591,31 +1625,28 @@
 
 .stage-c-product-detail-media {
   display: flex;
+  box-sizing: border-box;
   flex: 1 1 auto;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  min-height: clamp(15rem, 39dvh, 20rem);
-  padding: 1rem 0;
+  min-height: calc(var(--stage-c-featured-product-height) + var(--stage-c-product-detail-image-top-space) + 0.25rem);
+  max-height: calc(var(--stage-c-featured-product-height) + var(--stage-c-product-detail-image-top-space) + 2rem);
+  padding: var(--stage-c-product-detail-image-top-space) 1rem 0.25rem;
 }
 
 .stage-c-product-detail-media > img {
   display: block;
-  width: min(100%, 20rem);
-  max-height: min(20rem, 42dvh);
+  width: var(--stage-c-featured-product-width);
+  height: var(--stage-c-featured-product-height);
+  max-height: var(--stage-c-featured-product-height);
   object-fit: contain;
-}
-
-.stage-c-product-detail-media--styling {
-  flex: 0 1 auto;
-  min-height: 0;
-  padding-top: clamp(3rem, 9dvh, 5rem);
 }
 
 .stage-c-product-detail-media--styling .stage-c-gallery {
   position: relative;
   display: block;
-  width: min(100%, 21.25rem);
-  height: clamp(18rem, 40dvh, 22rem);
+  width: var(--stage-c-featured-product-width);
+  height: var(--stage-c-featured-product-height);
   margin: 0;
   overflow: hidden;
   border: 0;
@@ -1711,6 +1742,16 @@
   font: inherit;
   font-size: 0.9375rem;
   cursor: pointer;
+}
+
+.stage-c-product-detail-shell--craft .stage-c-product-detail-more-button,
+.stage-c-product-detail-shell--heritage .stage-c-product-detail-more-button {
+  margin-top: auto;
+}
+
+.stage-c-product-detail-shell--craft .stage-c-product-detail-actions,
+.stage-c-product-detail-shell--heritage .stage-c-product-detail-actions {
+  margin-top: 0;
 }
 
 .stage-c-product-detail-actions .stage-c-action-button {

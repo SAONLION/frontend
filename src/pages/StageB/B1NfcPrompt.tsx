@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import PrimaryButton from '../../components/common/PrimaryButton'
 import ScreenHeadline from '../../components/common/ScreenHeadline'
 
@@ -16,15 +17,17 @@ export default function B1NfcPrompt({
   onNfcDetected,
   subtext = '제품에 대해 알려드릴게요',
 }: B1NfcPromptProps) {
+  const [areActionsVisible, setAreActionsVisible] = useState(false)
+
   return (
     <main className="stage-entry-page stage-entry-page--stage-b stage-entry-page--nfc">
       <div className="stage-entry-content stage-entry-content--nfc">
         <div aria-hidden="true" className="stage-entry-docent stage-entry-docent--wide" />
-        <ScreenHeadline className="stage-entry-nfc-headline" headline={headline} subtext={subtext} variant="md" />
-        <div className="stage-entry-actions stage-entry-actions--nfc">
+        <ScreenHeadline className="stage-entry-nfc-headline" headline={headline} onRevealComplete={() => setAreActionsVisible(true)} reveal subtext={subtext} variant="md" />
+        {areActionsVisible && <div className="stage-entry-actions stage-entry-actions--nfc">
           <PrimaryButton label="제품 태그 인식하기" onClick={onNfcDetected} />
           <PrimaryButton label={buttonLabel} onClick={onCallStaff} />
-        </div>
+        </div>}
       </div>
     </main>
   )
