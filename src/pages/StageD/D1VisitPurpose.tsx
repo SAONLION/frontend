@@ -32,25 +32,21 @@ export default function D1VisitPurpose({
   };
 
   return (
-    <div className="relative min-h-dvh w-full overflow-hidden bg-black">
-      <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
-      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-100.5 flex-col items-center pt-56 pb-16.25">
-        <DocentStage cue="idle" className="mx-auto aspect-345/216 w-[85.8%] max-w-86.25" />
-        <ScreenHeadline headline={headline} subtext={subtext} variant="md" className="mt-4" />
-        <div className="mt-auto flex w-[84.6%] max-w-85 flex-col gap-16">
-          <div className="flex flex-col gap-3.25">
-            {[0, 1].map((row) => (
-              <div key={row} className="flex gap-2.5">
-                {purposeOptions.slice(row * 2, row * 2 + 2).map((option) => (
-                  <SecondaryButton
-                    key={option}
-                    label={option}
-                    selected={selectedPurpose === option}
-                    onClick={() => handleSelect(option)}
-                    fullWidth={false}
-                  />
-                ))}
-              </div>
+    <div className="stage-external-page">
+      <img src={backgroundImage} alt="" className="stage-external-page__background" />
+      <div className="stage-external-page__content stage-external-page__content--docent stage-external-page__content--d1">
+        <DocentStage cue="listen" className="stage-external-page__docent" />
+        <ScreenHeadline headline={headline} subtext={subtext} variant="md" className="stage-external-page__headline" />
+        <div className="stage-external-page__actions">
+          <div className="stage-external-page__choice-grid">
+            {purposeOptions.map((option) => (
+              <SecondaryButton
+                key={option}
+                label={option}
+                selected={selectedPurpose === option}
+                onClick={() => handleSelect(option)}
+                fullWidth={false}
+              />
             ))}
           </div>
           <PrimaryButton label={buttonLabel} onClick={onCallStaff} />

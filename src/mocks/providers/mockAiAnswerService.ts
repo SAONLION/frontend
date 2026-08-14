@@ -12,11 +12,10 @@ function resolveAnswer(request: AiAnswerRequest): AiAnswerResult {
   if (request.sku === 'MMKEAVE15CO001' && isDemoQuestion) {
     return {
       resolved: true,
-      title: '“비 오는 날”에 대해서는\n이렇게 안내드릴 수 있어요',
+      title: 'A/S · 수선은 직원에게\n정확히 안내받으실 수 있어요',
       answerLines: [
-        '방수 코팅이 적용되어 가벼운 비에는 문제 없어요',
-        '장시간 노출 시에는 마른 천으로 닦아 그늘에 말려주세요',
-        '전용 방수 커버는 별도 판매되고 있어요',
+        '수선 가능 여부와 절차는 제품 상태에 따라 달라질 수 있어요.',
+        '직원이 제품을 확인한 뒤 가능한 안내를 도와드릴게요.',
       ],
     }
   }

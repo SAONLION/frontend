@@ -1,7 +1,14 @@
-import type { FreeQueryTopic, HubType, SessionEvent, StaffCallType } from '../../constants/events'
+import type { BlockerCode, BlockerTriggerId, FreeQueryTopic, HubType, SessionEvent, StaffCallType } from '../../constants/events'
 import type { StageCComingSoonScreenId } from '../../constants/stageC'
 
 export const SESSION_ACTIONS = {
+  recordActionAccepted: 'record_action_accepted',
+  recordActionDeclined: 'record_action_declined',
+  recordActionImpression: 'record_action_impression',
+  recordBlockerDetected: 'record_blocker_detected',
+  recordContactCaptured: 'record_contact_captured',
+  recordContactOffer: 'record_contact_offer',
+  recordContentSent: 'record_content_sent',
   recordFreeQuery: 'record_free_query',
   recordAiAnswer: 'record_ai_answer',
   recordHubSelect: 'record_hub_select',
@@ -17,14 +24,13 @@ export const SESSION_ACTIONS = {
   setNickname: 'set_nickname',
   recordTabView: 'record_tab_view', recordSaCall: 'record_sa_call',
   setVisitPurpose: 'set_visit_purpose',
-  incrementLoopCount: 'increment_loop_count',
-  markStageGShown: 'mark_stage_g_shown',
   setActiveOverlay: 'set_active_overlay',
 } as const
 
-export type ActiveOverlay = 'E' | 'F' | null
+export type ActiveOverlay = 'E' | null
 
 export type SessionState = {
+  pseudonymousId: string
   currentSku: string | null
   nickname: string | null
   taggedSkus: readonly string[]
@@ -33,12 +39,21 @@ export type SessionState = {
   aiAnswerContexts: Readonly<Record<string, { queryId: string; sku: string }>>
   intentScore: number
   visitPurpose: string | null
-  loopCount: number
-  hasShownStageG: boolean
   activeOverlay: ActiveOverlay
+  blocker: {
+    cb6Handled: boolean
+    contactCaptured: boolean
+  }
 }
 
 export type SessionAction =
+  | { type: typeof SESSION_ACTIONS.recordActionAccepted; code: BlockerCode }
+  | { type: typeof SESSION_ACTIONS.recordActionDeclined; code: BlockerCode }
+  | { type: typeof SESSION_ACTIONS.recordActionImpression; code: BlockerCode; triggerId: BlockerTriggerId }
+  | { type: typeof SESSION_ACTIONS.recordBlockerDetected; code: BlockerCode; triggerId: BlockerTriggerId }
+  | { type: typeof SESSION_ACTIONS.recordContactCaptured; channel: 'email'; blockerCode: 'CB6' }
+  | { type: typeof SESSION_ACTIONS.recordContactOffer; blockerCode: 'CB6' }
+  | { type: typeof SESSION_ACTIONS.recordContentSent; sku: string }
   | { type: typeof SESSION_ACTIONS.recordFreeQuery; sku: string; topic: FreeQueryTopic; text: string }
   | { type: typeof SESSION_ACTIONS.recordAiAnswer; queryId: string; sku: string; topic: FreeQueryTopic; resolved: boolean }
   | { type: typeof SESSION_ACTIONS.recordHubSelect; hubType: HubType }
@@ -55,6 +70,4 @@ export type SessionAction =
   | { type: typeof SESSION_ACTIONS.recordTabView; topic: 'craft' | 'heritage' | 'styling'; sku: string }
   | { type: typeof SESSION_ACTIONS.recordSaCall; sku: string; callType: StaffCallType; queryId?: string }
   | { type: typeof SESSION_ACTIONS.setVisitPurpose; visitPurpose: string }
-  | { type: typeof SESSION_ACTIONS.incrementLoopCount }
-  | { type: typeof SESSION_ACTIONS.markStageGShown }
   | { type: typeof SESSION_ACTIONS.setActiveOverlay; overlay: ActiveOverlay }

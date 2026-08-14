@@ -1,5 +1,5 @@
 interface ScreenHeadlineProps {
-  headline: string | string[];
+  headline: string | readonly string[];
   subtext?: string;
   align?: 'left' | 'center';
   variant?: 'lg' | 'md';

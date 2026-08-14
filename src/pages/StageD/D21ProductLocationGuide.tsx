@@ -26,18 +26,22 @@ export default function D21ProductLocationGuide({
   onViewOtherProducts,
 }: D21ProductLocationGuideProps) {
   return (
-    <div className="relative min-h-dvh w-full overflow-hidden bg-black">
-      <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
-      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-100.5 flex-col items-center px-[7.71%] pt-44.75 pb-16.25">
-        <DocentStage cue="idle" className="mx-auto aspect-325/203 w-[80.85%] max-w-81.25" />
-        <ScreenHeadline headline={headline} subtext={subtext} variant="md" className="mt-7.5" />
-        <InfoCard
-          image={selectedProduct.image}
-          name={selectedProduct.name}
-          description={selectedProduct.description}
-          className="mt-10"
-        />
-        <SecondaryButton label={buttonLabel} onClick={onViewOtherProducts} className="mt-auto" />
+    <div className="stage-external-page">
+      <img src={backgroundImage} alt="" className="stage-external-page__background" />
+      <div className="stage-external-page__content stage-external-page__content--docent stage-external-page__content--d21">
+        <div className="stage-external-page__d21-main">
+          <DocentStage cue="guide" className="stage-external-page__docent" />
+          <ScreenHeadline headline={headline} subtext={subtext} variant="md" className="stage-external-page__headline" />
+          <InfoCard
+            image={selectedProduct.image}
+            name={selectedProduct.name}
+            description={selectedProduct.description}
+            className="stage-external-page__headline"
+          />
+        </div>
+        <div className="stage-external-page__actions">
+          <SecondaryButton label={buttonLabel} onClick={onViewOtherProducts} />
+        </div>
       </div>
     </div>
   );

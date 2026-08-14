@@ -22,22 +22,23 @@ export default function E2RequestReceived({
   const requestSummary = buildRequestSummary(selectedRequests);
 
   return (
-    <div className="relative min-h-dvh w-full overflow-hidden bg-black">
-      <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
+    <div className="stage-external-page"><img src={backgroundImage} alt="" className="stage-external-page__background" />
       <CircleIconButton
         icon={closeIcon}
         ariaLabel="닫기"
         onClick={onClose}
         iconClassName="h-4 w-auto"
-        className="absolute right-5 top-17.25 z-10"
+        className="stage-external-page__close"
       />
-      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-100.5 flex-col items-center px-6 pt-82.25">
-        <DocentStage cue="greet" className="mx-auto aspect-345/216 w-[85.8%] max-w-86.25" />
+      <div className="stage-external-page__content stage-external-page__content--docent stage-external-page__content--e2">
+        <section aria-label="나이비스 AI 도슨트" className="stage-external-page__docent stage-external-page__docent--entry">
+          <DocentStage cue="success" />
+        </section>
         <ScreenHeadline
           headline={[`요청하신 ${requestSummary}에 대해`, '직원이 곧 안내드릴 예정이에요!']}
           subtext={subtext}
           variant="md"
-          className="mt-7.5"
+          className="stage-external-page__headline"
         />
       </div>
     </div>

@@ -3,6 +3,7 @@ import { findLatestFreeQueryForSku } from './freeQueryContext'
 import { SESSION_ACTIONS, type SessionAction, type SessionState } from './sessionTypes'
 
 export const initialSessionState: SessionState = {
+  pseudonymousId: `session-${crypto.randomUUID()}`,
   currentSku: null,
   nickname: null,
   taggedSkus: [],
@@ -11,9 +12,8 @@ export const initialSessionState: SessionState = {
   aiAnswerContexts: {},
   intentScore: 0,
   visitPurpose: null,
-  loopCount: 1,
-  hasShownStageG: false,
   activeOverlay: null,
+  blocker: { cb6Handled: false, contactCaptured: false },
 }
 
 function createEventId(): string {
@@ -29,6 +29,25 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
   const createdAt = createTimestamp()
 
   switch (action.type) {
+    case SESSION_ACTIONS.recordBlockerDetected:
+      if (state.events.some((event) => event.name === EVENT_NAMES.blockerDetected && event.code === action.code && event.triggerId === action.triggerId)) return state
+      return { ...state, events: [...state.events, { id, name: EVENT_NAMES.blockerDetected, code: action.code, triggerId: action.triggerId, stage: 'F', tier: 'primary', ruleVersion: 'v2.2', createdAt }] }
+    case SESSION_ACTIONS.recordActionImpression:
+      if (state.events.some((event) => event.name === EVENT_NAMES.actionImpression && event.code === action.code && event.triggerId === action.triggerId)) return state
+      return { ...state, events: [...state.events, { id, name: EVENT_NAMES.actionImpression, code: action.code, triggerId: action.triggerId, createdAt }] }
+    case SESSION_ACTIONS.recordActionAccepted:
+      return { ...state, events: [...state.events, { id, name: EVENT_NAMES.actionAccepted, code: action.code, createdAt }] }
+    case SESSION_ACTIONS.recordActionDeclined:
+      return { ...state, events: [...state.events, { id, name: EVENT_NAMES.actionDeclined, code: action.code, createdAt }], blocker: action.code === 'CB6' ? { ...state.blocker, cb6Handled: true } : state.blocker }
+    case SESSION_ACTIONS.recordContactOffer:
+      if (state.events.some((event) => event.name === EVENT_NAMES.contactOffer && event.blockerCode === action.blockerCode)) return state
+      return { ...state, events: [...state.events, { id, name: EVENT_NAMES.contactOffer, blockerCode: action.blockerCode, createdAt }] }
+    case SESSION_ACTIONS.recordContactCaptured:
+      if (state.blocker.contactCaptured) return state
+      return { ...state, events: [...state.events, { id, name: EVENT_NAMES.contactCaptured, channel: action.channel, blockerCode: action.blockerCode, pseudonymousId: state.pseudonymousId, createdAt }], blocker: { ...state.blocker, contactCaptured: true, cb6Handled: true } }
+    case SESSION_ACTIONS.recordContentSent:
+      if (state.events.some((event) => event.name === EVENT_NAMES.contentSent && event.sku === action.sku)) return state
+      return { ...state, events: [...state.events, { id, name: EVENT_NAMES.contentSent, type: 'personalized_product_content', sku: action.sku, createdAt }] }
     case SESSION_ACTIONS.setCurrentSku:
       return { ...state, currentSku: action.sku }
     case SESSION_ACTIONS.setNickname:
@@ -140,10 +159,6 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
     }
     case SESSION_ACTIONS.setVisitPurpose:
       return { ...state, visitPurpose: action.visitPurpose }
-    case SESSION_ACTIONS.incrementLoopCount:
-      return { ...state, loopCount: state.loopCount + 1 }
-    case SESSION_ACTIONS.markStageGShown:
-      return { ...state, hasShownStageG: true }
     case SESSION_ACTIONS.setActiveOverlay:
       return { ...state, activeOverlay: action.overlay }
   }

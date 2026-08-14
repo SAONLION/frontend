@@ -1,5 +1,12 @@
 export const EVENT_NAMES = {
+  actionAccepted: 'action_accepted',
+  actionDeclined: 'action_declined',
+  actionImpression: 'action_impression',
   aiAnswer: 'ai_answer',
+  blockerDetected: 'blocker_detected',
+  contactCaptured: 'contact_captured',
+  contactOffer: 'contact_offer',
+  contentSent: 'content_sent',
   freeQuery: 'free_query',
   hubSelect: 'hub_select',
   nfcTag: 'nfc_tag',
@@ -32,6 +39,8 @@ export type StaffCallType = (typeof STAFF_CALL_TYPES)[number]
 export const HUB_TYPES = ['product', 'fit', 'purchase', 'other'] as const
 
 export type HubType = (typeof HUB_TYPES)[number]
+export type BlockerCode = 'CB3' | 'CB5' | 'CB6'
+export type BlockerTriggerId = 'T-CB3-2' | 'T-CB5-1' | 'T-CB5-2' | 'T-CB6-a' | 'T-CB6-b' | 'T-CB6-c'
 
 type EventBase<Name extends (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES]> = {
   id: string
@@ -40,6 +49,13 @@ type EventBase<Name extends (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES]> = {
 }
 
 export type SessionEvent =
+  | (EventBase<typeof EVENT_NAMES.actionAccepted> & { code: BlockerCode })
+  | (EventBase<typeof EVENT_NAMES.actionDeclined> & { code: BlockerCode })
+  | (EventBase<typeof EVENT_NAMES.actionImpression> & { code: BlockerCode; triggerId: BlockerTriggerId })
+  | (EventBase<typeof EVENT_NAMES.blockerDetected> & { code: BlockerCode; triggerId: BlockerTriggerId; stage: 'F'; tier: 'primary'; ruleVersion: 'v2.2' })
+  | (EventBase<typeof EVENT_NAMES.contactCaptured> & { channel: 'email'; blockerCode: 'CB6'; pseudonymousId: string })
+  | (EventBase<typeof EVENT_NAMES.contactOffer> & { blockerCode: 'CB6' })
+  | (EventBase<typeof EVENT_NAMES.contentSent> & { type: 'personalized_product_content'; sku: string })
   | (EventBase<typeof EVENT_NAMES.freeQuery> & { topic: FreeQueryTopic; text: string })
   | (EventBase<typeof EVENT_NAMES.aiAnswer> & { topic: FreeQueryTopic; resolved: boolean })
   | (EventBase<typeof EVENT_NAMES.hubSelect> & { type: HubType })

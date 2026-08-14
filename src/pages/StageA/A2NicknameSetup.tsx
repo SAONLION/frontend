@@ -1,44 +1,47 @@
-import { useState } from 'react';
-import backgroundImage from '../../assets/images/stage-a-background.png';
-import { DocentStage } from '../../components/domain/DocentStage';
-import TextInput from '../../components/common/TextInput';
-import CircleIconButton from '../../components/common/CircleIconButton';
-import arrowUpIcon from '../../assets/images/icon-arrow-up.svg';
+import { useState, type FormEvent } from 'react'
+import CircleButton from '../../components/common/CircleButton'
+import TextInput from '../../components/common/TextInput'
 
-interface A2NicknameSetupProps {
-  headline?: string;
-  placeholder?: string;
-  onSubmit?: (nickname: string) => void;
+type A2NicknameSetupProps = {
+  headline?: string
+  onSubmit: (nickname: string) => void
+  placeholder?: string
 }
 
 export default function A2NicknameSetup({
   headline = '고객님을 어떻게 불러드리면 좋을까요?',
-  placeholder = '이름/닉네임',
   onSubmit,
+  placeholder = '이름/닉네임',
 }: A2NicknameSetupProps) {
-  const [nickname, setNickname] = useState('');
+  const [nickname, setNickname] = useState('')
+  const normalizedNickname = nickname.trim()
+
+  const submitNickname = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (normalizedNickname) onSubmit(normalizedNickname)
+  }
 
   return (
-    <div className="relative min-h-dvh w-full overflow-hidden bg-black">
-      <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
-      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-100.5 flex-col items-center pt-64.25">
-        <DocentStage cue="idle" className="mx-auto aspect-321/201 w-[79.85%] max-w-80.25" />
-        <h1 className="mt-17.5 w-full px-[8.7%] text-left text-[22px] font-semibold leading-normal text-white">
-          {headline}
-        </h1>
+    <main className="stage-entry-page">
+      <form className="stage-entry-content stage-entry-content--nickname" onSubmit={submitNickname}>
+        <div aria-hidden="true" className="stage-entry-docent stage-entry-docent--wide" />
+        <h1>{headline}</h1>
         <TextInput
-          value={nickname}
+          ariaLabel="이름 또는 닉네임"
+          className="stage-entry-nickname-input"
+          maxLength={24}
           onChange={setNickname}
           placeholder={placeholder}
-          className="mt-17.5 w-[84.6%] max-w-85"
+          value={nickname}
         />
-        <CircleIconButton
-          icon={arrowUpIcon}
-          ariaLabel="다음"
-          onClick={() => onSubmit?.(nickname)}
-          className="mt-17.5"
+        <CircleButton
+          ariaLabel="닉네임을 저장하고 제품 태그 안내로 이동"
+          className="stage-entry-nickname-submit"
+          disabled={!normalizedNickname}
+          direction="right"
+          type="submit"
         />
-      </div>
-    </div>
-  );
+      </form>
+    </main>
+  )
 }

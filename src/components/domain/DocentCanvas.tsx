@@ -1,62 +1,257 @@
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Center, useGLTF } from '@react-three/drei'
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
-import type { DocentCue } from './DocentStage'
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
+import { getDocentCueDuration, writeDocentMotion, type DocentMotion } from '../../features/docent/docentMotion'
+import type { DocentCue } from '../../features/docent/docentCue'
 
 const MODEL_URL = '/models/docent/u.glb'
+const QUESTION_MARK_URL = '/models/docent/question_mark.glb'
 const WING_NAMES = ['joint1_L', 'joint1_R'] as const
+const QUESTION_MARK_BASE_ROTATION = -0.1 + Math.PI / 36
+const QUESTION_MARK_SCALE = 0.14 * (2 / 3)
+const QUESTION_MARK_HEIGHT = 3.25
+const LISTEN_CAMERA_FOV = 60
+const LISTEN_CAMERA_DISTANCE = 5.5
+const CUE_TRANSITION_DURATION = 0.42
+const CONTINUITY_WINDOW_MS = 1_000
+const neutralMotion: DocentMotion = {
+  positionX: 0,
+  positionY: 0,
+  positionZ: 0,
+  rotationX: 0,
+  rotationY: 0,
+  rotationZ: 0,
+  leftWingBow: 0,
+  leftWingLift: 0,
+  rightWingBow: 0,
+  rightWingLift: 0,
+}
 
-function Model({ cue }: { cue: DocentCue }) {
+type Transform = {
+  position: THREE.Vector3
+  rotation: THREE.Euler
+}
+
+type StoredContinuity = {
+  motion: DocentMotion
+  storedAt: number
+}
+
+const continuityMotion = new Map<string, StoredContinuity>()
+
+type MaterialRest = {
+  color: THREE.Color
+  metalness: number
+  roughness: number
+  clearcoat: number
+  clearcoatRoughness: number
+  envMapIntensity: number
+}
+
+function applyStudioGoldMaterial(scene: THREE.Group) {
+  const materialRest = new Map<THREE.MeshPhysicalMaterial, MaterialRest>()
+  const materialAssignments = new Map<THREE.Mesh, THREE.Material | THREE.Material[]>()
+
+  scene.traverse((object) => {
+    if (!(object instanceof THREE.Mesh)) return
+
+    if (object.name === 'Mesh056') {
+      const originalMaterial = object.material
+      const originalMaterials = Array.isArray(originalMaterial) ? originalMaterial : [originalMaterial]
+      const bodyMaterials = originalMaterials.map((material) => material.clone())
+
+      object.material = Array.isArray(originalMaterial) ? bodyMaterials : bodyMaterials[0]
+      materialAssignments.set(object, originalMaterial)
+    }
+
+    const materials = Array.isArray(object.material) ? object.material : [object.material]
+
+    materials.forEach((material) => {
+      if (!(material instanceof THREE.MeshPhysicalMaterial) || materialRest.has(material)) return
+
+      materialRest.set(material, {
+        color: material.color.clone(),
+        metalness: material.metalness,
+        roughness: material.roughness,
+        clearcoat: material.clearcoat,
+        clearcoatRoughness: material.clearcoatRoughness,
+        envMapIntensity: material.envMapIntensity,
+      })
+
+      if (object.name === 'Mesh056_1') {
+        material.color.set('#4b2908')
+        material.roughness = 0.42
+        material.clearcoat = 0
+        material.clearcoatRoughness = 0.3
+        material.envMapIntensity = 0.32
+      } else if (object.name === 'Mesh056') {
+        material.color.set('#f2d68a')
+        material.metalness = 0.78
+        material.roughness = 0.34
+        material.clearcoat = Math.max(material.clearcoat, 0.18)
+        material.clearcoatRoughness = 0.18
+        material.envMapIntensity = 0.78
+      } else {
+        material.color.lerp(new THREE.Color('#d6ba70'), 0.4)
+        material.roughness = Math.min(material.roughness, 0.32)
+        material.clearcoat = Math.max(material.clearcoat, 0.16)
+        material.clearcoatRoughness = 0.2
+        material.envMapIntensity = 0.92
+      }
+      material.needsUpdate = true
+    })
+  })
+
+  return () => {
+    materialRest.forEach((rest, material) => {
+      material.color.copy(rest.color)
+      material.metalness = rest.metalness
+      material.roughness = rest.roughness
+      material.clearcoat = rest.clearcoat
+      material.clearcoatRoughness = rest.clearcoatRoughness
+      material.envMapIntensity = rest.envMapIntensity
+      material.needsUpdate = true
+    })
+
+    materialAssignments.forEach((originalMaterial, mesh) => {
+      const bodyMaterials = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
+
+      mesh.material = originalMaterial
+      bodyMaterials.forEach((material) => material.dispose())
+    })
+  }
+}
+
+function Model({ cue, continuityKey, reducedMotion }: { cue: DocentCue; continuityKey?: string; reducedMotion: boolean }) {
   const { scene } = useGLTF(MODEL_URL)
   const group = useRef<THREE.Group>(null)
   const wings = useRef<THREE.Object3D[]>([])
-  const greetStartedAt = useRef<number | null>(null)
-  const [reducedMotion, setReducedMotion] = useState(false)
+  const groupRest = useRef<Transform | null>(null)
+  const wingRest = useRef<Transform[]>([])
+  const targetMotion = useRef<DocentMotion>({ ...neutralMotion })
+  const appliedMotion = useRef<DocentMotion>({ ...neutralMotion })
+  const transitionFromMotion = useRef<DocentMotion>({ ...neutralMotion })
+  const cueStartedAt = useRef(performance.now())
+  const cueTransitionStartedAt = useRef(performance.now())
+  const previousCue = useRef(cue)
+  const initialPoseApplied = useRef(false)
 
-  useEffect(() => {
-    wings.current = WING_NAMES.map((name) => scene.getObjectByName(name)).filter(
+  useEffect(() => applyStudioGoldMaterial(scene), [scene])
+
+  useLayoutEffect(() => {
+    const foundWings = WING_NAMES.map((name) => scene.getObjectByName(name)).filter(
       (bone): bone is THREE.Object3D => Boolean(bone),
     )
-    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const update = () => setReducedMotion(media.matches)
 
-    update()
-    media.addEventListener('change', update)
+    wings.current = foundWings
+    wingRest.current = foundWings.map((wing) => ({
+      position: wing.position.clone(),
+      rotation: wing.rotation.clone(),
+    }))
 
-    return () => media.removeEventListener('change', update)
+    return () => {
+      wings.current = []
+      wingRest.current = []
+    }
   }, [scene])
 
-  useEffect(() => {
-    greetStartedAt.current = cue === 'greet' ? performance.now() : null
+  useLayoutEffect(() => {
+    if (group.current && !groupRest.current) {
+      groupRest.current = {
+        position: group.current.position.clone(),
+        rotation: group.current.rotation.clone(),
+      }
+    }
+  }, [])
+
+  useLayoutEffect(() => {
+    const motionGroup = group.current
+    const rest = groupRest.current
+
+    if (initialPoseApplied.current || !motionGroup || !rest) return
+
+    const continuedMotion = takeContinuityMotion(continuityKey)
+
+    if (continuedMotion) {
+      copyMotion(appliedMotion.current, continuedMotion)
+      copyMotion(transitionFromMotion.current, continuedMotion)
+      cueTransitionStartedAt.current = performance.now()
+    } else {
+      writeDocentMotion(cue, 0, 0, appliedMotion.current)
+      copyMotion(targetMotion.current, appliedMotion.current)
+    }
+
+    applyMotionPose(motionGroup, rest, wings.current, wingRest.current, appliedMotion.current)
+    initialPoseApplied.current = true
+  }, [continuityKey, cue])
+
+  useLayoutEffect(() => {
+    if (previousCue.current !== cue) {
+      copyMotion(transitionFromMotion.current, appliedMotion.current)
+      cueTransitionStartedAt.current = performance.now()
+      previousCue.current = cue
+    }
+
+    cueStartedAt.current = performance.now()
   }, [cue])
 
   useEffect(() => {
-    if (!reducedMotion) {
+    if (!reducedMotion) return
+    restoreRestPose(group.current, groupRest.current, wings.current, wingRest.current)
+  }, [reducedMotion])
+
+  useLayoutEffect(() => {
+    const motionGroup = group.current
+    const groupTransform = groupRest.current
+    const currentWings = wings.current
+    const currentWingRest = wingRest.current
+    const currentAppliedMotion = appliedMotion
+
+    return () => {
+      storeContinuityMotion(continuityKey, currentAppliedMotion.current)
+      restoreRestPose(motionGroup, groupTransform, currentWings, currentWingRest)
+    }
+  }, [continuityKey])
+
+  useFrame(({ clock }, delta) => {
+    const motionGroup = group.current
+    const rest = groupRest.current
+
+    if (!motionGroup || !rest || document.visibilityState === 'hidden') return
+
+    if (reducedMotion) {
+      restoreRestPose(motionGroup, rest, wings.current, wingRest.current)
       return
     }
 
-    if (group.current) {
-      group.current.position.y = 0
-    }
+    const elapsed = (performance.now() - cueStartedAt.current) / 1000
+    const duration = getDocentCueDuration(cue)
+    const activeCue = duration !== null && elapsed >= duration ? 'idle' : cue
+    writeDocentMotion(activeCue, elapsed, clock.elapsedTime, targetMotion.current)
+    const transitionProgress = Math.min((performance.now() - cueTransitionStartedAt.current) / 1000 / CUE_TRANSITION_DURATION, 1)
+    blendMotion(appliedMotion.current, transitionFromMotion.current, targetMotion.current, smoothstep(transitionProgress))
+    const nextMotion = appliedMotion.current
+    const blend = 1 - Math.exp(-delta * 13)
 
-    wings.current.forEach((wing) => {
-      wing.rotation.set(0, 0, 0)
-    })
-  }, [reducedMotion])
+    motionGroup.position.x = THREE.MathUtils.lerp(motionGroup.position.x, rest.position.x + nextMotion.positionX, blend)
+    motionGroup.position.y = THREE.MathUtils.lerp(motionGroup.position.y, rest.position.y + nextMotion.positionY, blend)
+    motionGroup.position.z = THREE.MathUtils.lerp(motionGroup.position.z, rest.position.z + nextMotion.positionZ, blend)
+    motionGroup.rotation.x = THREE.MathUtils.lerp(motionGroup.rotation.x, rest.rotation.x + nextMotion.rotationX, blend)
+    motionGroup.rotation.y = THREE.MathUtils.lerp(motionGroup.rotation.y, rest.rotation.y + nextMotion.rotationY, blend)
+    motionGroup.rotation.z = THREE.MathUtils.lerp(motionGroup.rotation.z, rest.rotation.z + nextMotion.rotationZ, blend)
 
-  useFrame(({ clock }) => {
-    if (!group.current || reducedMotion) return
-    const t = clock.elapsedTime
-    group.current.position.y = Math.sin(t * 1.4) * 0.08
-    const elapsed = greetStartedAt.current === null ? null : (performance.now() - greetStartedAt.current) / 1000
     wings.current.forEach((wing, index) => {
-      const sign = index === 0 ? -1 : 1
-      const lift =
-        elapsed !== null && elapsed < 1.8
-          ? Math.sin((elapsed / 1.8) * Math.PI) * 0.15 * sign
-          : Math.sin(t * 0.6) * 0.06 * sign
-      wing.rotation.set(0, lift, 0)
+      const wingTransform = wingRest.current[index]
+      if (!wingTransform) return
+      const isLeft = index === 0
+      const bow = isLeft ? nextMotion.leftWingBow : nextMotion.rightWingBow
+      const lift = isLeft ? nextMotion.leftWingLift : nextMotion.rightWingLift
+
+      wing.rotation.x = THREE.MathUtils.lerp(wing.rotation.x, wingTransform.rotation.x + bow, blend)
+      wing.rotation.y = THREE.MathUtils.lerp(wing.rotation.y, wingTransform.rotation.y + lift, blend)
+      wing.rotation.z = THREE.MathUtils.lerp(wing.rotation.z, wingTransform.rotation.z, blend)
     })
   })
 
@@ -65,17 +260,266 @@ function Model({ cue }: { cue: DocentCue }) {
       <Center>
         <primitive object={scene} />
       </Center>
+      {cue === 'listen' ? (
+        <Suspense fallback={null}>
+          <ListeningQuestion reducedMotion={reducedMotion} />
+        </Suspense>
+      ) : null}
     </group>
   )
 }
 
-export default function DocentCanvas({ cue }: { cue: DocentCue }) {
+function ListeningQuestion({ reducedMotion }: { reducedMotion: boolean }) {
+  const { scene } = useGLTF(QUESTION_MARK_URL)
+  const question = useRef<THREE.Group>(null)
+  const startedAt = useRef(performance.now())
+
+  useEffect(() => {
+    scene.traverse((object) => {
+      if (!(object instanceof THREE.Mesh)) return
+      const materials = Array.isArray(object.material) ? object.material : [object.material]
+
+      materials.forEach((material) => {
+        if (!(material instanceof THREE.MeshStandardMaterial)) return
+        material.color.set('#fffdf7')
+        material.emissive.set('#fff5d6')
+        material.emissiveIntensity = 0.18
+        material.metalness = 0.76
+        material.roughness = 0.2
+      })
+    })
+  }, [scene])
+
+  useFrame(({ clock }) => {
+    const model = question.current
+    if (!model) return
+
+    if (reducedMotion) {
+      model.position.x = 0.32
+      model.position.y = QUESTION_MARK_HEIGHT
+      model.rotation.z = QUESTION_MARK_BASE_ROTATION
+      model.scale.setScalar(QUESTION_MARK_SCALE)
+      return
+    }
+
+    const elapsed = (performance.now() - startedAt.current) / 1000
+    const progress = Math.min(elapsed / 1.1, 1)
+    const spring = Math.sin(progress * Math.PI * 3) * (1 - progress) * 0.24
+    const squash = Math.sin(progress * Math.PI * 3) * (1 - progress) * 0.055
+
+    model.position.x = 0.32
+    model.position.y = QUESTION_MARK_HEIGHT + spring
+    model.rotation.z = QUESTION_MARK_BASE_ROTATION + Math.sin(clock.elapsedTime * 1.2) * (Math.PI / 36)
+    model.scale.set(
+      QUESTION_MARK_SCALE * (1 - squash),
+      QUESTION_MARK_SCALE * (1 + squash),
+      QUESTION_MARK_SCALE,
+    )
+  })
+
   return (
-    <Canvas aria-hidden camera={{ fov: 36, position: [0, 0, 9.75] }} dpr={[1, 1.5]} gl={{ alpha: true }}>
-      <ambientLight intensity={2} />
-      <directionalLight intensity={3} position={[3, 4, 4]} />
-      <Model cue={cue} />
-    </Canvas>
+    <group ref={question} rotation={[0, 0, QUESTION_MARK_BASE_ROTATION]} scale={QUESTION_MARK_SCALE}>
+      <Center>
+        <primitive object={scene} />
+      </Center>
+    </group>
+  )
+}
+
+function useReducedMotionPreference() {
+  const [reducedMotion, setReducedMotion] = useState(false)
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const update = () => setReducedMotion(media.matches)
+
+    update()
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
+
+  return reducedMotion
+}
+
+function CameraFraming({ cue }: { cue: DocentCue }) {
+  const { camera } = useThree()
+
+  useEffect(() => {
+    if (!(camera instanceof THREE.PerspectiveCamera)) return
+
+    if (cue === 'listen') {
+      // 물음표까지 담을 만큼 세로 프레임을 넓히되, 카메라를 가까이 옮겨
+      // A1의 greet cue와 도슨트 본체가 같은 크기로 보이도록 보정한다.
+      camera.fov = LISTEN_CAMERA_FOV
+      camera.position.set(0, 0.6, LISTEN_CAMERA_DISTANCE)
+    } else {
+      camera.fov = 36
+      camera.position.set(0, 0, 9.75)
+    }
+    camera.updateProjectionMatrix()
+  }, [camera, cue])
+
+  return null
+}
+
+function StudioEnvironment() {
+  const { gl, scene } = useThree()
+
+  useEffect(() => {
+    const pmremGenerator = new THREE.PMREMGenerator(gl)
+    const studio = new RoomEnvironment()
+    studio.traverse((object) => {
+      if (object instanceof THREE.PointLight) {
+        object.color.set('#f4d98f')
+        object.intensity = 260
+        return
+      }
+
+      if (!(object instanceof THREE.Mesh)) return
+      const materials = Array.isArray(object.material) ? object.material : [object.material]
+
+      materials.forEach((material) => {
+        if (material instanceof THREE.MeshStandardMaterial) {
+          material.color.set('#120b03')
+          return
+        }
+
+        if (material instanceof THREE.MeshLambertMaterial) {
+          material.emissive.set('#e8cb7f')
+          material.emissiveIntensity *= 0.28
+        }
+      })
+    })
+
+    const environmentTarget = pmremGenerator.fromScene(studio, 0.04)
+    const previousEnvironment = scene.environment
+
+    scene.environment = environmentTarget.texture
+
+    return () => {
+      scene.environment = previousEnvironment
+      environmentTarget.dispose()
+      studio.dispose()
+      pmremGenerator.dispose()
+    }
+  }, [gl, scene])
+
+  return null
+}
+
+function restoreRestPose(
+  group: THREE.Group | null,
+  groupRest: Transform | null,
+  wings: readonly THREE.Object3D[],
+  wingRest: readonly Transform[],
+) {
+  if (group && groupRest) {
+    group.position.copy(groupRest.position)
+    group.rotation.copy(groupRest.rotation)
+  }
+
+  wings.forEach((wing, index) => {
+    const rest = wingRest[index]
+    if (!rest) return
+    wing.position.copy(rest.position)
+    wing.rotation.copy(rest.rotation)
+  })
+}
+
+function applyMotionPose(
+  group: THREE.Group,
+  groupRest: Transform,
+  wings: readonly THREE.Object3D[],
+  wingRest: readonly Transform[],
+  motion: DocentMotion,
+) {
+  group.position.set(
+    groupRest.position.x + motion.positionX,
+    groupRest.position.y + motion.positionY,
+    groupRest.position.z + motion.positionZ,
+  )
+  group.rotation.set(
+    groupRest.rotation.x + motion.rotationX,
+    groupRest.rotation.y + motion.rotationY,
+    groupRest.rotation.z + motion.rotationZ,
+  )
+
+  wings.forEach((wing, index) => {
+    const rest = wingRest[index]
+    if (!rest) return
+    const isLeft = index === 0
+
+    wing.rotation.set(
+      rest.rotation.x + (isLeft ? motion.leftWingBow : motion.rightWingBow),
+      rest.rotation.y + (isLeft ? motion.leftWingLift : motion.rightWingLift),
+      rest.rotation.z,
+    )
+  })
+}
+
+function takeContinuityMotion(continuityKey: string | undefined): DocentMotion | null {
+  if (!continuityKey) return null
+
+  const stored = continuityMotion.get(continuityKey)
+  continuityMotion.delete(continuityKey)
+
+  if (!stored || performance.now() - stored.storedAt > CONTINUITY_WINDOW_MS) return null
+  return stored.motion
+}
+
+function storeContinuityMotion(continuityKey: string | undefined, motion: DocentMotion) {
+  if (!continuityKey) return
+
+  continuityMotion.set(continuityKey, {
+    motion: { ...motion },
+    storedAt: performance.now(),
+  })
+}
+
+function copyMotion(target: DocentMotion, source: DocentMotion) {
+  target.positionX = source.positionX
+  target.positionY = source.positionY
+  target.positionZ = source.positionZ
+  target.rotationX = source.rotationX
+  target.rotationY = source.rotationY
+  target.rotationZ = source.rotationZ
+  target.leftWingBow = source.leftWingBow
+  target.leftWingLift = source.leftWingLift
+  target.rightWingBow = source.rightWingBow
+  target.rightWingLift = source.rightWingLift
+}
+
+function blendMotion(target: DocentMotion, from: DocentMotion, to: DocentMotion, progress: number) {
+  target.positionX = THREE.MathUtils.lerp(from.positionX, to.positionX, progress)
+  target.positionY = THREE.MathUtils.lerp(from.positionY, to.positionY, progress)
+  target.positionZ = THREE.MathUtils.lerp(from.positionZ, to.positionZ, progress)
+  target.rotationX = THREE.MathUtils.lerp(from.rotationX, to.rotationX, progress)
+  target.rotationY = THREE.MathUtils.lerp(from.rotationY, to.rotationY, progress)
+  target.rotationZ = THREE.MathUtils.lerp(from.rotationZ, to.rotationZ, progress)
+  target.leftWingBow = THREE.MathUtils.lerp(from.leftWingBow, to.leftWingBow, progress)
+  target.leftWingLift = THREE.MathUtils.lerp(from.leftWingLift, to.leftWingLift, progress)
+  target.rightWingBow = THREE.MathUtils.lerp(from.rightWingBow, to.rightWingBow, progress)
+  target.rightWingLift = THREE.MathUtils.lerp(from.rightWingLift, to.rightWingLift, progress)
+}
+
+function smoothstep(progress: number) {
+  return progress * progress * (3 - 2 * progress)
+}
+
+export default function DocentCanvas({ cue, continuityKey }: { cue: DocentCue; continuityKey?: string }) {
+  const reducedMotion = useReducedMotionPreference()
+
+  return (
+    <>
+      <Canvas aria-hidden camera={{ fov: 36, position: [0, 0, 9.75] }} dpr={[1, 1.5]} gl={{ alpha: true }}>
+        <ambientLight intensity={0.4} />
+        <directionalLight color="#ffe7a6" intensity={2.2} position={[3, 4, 4]} />
+        <pointLight color="#fff2c4" intensity={8} distance={5} position={[0, 1.4, 4]} />
+        <StudioEnvironment />
+      <CameraFraming cue={cue} />
+        <Model continuityKey={continuityKey} cue={cue} reducedMotion={reducedMotion} />
+      </Canvas>
+    </>
   )
 }
 

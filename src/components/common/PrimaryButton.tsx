@@ -11,7 +11,7 @@ export default function PrimaryButton({ label, onClick, className = '' }: Primar
     <button
       type="button"
       onClick={onClick}
-      className={`relative flex h-13 items-center justify-center rounded-[30px] ${PRIMARY_BG} text-[16px] font-medium text-white ${PRIMARY_INSET_HIGHLIGHT} ${className}`}
+      className={`liquid-glass-button liquid-glass-button--primary relative flex h-13 items-center justify-center rounded-[30px] ${PRIMARY_BG} text-[16px] font-medium text-white ${PRIMARY_INSET_HIGHLIGHT} ${className}`}
     >
       {label}
     </button>

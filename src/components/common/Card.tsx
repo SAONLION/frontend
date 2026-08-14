@@ -16,7 +16,7 @@ export default function Card({ variant = 'product', onSelect, className = '', ch
   return (
     <div
       onClick={onSelect}
-      className={`w-full rounded-[15px] border-[0.6px] ${SURFACE_STYLES[variant]} ${
+      className={`liquid-glass-card w-full rounded-[15px] border-[0.6px] ${SURFACE_STYLES[variant]} ${
         onSelect ? 'cursor-pointer' : ''
       } ${className}`}
     >
