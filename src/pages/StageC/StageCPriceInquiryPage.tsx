@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router';
-import { DocentStage } from '../../components/domain/DocentStage';
 import { GlassBottomActionDock, GlassInfoCard, GlassSpeechBubble, GlassTopBar, StageCDetailShell } from '../../components/domain/GlassShell';
 import PrimaryButton from '../../components/common/PrimaryButton';
 import SecondaryButton from '../../components/common/SecondaryButton';
@@ -94,8 +93,7 @@ function PriceInquiryContent({ pageState, productName, productImageUrl, sku }: P
         context="구매 조건"
         action={<SecondaryButton label="← 구매 조건" onClick={() => navigate(purchaseHubPath)} className="w-auto px-4" />}
       />
-      <section aria-label="제품과 도슨트 안내" className="relative h-48 w-full overflow-hidden rounded-[15px]">
-        <DocentStage cue={pageState === 'completed' ? 'greet' : 'idle'} className="absolute inset-0 z-10 h-full w-full" />
+      <section aria-label="제품 안내" className="relative h-48 w-full overflow-hidden rounded-[15px]">
         <img src={productImageUrl} alt={productName} className="absolute inset-0 h-full w-full object-cover" />
       </section>
       {pageState === 'request' && (

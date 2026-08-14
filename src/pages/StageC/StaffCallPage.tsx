@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router';
+import backgroundImage from '../../assets/images/stage-a-background.png';
+import closeIcon from '../../assets/images/icon-close.svg';
 import { DocentStage } from '../../components/domain/DocentStage';
-import { GlassInfoCard, StageCDetailShell } from '../../components/domain/GlassShell';
+import CircleIconButton from '../../components/common/CircleIconButton';
 import PrimaryButton from '../../components/common/PrimaryButton';
 import SecondaryButton from '../../components/common/SecondaryButton';
 import { EVENT_NAMES, type StaffCallType } from '../../constants/events';
@@ -77,27 +79,27 @@ export default function StaffCallPage({ completed = false, callType = 'info' }: 
 
   if (!hasRequestContext) {
     return (
-      <StageCDetailShell>
-        <GlassInfoCard>
-          <h1 className="text-[16px] font-semibold">직원 호출 정보를 찾을 수 없어요.</h1>
+      <div className="relative flex min-h-dvh w-full flex-col items-center justify-center gap-4 overflow-hidden bg-black px-6 text-center">
+        <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="relative z-10 flex w-full max-w-100.5 flex-col items-center">
+          <h1 className="text-[18px] font-semibold text-white">직원 호출 정보를 찾을 수 없어요.</h1>
           <SecondaryButton
             label={callType === 'info' ? '제품 이해로 돌아가기' : '기타 질문으로 돌아가기'}
             onClick={() => navigate(returnPath)}
             className="mt-4"
           />
-        </GlassInfoCard>
-      </StageCDetailShell>
+        </div>
+      </div>
     );
   }
 
   if (callType === 'info') {
     return (
-      <StageCDetailShell className="items-center justify-center text-center">
-        <div className="flex w-full flex-col items-center gap-4">
-          <section aria-label="나이비스 AI 도슨트" className="h-48 w-full">
-            <DocentStage cue="idle" className="h-full w-full" />
-          </section>
-          <h1 className="text-[18px] font-semibold text-white">
+      <div className="relative min-h-dvh w-full overflow-hidden bg-black">
+        <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-100.5 flex-col items-center px-6 pt-69.25 pb-16.25">
+          <DocentStage cue={completed ? 'greet' : 'idle'} className="mx-auto aspect-345/216 w-[85.8%] max-w-86.25" />
+          <h1 className="mt-8 text-[25px] font-semibold leading-tight text-white">
             {(completed
               ? ['제가 직원분께 궁금해 하시는', '부분을 잘 전달했어요!']
               : ['더 자세히 설명드리기 위해', '직원에게 알림을 보내는 중이에요!']
@@ -107,41 +109,43 @@ export default function StaffCallPage({ completed = false, callType = 'info' }: 
               </span>
             ))}
           </h1>
-        </div>
 
-        {completed && (
-          <div aria-label="직원 문의 후 액션" className="mt-auto flex w-full flex-col gap-2.75">
-            <SecondaryButton label="← 다른 정보 보기" onClick={() => navigate(returnPath)} />
-            <PrimaryButton label="구매 문의" onClick={() => navigate(purchaseInquiryPath)} />
-            <SecondaryButton label="다른 제품 보기 →" onClick={exitProduct} />
-          </div>
-        )}
-      </StageCDetailShell>
+          {completed && (
+            <div aria-label="직원 문의 후 액션" className="mt-auto flex w-full flex-col gap-4.5">
+              <SecondaryButton label="← 다른 정보 보기" onClick={() => navigate(returnPath)} />
+              <div className="flex w-full gap-2.5">
+                <PrimaryButton label="구매 문의" onClick={() => navigate(purchaseInquiryPath)} className="h-11.5 flex-1" />
+                <SecondaryButton label="다른 제품 보기 →" onClick={exitProduct} className="h-11.5 flex-1" />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     );
   }
 
   return (
-    <StageCDetailShell>
-      <header className="flex justify-end">
-        <button aria-label="기타 질문 닫기" onClick={() => navigate(returnPath)} type="button" className="text-[20px] text-[#d1d1d1]">
-          ×
-        </button>
-      </header>
-      <div className="flex flex-col items-center gap-4 text-center">
-        <section aria-label="나이비스 AI 도슨트" className="h-48 w-full">
-          <DocentStage cue="idle" className="h-full w-full" />
-        </section>
-        <h1 className="text-[18px] font-semibold text-white">
+    <div className="relative min-h-dvh w-full overflow-hidden bg-black">
+      <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      <CircleIconButton
+        icon={closeIcon}
+        ariaLabel="기타 질문 닫기"
+        onClick={() => navigate(returnPath)}
+        iconClassName="h-4 w-auto"
+        className="absolute right-5 top-17.25 z-10"
+      />
+      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-100.5 flex-col items-center px-6 pt-82.25 pb-16.25">
+        <DocentStage cue="greet" className="mx-auto aspect-345/216 w-[85.8%] max-w-86.25" />
+        <h1 className="mt-7.5 text-[25px] font-semibold leading-tight text-white">
           <span className="block">직원에게 궁금한 사항에 대해</span>
-          <span className="block">문의 알림을 보냈어요!</span>
+          <span className="block">문의 알람을 보냈어요!</span>
         </h1>
-        <p className="text-[13px] text-[#d1d1d1]">더 자세한 상담을 받아보세요</p>
+        <p className="mt-1 text-[18px] font-medium text-[#d1d1d1]">더 자세한 상담을 받아보세요</p>
+        <div className="mt-auto flex w-full flex-col gap-3.25">
+          <SecondaryButton label="다른 것도 물어보기" onClick={() => navigate(returnPath)} />
+          <SecondaryButton label="다른 제품 보기 →" onClick={exitProduct} />
+        </div>
       </div>
-      <div className="mt-auto flex w-full flex-col gap-2.75">
-        <SecondaryButton label="다른 것도 물어보기" onClick={() => navigate(returnPath)} />
-        <SecondaryButton label="직원에게 문의하기" onClick={() => navigate(returnPath)} />
-        <SecondaryButton label="다른 제품 보기 →" onClick={exitProduct} />
-      </div>
-    </StageCDetailShell>
+    </div>
   );
 }

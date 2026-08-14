@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { StageCDetailShell } from '../../components/domain/GlassShell';
-import PrimaryButton from '../../components/common/PrimaryButton';
-import SecondaryButton from '../../components/common/SecondaryButton';
-import { STAGE_C_ROUTES, stageCPath } from '../../constants/stageC';
-import { STAGE_C_PRODUCT_DETAIL_ROUTES } from '../../constants/stageC';
+import backgroundImage from '../../assets/images/stage-a-background.png';
+import bostonBagHero from '../../assets/images/product-boston-bag-hero.png';
+import stylingLifestylePhoto from '../../assets/images/product-styling-lifestyle.png';
+import closeIcon from '../../assets/images/icon-close.svg';
+import CircleIconButton from '../../components/common/CircleIconButton';
+import { STAGE_C_PRODUCT_DETAIL_ROUTES, STAGE_C_ROUTES, stageCPath } from '../../constants/stageC';
 import { useProductExit } from '../../features/product-explore/useProductExit';
 import { useStageCProduct } from '../../features/product-explore/useStageCProduct';
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes';
@@ -13,8 +14,8 @@ import { StageCState } from './StageCHubPage';
 
 type Topic = 'craft' | 'heritage' | 'styling';
 
-const topicTitles: Record<Topic, string> = {
-  craft: '제작 공정 · 소재',
+const topicBadgeLabels: Record<Topic, string> = {
+  craft: '제품 공정 · 소재',
   heritage: '헤리티지 · 브랜드 스토리',
   styling: '스타일링 · 코디',
 };
@@ -23,7 +24,7 @@ const topicSummaries: Record<Topic, readonly string[]> = {
   craft: [
     '소재 : 비세토스 코티드 캔버스',
     '공정 : 6단계 핸드 피니싱, 엣지 코팅 3회 반복',
-    '내구성 : 스크래치 저항 테스트 통과',
+    '내구 : 발수 처리 · 스크래치 저항 테스트 통과',
     '지속가능성 : 업사이클 소재 부분 적용',
   ],
   heritage: [
@@ -31,8 +32,14 @@ const topicSummaries: Record<Topic, readonly string[]> = {
     '브랜드가 추구하는 가치와 방향성',
     '비세토스 패턴의 유래와 로고 각인의 의미',
   ],
-  styling: ['LOOK 1 — 데일리 · 데님 + 니트', 'LOOK 2 — 트래블 · 셋업 + 스니커즈', 'LOOK 3 — 오피스 · 코트 + 로퍼'],
+  styling: [],
 };
+
+const stylingLooks = [
+  { label: 'LOOK 1', text: '데일리 · 데님 + 니트' },
+  { label: 'LOOK 2', text: '트래블 · 셋업 + 스니커즈' },
+  { label: 'LOOK 3', text: '오피스 · 코트 + 로퍼' },
+];
 
 interface StageCProductDetailPageProps {
   topic: Topic;
@@ -45,8 +52,7 @@ export default function StageCProductDetailPage({ topic }: StageCProductDetailPa
   const navigate = useNavigate();
   const exitProduct = useProductExit(sku);
   const viewed = useRef(false);
-  const galleryTrackRef = useRef<HTMLDivElement>(null);
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [imageLoadFailed, setImageLoadFailed] = useState(false);
 
   useEffect(() => {
     if (product && !viewed.current) {
@@ -62,110 +68,83 @@ export default function StageCProductDetailPage({ topic }: StageCProductDetailPa
   const productHubPath = stageCPath(STAGE_C_ROUTES.c2, sku);
 
   if (!product) {
-    return (
-      <StageCDetailShell>
-        <div className="rounded-[15px] border-[0.6px] border-white/18 bg-[#1c1f26]/70 p-5 text-white">
-          <h1 className="text-[16px] font-semibold">상품을 찾을 수 없어요</h1>
-          <p className="mt-1 text-[13px] text-[#d1d1d1]">태그한 상품의 주소를 다시 확인해 주세요.</p>
-          <SecondaryButton label="제품 이해로 돌아가기" onClick={() => navigate(productHubPath)} className="mt-4" />
-        </div>
-      </StageCDetailShell>
-    );
+    return <StageCState title="상품을 찾을 수 없어요" description="태그한 상품의 주소를 다시 확인해 주세요." />;
   }
 
-  const images = product.detailImages ?? [];
-  const lines = topicSummaries[topic];
-  const imageCount = images.length;
-
-  const scrollToImage = (nextIndex: number) => {
-    if (imageCount === 0) return;
-    const normalizedIndex = (nextIndex + imageCount) % imageCount;
-    const track = galleryTrackRef.current;
-
-    if (track) {
-      track.scrollTo({ left: track.clientWidth * normalizedIndex, behavior: 'smooth' });
-    }
-
-    setActiveImageIndex(normalizedIndex);
-  };
-
-  const syncActiveImageFromScroll = () => {
-    const track = galleryTrackRef.current;
-    if (!track || imageCount === 0 || track.clientWidth === 0) return;
-    const nextIndex = Math.max(0, Math.min(imageCount - 1, Math.round(track.scrollLeft / track.clientWidth)));
-    setActiveImageIndex(nextIndex);
-  };
-
-  const openPurchaseInquiry = () => {
-    navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn, sku));
-  };
+  const heroImage = topic === 'styling' ? stylingLifestylePhoto : bostonBagHero;
+  const staffPendingPath = stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.staffPending, sku);
+  const openPurchaseInquiry = () => navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn, sku));
 
   return (
-    <StageCDetailShell>
-      <header className="flex items-center justify-between text-[14px] text-white">
-        <span>{topicTitles[topic]}</span>
-        <button aria-label="제품 이해 닫기" onClick={() => navigate(productHubPath)} type="button" className="text-[20px] text-[#d1d1d1]">
-          ×
-        </button>
-      </header>
+    <div className="relative min-h-dvh w-full overflow-hidden bg-black">
+      <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
 
-      <section aria-label={`${topicTitles[topic]} 안내 미디어`} className="w-full">
-        {topic !== 'styling' && (
-          <img src={product.imageUrl} alt={product.name} className="h-40 w-full rounded-[15px] object-cover" />
+      <div className="relative h-125 w-full overflow-hidden">
+        {!imageLoadFailed && (
+          <img
+            src={heroImage}
+            alt={topicBadgeLabels[topic]}
+            onError={() => setImageLoadFailed(true)}
+            className="h-full w-full object-cover"
+          />
         )}
-        {topic === 'styling' && imageCount > 0 && (
-          <div>
-            <div
-              ref={galleryTrackRef}
-              onScroll={syncActiveImageFromScroll}
-              role="region"
-              aria-label="스타일링 제품 이미지"
-              tabIndex={0}
-              className="flex snap-x snap-mandatory gap-3 overflow-x-auto [scrollbar-width:none]"
-            >
-              {images.map((image, imageIndex) => (
-                <img
-                  key={image}
-                  src={image}
-                  alt={`${product.name} ${imageIndex + 1}번째 이미지`}
-                  className="h-40 w-full shrink-0 snap-center rounded-[15px] object-cover"
-                />
-              ))}
-            </div>
-            <div className="mt-2 flex items-center justify-center gap-4">
-              <button aria-label="이전 제품 이미지" onClick={() => scrollToImage(activeImageIndex - 1)} type="button" className="text-[18px] text-white">
-                ‹
-              </button>
-              <span aria-live="polite" className="flex gap-1.5">
-                {images.map((image, imageIndex) => (
-                  <i
-                    key={image}
-                    aria-hidden="true"
-                    className={`block size-1.5 rounded-full ${imageIndex === activeImageIndex ? 'bg-white' : 'bg-white/30'}`}
-                  />
-                ))}
-              </span>
-              <button aria-label="다음 제품 이미지" onClick={() => scrollToImage(activeImageIndex + 1)} type="button" className="text-[18px] text-white">
-                ›
-              </button>
-            </div>
+      </div>
+
+      <span className="absolute left-[8.5%] top-[9%] w-fit rounded-[10px] border-[0.8px] border-[#424242] bg-[#d9d9d9]/20 px-3.75 py-1.25 text-[14px] text-white">
+        {topicBadgeLabels[topic]}
+      </span>
+      <CircleIconButton
+        icon={closeIcon}
+        ariaLabel="제품 이해 닫기"
+        onClick={() => navigate(productHubPath)}
+        iconClassName="h-4 w-auto"
+        className="absolute right-[8.5%] top-[8%]"
+      />
+
+      <div className="relative z-10 mx-auto -mt-4 flex w-full max-w-100.5 flex-col gap-2.75 px-[7%] pb-8">
+        {topic === 'styling' ? (
+          <div className="rounded-[15px] border-[0.6px] border-[#424242] bg-[#d9d9d9]/20 p-3.75 text-[14px] text-white">
+            {stylingLooks.map((look) => (
+              <p key={look.label}>
+                · <span className="font-bold">{look.label}</span> — {look.text}
+              </p>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-[15px] border-[0.6px] border-[#424242] bg-[#d9d9d9]/20 p-3.75 text-[14px] text-white">
+            {topicSummaries[topic].map((line) => (
+              <p key={line}>· {line}</p>
+            ))}
           </div>
         )}
-        {topic === 'styling' && imageCount === 0 && (
-          <img src={product.imageUrl} alt={product.name} className="h-40 w-full rounded-[15px] object-cover" />
+
+        {topic !== 'styling' && (
+          <button
+            type="button"
+            onClick={() => navigate(staffPendingPath)}
+            className="flex h-13.5 w-full items-center justify-center rounded-full bg-[#d9d9d9]/15 text-[16px] font-medium text-[#ebebeb]"
+          >
+            더 자세한 내용이 궁금하다면
+          </button>
         )}
-      </section>
 
-      <section className="flex flex-col gap-1 text-[13px] text-[#d1d1d1]">
-        {lines.map((line) => (
-          <p key={line}>· {line}</p>
-        ))}
-      </section>
-
-      <div className="mt-auto flex w-full flex-col gap-2.75">
-        <PrimaryButton label="착용 및 구매 문의" onClick={openPurchaseInquiry} />
-        <SecondaryButton label="다른 제품 보기 →" onClick={exitProduct} />
+        <div className="mt-1 flex w-full gap-2.5">
+          <button
+            type="button"
+            onClick={openPurchaseInquiry}
+            className="h-11.5 flex-1 rounded-[30px] bg-[#8a5111] text-[16px] font-medium text-white shadow-[inset_0px_-2px_4px_0px_rgba(255,255,255,0.25)]"
+          >
+            착용 및 구매 문의
+          </button>
+          <button
+            type="button"
+            onClick={exitProduct}
+            className="h-11.5 flex-1 rounded-full bg-[#d9d9d9]/15 text-[16px] font-medium text-white"
+          >
+            다른 제품 보기 →
+          </button>
+        </div>
       </div>
-    </StageCDetailShell>
+    </div>
   );
 }

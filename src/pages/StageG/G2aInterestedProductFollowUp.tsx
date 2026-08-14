@@ -1,6 +1,5 @@
 import backgroundImage from '../../assets/images/stage-a-background.png';
-import emblemImage from '../../assets/images/mcm-emblem.png';
-import ImageFrame from '../../components/common/ImageFrame';
+import { DocentStage } from '../../components/domain/DocentStage';
 import ScreenHeadline from '../../components/common/ScreenHeadline';
 import PrimaryButton from '../../components/common/PrimaryButton';
 import SecondaryButton from '../../components/common/SecondaryButton';
@@ -26,11 +25,7 @@ export default function G2aInterestedProductFollowUp({
     <div className="relative min-h-dvh w-full overflow-hidden bg-black">
       <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
       <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-100.5 flex-col items-center pt-52.5 pb-18">
-        <ImageFrame
-          src={emblemImage}
-          alt="MCM 엠블럼"
-          className="mx-auto aspect-345/216 w-[85.8%] max-w-86.25"
-        />
+        <DocentStage cue="idle" className="mx-auto aspect-345/216 w-[85.8%] max-w-86.25" />
         <ScreenHeadline
           headline={`관심 있게 보시던 ${productName}`}
           subtext={`${colorName} 컬러에 대한 사항들을 가장 먼저 알려드릴까요?`}

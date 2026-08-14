@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { GlassInfoCard, StageCDetailShell } from '../../components/domain/GlassShell';
-import PrimaryButton from '../../components/common/PrimaryButton';
+import backgroundImage from '../../assets/images/stage-a-background.png';
+import closeIcon from '../../assets/images/icon-close.svg';
+import CircleIconButton from '../../components/common/CircleIconButton';
 import SecondaryButton from '../../components/common/SecondaryButton';
 import type { AiAnswerResult } from '../../features/ai-answer/AiAnswerService';
 import { useAiAnswerService } from '../../features/ai-answer/useAiAnswerService';
@@ -102,50 +103,65 @@ export default function StageCAiAnswerPage() {
   };
 
   return (
-    <StageCDetailShell>
-      <header className="flex justify-end">
-        <button aria-label="기타 질문 닫기" onClick={() => navigate(otherPath)} type="button" className="text-[20px] text-[#d1d1d1]">
-          ×
-        </button>
-      </header>
-      <div className="flex flex-col gap-2">
-        <h1 className="text-[18px] font-semibold text-white">{view.title}</h1>
+    <div className="relative min-h-dvh w-full overflow-hidden bg-black">
+      <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      <CircleIconButton
+        icon={closeIcon}
+        ariaLabel="기타 질문 닫기"
+        onClick={() => navigate(otherPath)}
+        iconClassName="h-4 w-auto"
+        className="absolute right-5 top-17.25 z-10"
+      />
+      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-100.5 flex-col items-center px-6 pt-73 pb-16.25">
+        <h1 className="text-center text-[25px] font-semibold leading-tight text-white">
+          {view.title.split('\n').map((line) => (
+            <span key={line} className="block">
+              {line}
+            </span>
+          ))}
+        </h1>
         {view.status === 'loading' && (
-          <p aria-live="polite" className="text-[13px] text-[#d1d1d1]">
+          <p aria-live="polite" className="mt-2 text-[14px] text-[#d1d1d1]">
             답변을 준비하고 있어요.
           </p>
         )}
-        {view.status === 'error' && <p className="text-[13px] text-[#d1d1d1]">잠시 후 다시 시도하거나 직원에게 문의해 주세요.</p>}
+        {view.status === 'error' && <p className="mt-2 text-[14px] text-[#d1d1d1]">잠시 후 다시 시도하거나 직원에게 문의해 주세요.</p>}
         {view.status === 'resolved' && (
-          <section aria-label="AI 답변" className="flex flex-col gap-1 rounded-[15px] border-[0.6px] border-white/18 bg-[#1c1f26]/70 p-4 text-[13px] text-[#d1d1d1] backdrop-blur-md">
+          <section
+            aria-label="AI 답변"
+            className="mt-6 flex w-full flex-col gap-1 rounded-[15px] border-[0.6px] border-[#424242] bg-[#d9d9d9]/20 p-4.5 text-[17px] font-medium text-[#e5e5e5]"
+          >
             {view.lines.map((line) => (
               <p key={line}>· {line}</p>
             ))}
           </section>
         )}
+        <div className="mt-auto flex w-full flex-col gap-3.25">
+          {view.status === 'error' ? (
+            <SecondaryButton label="다시 시도하기" onClick={retry} />
+          ) : (
+            <SecondaryButton label="다른 것도 물어보기" onClick={() => navigate(otherPath)} />
+          )}
+          <div className="flex w-full gap-2.5">
+            <SecondaryButton label="직원에게 문의하기" onClick={requestStaff} className="h-11.5 flex-1" />
+            <SecondaryButton label="다른 제품 보기 →" onClick={exitProduct} className="h-11.5 flex-1" />
+          </div>
+        </div>
       </div>
-      <div className="mt-auto flex w-full flex-col gap-2.75">
-        {view.status === 'error' ? (
-          <SecondaryButton label="다시 시도하기" onClick={retry} />
-        ) : (
-          <SecondaryButton label="다른 것도 물어보기" onClick={() => navigate(otherPath)} />
-        )}
-        <PrimaryButton label="직원에게 문의하기" onClick={requestStaff} />
-        <SecondaryButton label="다른 제품 보기 →" onClick={exitProduct} />
-      </div>
-    </StageCDetailShell>
+    </div>
   );
 }
 
 function MissingQuestion({ path }: { path: string }) {
   const navigate = useNavigate();
   return (
-    <StageCDetailShell>
-      <GlassInfoCard>
-        <h1 className="text-[16px] font-semibold">질문 내용을 찾을 수 없어요.</h1>
-        <p className="mt-1 text-[13px] text-[#d1d1d1]">궁금한 점을 다시 입력해 주세요.</p>
+    <div className="relative flex min-h-dvh w-full flex-col items-center justify-center gap-4 overflow-hidden bg-black px-6 text-center">
+      <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      <div className="relative z-10 flex w-full max-w-100.5 flex-col items-center">
+        <h1 className="text-[18px] font-semibold text-white">질문 내용을 찾을 수 없어요.</h1>
+        <p className="mt-1 text-[14px] text-[#d1d1d1]">궁금한 점을 다시 입력해 주세요.</p>
         <SecondaryButton label="기타 질문으로 돌아가기" onClick={() => navigate(path)} className="mt-4" />
-      </GlassInfoCard>
-    </StageCDetailShell>
+      </div>
+    </div>
   );
 }

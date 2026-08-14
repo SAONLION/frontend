@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { GlassBottomActionDock, GlassChoiceChip, GlassInfoCard, GlassTopBar, StageCDetailShell } from '../../components/domain/GlassShell';
+import backgroundImage from '../../assets/images/stage-a-background.png';
+import closeIcon from '../../assets/images/icon-close.svg';
+import CircleIconButton from '../../components/common/CircleIconButton';
+import ScreenHeadline from '../../components/common/ScreenHeadline';
 import PrimaryButton from '../../components/common/PrimaryButton';
 import SecondaryButton from '../../components/common/SecondaryButton';
 import { FREE_QUERY_TOPICS, type FreeQueryTopic } from '../../constants/events';
@@ -39,24 +42,19 @@ export default function StageCOtherPage() {
   };
 
   return (
-    <StageCDetailShell>
-      <GlassTopBar
-        context=""
-        action={
-          <button
-            aria-label="기타 질문 닫기"
-            onClick={() => navigate(stageCPath(STAGE_C_ROUTES.c1, sku))}
-            type="button"
-            className="text-[20px] text-[#d1d1d1]"
-          >
-            ×
-          </button>
-        }
+    <div className="relative min-h-dvh w-full overflow-hidden bg-black">
+      <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      <CircleIconButton
+        icon={closeIcon}
+        ariaLabel="기타 질문 닫기"
+        onClick={() => navigate(stageCPath(STAGE_C_ROUTES.c1, sku))}
+        iconClassName="h-4 w-auto"
+        className="absolute right-5 top-17.25 z-10"
       />
-      <GlassInfoCard>
-        <h1 className="text-[16px] font-semibold">선택지에 없는 게 궁금하시면</h1>
-        <p className="mt-1 text-[13px] text-[#d1d1d1]">아래에 편하게 적어주세요.</p>
-        <div className="mt-4 flex flex-col gap-3">
+      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-100.5 flex-col items-center px-6 pt-34 pb-16.25">
+        <ScreenHeadline headline="선택지에 없는 게 궁금하시면" subtext="아래에 편하게 적어주세요" variant="md" />
+
+        <div className="mt-16.25 flex w-full flex-col gap-1.75 rounded-[15px] border-[0.6px] border-[#424242] bg-[#d9d9d9]/20 p-3.75">
           <label htmlFor="stage-c-free-query" className="sr-only">
             궁금한 내용
           </label>
@@ -70,35 +68,46 @@ export default function StageCOtherPage() {
               setError('');
             }}
             placeholder="예) 비 오는 날 들어도 괜찮을까요?"
-            rows={3}
-            className="rounded-xl bg-white/10 px-4 py-3 text-[14px] text-white outline-none placeholder:text-[#8a8a8a]"
+            rows={2}
+            className="resize-none text-[13px] text-white outline-none placeholder:text-[#a6a6a6]"
           />
-          <div aria-label="자주 묻는 질문" className="flex flex-wrap gap-2">
+          <div aria-label="자주 묻는 질문" className="flex flex-wrap gap-1.75">
             {quickQueryTopics.map((item) => (
-              <GlassChoiceChip
+              <button
                 key={item.label}
-                label={item.label}
-                selected={topic === item.topic && query === item.question}
+                type="button"
                 onClick={() => {
                   setQuery(item.question);
                   setTopic(item.topic);
                   setError('');
                 }}
-              />
+                aria-pressed={topic === item.topic && query === item.question}
+                className={`rounded-full border-[0.6px] border-[#424242] px-3.25 py-0.75 text-[12.5px] ${
+                  topic === item.topic && query === item.question ? 'bg-[#8a5111]/40 text-white' : 'bg-[#d9d9d9]/20 text-[#a6a6a6]'
+                }`}
+              >
+                {item.label}
+              </button>
             ))}
           </div>
-          {error && (
-            <p id="stage-c-free-query-error" role="alert" className="text-[12px] text-[#e0836b]">
-              {error}
-            </p>
-          )}
         </div>
-        <PrimaryButton label={submitting ? '보내는 중…' : '보내기'} className="mt-4" onClick={submitQuery} />
-      </GlassInfoCard>
-      <GlassBottomActionDock>
-        <SecondaryButton label="착용 및 구매 문의" onClick={() => navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn, sku))} />
-        <SecondaryButton label="다른 제품 보기 →" onClick={exitProduct} />
-      </GlassBottomActionDock>
-    </StageCDetailShell>
+        {error && (
+          <p id="stage-c-free-query-error" role="alert" className="mt-2 w-full text-[12px] text-[#e0836b]">
+            {error}
+          </p>
+        )}
+
+        <PrimaryButton label={submitting ? '보내는 중…' : '보내기'} onClick={submitQuery} className="mt-8" />
+
+        <div className="mt-auto flex w-full gap-2.5">
+          <SecondaryButton
+            label="착용 및 구매 문의"
+            onClick={() => navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn, sku))}
+            className="h-11.5 flex-1"
+          />
+          <SecondaryButton label="다른 제품 보기 →" onClick={exitProduct} className="h-11.5 flex-1" />
+        </div>
+      </div>
+    </div>
   );
 }

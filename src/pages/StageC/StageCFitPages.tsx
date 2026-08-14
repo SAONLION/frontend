@@ -1,7 +1,10 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router';
+import backgroundImage from '../../assets/images/stage-a-background.png';
+import closeIcon from '../../assets/images/icon-close.svg';
 import { DocentStage } from '../../components/domain/DocentStage';
-import { GlassInfoCard, StageCDetailShell } from '../../components/domain/GlassShell';
+import CircleIconButton from '../../components/common/CircleIconButton';
+import ScreenHeadline from '../../components/common/ScreenHeadline';
 import PrimaryButton from '../../components/common/PrimaryButton';
 import SecondaryButton from '../../components/common/SecondaryButton';
 import { EVENT_NAMES, type SessionEvent } from '../../constants/events';
@@ -143,24 +146,24 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
 
   if (kind === 'size') {
     return (
-      <FitShell kind={kind} selection={selection}>
+      <FitShell kind={kind} selection={selection} sku={sku}>
         <SizeOptions onSelect={setSize} product={product} selection={selection} />
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-[13px] text-[#d1d1d1]">
-          <div className="flex justify-between border-b border-white/10 pb-1">
-            <dt>사이즈</dt>
-            <dd>미디엄 (W30 × H40 × D14 cm)</dd>
+        <dl className="flex flex-col text-[15px]">
+          <div className="flex items-start justify-between border-b border-white/10 py-2.75">
+            <dt className="text-[#999]">사이즈</dt>
+            <dd className="text-right font-medium text-[#f2f2f2]">미디엄 (W30 × H40 × D14 cm)</dd>
           </div>
-          <div className="flex justify-between border-b border-white/10 pb-1">
-            <dt>용량</dt>
-            <dd>15L · 노트북 14인치 수납</dd>
+          <div className="flex items-start justify-between border-b border-white/10 py-2.75">
+            <dt className="text-[#999]">용량</dt>
+            <dd className="text-right font-medium text-[#f2f2f2]">15L · 노트북 14인치 수납</dd>
           </div>
-          <div className="flex justify-between border-b border-white/10 pb-1">
-            <dt>무게</dt>
-            <dd>780 g</dd>
+          <div className="flex items-start justify-between border-b border-white/10 py-2.75">
+            <dt className="text-[#999]">무게</dt>
+            <dd className="text-right font-medium text-[#f2f2f2]">780 g</dd>
           </div>
-          <div className="flex justify-between border-b border-white/10 pb-1">
-            <dt>기내 반입</dt>
-            <dd>가능 · TSA 규격 대응</dd>
+          <div className="flex items-start justify-between py-2.75">
+            <dt className="text-[#999]">기내 반입</dt>
+            <dd className="text-right font-medium text-[#f2f2f2]">가능 · TSA 규격 대응</dd>
           </div>
         </dl>
         <FitActionRow onExitProduct={exitProduct} onPrimaryAction={confirmSize} />
@@ -170,7 +173,7 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
 
   if (kind === 'color') {
     return (
-      <FitShell kind={kind} selection={selection}>
+      <FitShell kind={kind} selection={selection} sku={sku}>
         <ColorOptions onSelect={setColor} product={product} selection={selection} />
         <FitActionRow onExitProduct={exitProduct} onPrimaryAction={() => navigate(fitSearchPath(paths.tryOn, selection))} />
       </FitShell>
@@ -179,7 +182,7 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
 
   if (kind === 'try-on') {
     return (
-      <FitShell kind={kind} selection={selection}>
+      <FitShell kind={kind} selection={selection} sku={sku}>
         <div className="flex flex-col gap-4">
           <SizeOptions label="사이즈" onSelect={setSize} product={product} selection={selection} />
           <ColorOptions label="컬러" onSelect={setColor} product={product} selection={selection} />
@@ -212,57 +215,73 @@ function FitStatusScreen({
   status: FitStatus;
 }) {
   const content = {
-    pending: { title: ['직원이 제품을 준비해서', '가는 중이에요!'] },
-    completed: { title: ['직원에게 충분한 정보를 전달했어요!'], description: '착샷 촬영도 요청해보세요.' },
+    pending: { headline: ['직원이 제품을 준비해서', '가는 중이에요!'] },
+    completed: { headline: '직원에게 충분한 정보를 전달했어요!', subtext: '착샷 촬영도 요청해보세요.' },
     'purchase-completed': {
-      title: ['직원에게 구매 안내 요청을 보냈어요!'],
-      description: '가격과 관련 정보들을 곧 안내해 드릴게요!',
+      headline: '직원에게 구매 안내 요청을 보냈어요!',
+      subtext: '가격과 관련 정보들을 곧 안내해 드릴게요!',
     },
   }[status];
 
   return (
-    <StageCDetailShell className="items-center justify-center text-center">
-      <div className="flex w-full flex-col items-center gap-4">
-        <section aria-label="나이비스 AI 도슨트" className="h-48 w-full">
-          <DocentStage cue="idle" className="h-full w-full" />
-        </section>
-        <h1 className="text-[20px] font-semibold text-white">
-          {content.title.map((line) => (
-            <span key={line} className="block">
-              {line}
-            </span>
-          ))}
-        </h1>
-        {content.description && <p className="text-[14px] text-[#d1d1d1]">{content.description}</p>}
+    <div className="relative min-h-dvh w-full overflow-hidden bg-black">
+      <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-100.5 flex-col items-center px-6 pt-69.25 pb-16.25">
+        <DocentStage cue={status === 'pending' ? 'idle' : 'greet'} className="mx-auto aspect-345/216 w-[85.8%] max-w-86.25" />
+        <ScreenHeadline headline={content.headline} subtext={'subtext' in content ? content.subtext : undefined} variant="md" className="mt-1.75" />
+        {status === 'completed' && onPurchaseInquiry && onExitProduct && (
+          <div className="mt-auto flex w-full gap-2.5">
+            <PrimaryButton label="구매 문의" onClick={onPurchaseInquiry} className="h-11.5 flex-1" />
+            <SecondaryButton label="다른 제품 보기 →" onClick={onExitProduct} className="h-11.5 flex-1" />
+          </div>
+        )}
+        {status === 'purchase-completed' && onExitProduct && (
+          <SecondaryButton label="다른 제품 보기 →" onClick={onExitProduct} className="mt-auto" />
+        )}
       </div>
-      {status === 'completed' && onPurchaseInquiry && onExitProduct && (
-        <div className="mt-auto flex w-full flex-col gap-2.75">
-          <PrimaryButton label="구매 문의" onClick={onPurchaseInquiry} />
-          <SecondaryButton label="다른 제품 보기 →" onClick={onExitProduct} />
-        </div>
-      )}
-      {status === 'purchase-completed' && onExitProduct && (
-        <div className="mt-auto flex w-full flex-col gap-2.75">
-          <SecondaryButton label="다른 제품 보기 →" onClick={onExitProduct} />
-        </div>
-      )}
-    </StageCDetailShell>
+    </div>
   );
 }
 
-function FitShell({ children, kind, selection }: { children: ReactNode; kind: FitPageKind; selection: FitSelection }) {
+function FitShell({
+  children,
+  kind,
+  selection,
+  sku,
+}: {
+  children: ReactNode;
+  kind: FitPageKind;
+  selection: FitSelection;
+  sku: string;
+}) {
+  const navigate = useNavigate();
   const labels: Record<'size' | 'color' | 'try-on', string> = { size: '사이즈 · 용량', color: '컬러', 'try-on': '착장 요청' };
 
   return (
-    <StageCDetailShell>
-      <div className="w-fit rounded-full bg-white/10 px-4 py-1 text-[12px] text-[#d1d1d1]">
+    <div className="relative min-h-dvh w-full overflow-hidden bg-black">
+      <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
+
+      <img
+        src={selection.color.imageUrl}
+        alt={`${selection.color.label} 컬러 대표 이미지`}
+        className="relative h-125 w-full object-cover"
+      />
+
+      <span className="absolute left-[8.5%] top-[9%] w-fit rounded-[10px] border-[0.8px] border-[#424242] bg-[#d9d9d9]/20 px-3.75 py-1.25 text-[14px] text-white">
         {labels[kind as 'size' | 'color' | 'try-on']}
+      </span>
+      <CircleIconButton
+        icon={closeIcon}
+        ariaLabel="핏 정보 닫기"
+        onClick={() => navigate(stageCPath(STAGE_C_ROUTES.c3, sku))}
+        iconClassName="h-4 w-auto"
+        className="absolute right-[8.5%] top-[8%]"
+      />
+
+      <div className="relative z-10 mx-auto -mt-4 flex w-full max-w-100.5 flex-col gap-6 px-[7%] pb-8">
+        {children}
       </div>
-      <section aria-label="컬러 대표 이미지">
-        <img src={selection.color.imageUrl} alt={`${selection.color.label} 컬러 대표 이미지`} className="h-40 w-full rounded-[15px] object-cover" />
-      </section>
-      {children}
-    </StageCDetailShell>
+    </div>
   );
 }
 
@@ -349,9 +368,9 @@ function ColorOptions({
 
 function FitActionRow({ onExitProduct, onPrimaryAction }: { onExitProduct: () => void; onPrimaryAction: () => void }) {
   return (
-    <div className="mt-auto flex w-full flex-col gap-2.75">
-      <PrimaryButton label="착용 및 구매 문의" onClick={onPrimaryAction} />
-      <SecondaryButton label="다른 제품 보기 →" onClick={onExitProduct} />
+    <div className="mt-auto flex w-full gap-2.5">
+      <PrimaryButton label="착용 및 구매 문의" onClick={onPrimaryAction} className="h-11.5 flex-1" />
+      <SecondaryButton label="다른 제품 보기 →" onClick={onExitProduct} className="h-11.5 flex-1" />
     </div>
   );
 }
@@ -393,12 +412,13 @@ function hasPurchaseAfterMatchingTryOn(events: readonly SessionEvent[], sku: str
 function FitFallback({ path, text }: { path: string; text: string }) {
   const navigate = useNavigate();
   return (
-    <StageCDetailShell>
-      <GlassInfoCard>
-        <h1 className="text-[16px] font-semibold">이전 선택을 찾을 수 없어요.</h1>
-        <p className="mt-1 text-[13px] text-[#d1d1d1]">{text}</p>
+    <div className="relative flex min-h-dvh w-full flex-col items-center justify-center gap-4 overflow-hidden bg-black px-6 text-center">
+      <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      <div className="relative z-10 flex w-full max-w-100.5 flex-col items-center">
+        <h1 className="text-[18px] font-semibold text-white">이전 선택을 찾을 수 없어요.</h1>
+        <p className="mt-1 text-[14px] text-[#d1d1d1]">{text}</p>
         <SecondaryButton label="핏 · 취향으로 돌아가기" onClick={() => navigate(path)} className="mt-4" />
-      </GlassInfoCard>
-    </StageCDetailShell>
+      </div>
+    </div>
   );
 }

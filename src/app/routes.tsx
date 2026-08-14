@@ -58,9 +58,9 @@ export function AppRoutes() {
         <Route element={<StageCFitPage kind="purchase-completed" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.fitPurchaseInquiryCompleted} />
 
         {/* dev 원본 라우트 테이블과 동일하게, priceInquiry(request)/completed는 정적 상태 화면을 재사용한다 */}
-        <Route element={<StageCPurchaseStatusPage kind="price" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiry} />
+        <Route element={<StageCPurchaseStatusPage />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiry} />
         <Route element={<StageCPriceInquiryPage state="pending" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryPending} />
-        <Route element={<StageCPurchaseStatusPage kind="price" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryCompleted} />
+        <Route element={<StageCPurchaseStatusPage />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryCompleted} />
 
         {/* StageC의 제품 이탈 핸드오프 지점: 이 두 경로에 우리 화면을 매핑한다 */}
         <Route element={<StageD1Page />} path={STAGE_D1_HANDOFF_PATH} />

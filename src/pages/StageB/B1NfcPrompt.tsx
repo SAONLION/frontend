@@ -1,6 +1,5 @@
 import backgroundImage from '../../assets/images/stage-a-background.png';
-import emblemImage from '../../assets/images/mcm-emblem.png';
-import ImageFrame from '../../components/common/ImageFrame';
+import { DocentStage } from '../../components/domain/DocentStage';
 import ScreenHeadline from '../../components/common/ScreenHeadline';
 import PrimaryButton from '../../components/common/PrimaryButton';
 
@@ -22,11 +21,7 @@ export default function B1NfcPrompt({
     <div className="relative min-h-dvh w-full overflow-hidden bg-black">
       <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
       <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-100.5 flex-col items-center pt-69.25 pb-16.25">
-        <ImageFrame
-          src={emblemImage}
-          alt="MCM 엠블럼"
-          className="mx-auto aspect-345/216 w-[85.8%] max-w-86.25"
-        />
+        <DocentStage cue="idle" className="mx-auto aspect-345/216 w-[85.8%] max-w-86.25" />
         <ScreenHeadline headline={headline} subtext={subtext} variant="md" className="mt-1.75" />
         <PrimaryButton label={buttonLabel} onClick={onCallStaff} className="mt-auto w-[84.6%] max-w-85" />
       </div>
