@@ -37,6 +37,8 @@ export default function D21ProductLocationGuide({
           <ScreenHeadline headline={headline} onRevealComplete={() => setIsProductVisible(true)} reveal subtext={subtext} variant="md" className="stage-external-page__headline" />
           {isProductVisible && <InfoCard
             image={selectedProduct.image}
+            imageScale={1.25}
+            imageVariant="primary-cutout"
             name={selectedProduct.name}
             description={selectedProduct.description}
             className="stage-external-page__headline"

@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { useDocentReadyGate } from "../../features/docent/docentReadiness";
 import {
   motion,
   useReducedMotion,
@@ -11,7 +12,9 @@ import {
   forwardRef,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   type HTMLAttributes,
 } from "react";
@@ -61,6 +64,7 @@ interface KineticTextRevealProps extends Omit<
   onRevealStart?: () => void;
   /** Called after the last segment completes. */
   onRevealComplete?: () => void;
+  waitForDocent?: boolean;
 }
 
 interface Segment {
@@ -171,16 +175,30 @@ export const KineticTextReveal = forwardRef<
       delay = 0,
       onRevealStart,
       onRevealComplete,
+      waitForDocent = false,
       ...props
     },
     ref,
   ) => {
     const shouldReduceMotion = useReducedMotion();
+    const isDocentReady = useDocentReadyGate();
     const [run, setRun] = useState(0);
     const [visible, setVisible] = useState(false);
+    const previousText = useRef(text);
 
     const segments = useMemo(() => getSegments(text, splitBy), [text, splitBy]);
     const animatedTotal = segments.filter((segment) => segment.animated).length;
+
+    // 화면 간 Canvas를 유지할 때는 같은 리빌 인스턴스가 다음 문구를 받는다.
+    // 이때 이전 visible 상태가 한 프레임 남아 새 문구가 완성본으로 번쩍이지 않도록,
+    // 브라우저가 그리기 전에 반드시 hidden으로 되돌린다.
+    useLayoutEffect(() => {
+      if (previousText.current === text) return;
+
+      previousText.current = text;
+      setVisible(false);
+      setRun((current) => current + 1);
+    }, [text]);
 
     useImperativeHandle(ref, () => ({
       play: () => {
@@ -195,7 +213,7 @@ export const KineticTextReveal = forwardRef<
     }));
 
     useEffect(() => {
-      if (!autoPlay) return;
+      if (!autoPlay || (waitForDocent && !isDocentReady)) return;
 
       const timeout = window.setTimeout(() => {
         setRun((current) => current + 1);
@@ -204,7 +222,7 @@ export const KineticTextReveal = forwardRef<
       }, delay * 1000);
 
       return () => window.clearTimeout(timeout);
-    }, [autoPlay, delay, text, onRevealStart]);
+    }, [autoPlay, delay, isDocentReady, onRevealStart, text, waitForDocent]);
 
     const offset = getOffset(direction, distance);
 
@@ -244,6 +262,10 @@ export const KineticTextReveal = forwardRef<
         <span className="sr-only">{text}</span>
         {segments.map((segment, index) => {
           if (!segment.animated) {
+            if (segment.value.includes("\n")) {
+              return <span key={`${run}-${index}`} aria-hidden="true" className="basis-full h-0" />;
+            }
+
             return (
               <span key={`${run}-${index}`} aria-hidden="true">
                 {segment.value}

@@ -37,7 +37,7 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
   const { state } = useSession()
   const staffCallService = useStaffCallService()
   const pendingRequestRef = useRef<PendingStaffRequest | null>(null)
-  const [areActionsVisible, setAreActionsVisible] = useState(false)
+  const [revealedCompletedState, setRevealedCompletedState] = useState<boolean | null>(null)
   const exitProduct = useProductExit(sku)
   const returnPath = stageCPath(callType === 'info' ? STAGE_C_ROUTES.c2 : STAGE_C_ROUTES.c5, sku)
   const completedPath = stageCPath(callType === 'info' ? STAGE_C_PRODUCT_DETAIL_ROUTES.staffCompleted : STAGE_C_PRODUCT_DETAIL_ROUTES.otherStaffCompleted, sku)
@@ -101,12 +101,12 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
           <section aria-label="나이비스 AI 도슨트" className="stage-c-staff-call-docent">
             <DocentStage continuityKey={`staff-call-${callType}`} cue={completed ? 'success' : 'sending'} />
           </section>
-          <h1><KineticTextReveal autoPlay blur distance={16} onRevealComplete={() => setAreActionsVisible(true)} splitBy="characters" stagger={0.035} text={completed
+          <h1><KineticTextReveal autoPlay blur className="justify-center" distance={16} onRevealComplete={() => setRevealedCompletedState(completed)} splitBy="characters" stagger={0.035} text={completed
               ? '제가 직원분께 궁금해 하시는\n부분을 잘 전달했어요!'
-              : '더 자세히 설명드리기 위해\n직원에게 알림을 보내는 중이에요!'} /></h1>
+              : '더 자세히 설명드리기 위해\n직원에게 알림을 보내는 중이에요!'} waitForDocent /></h1>
         </div>
 
-        {completed && areActionsVisible && (
+        {completed && revealedCompletedState === completed && (
           <div className="stage-c-staff-call-actions" aria-label="직원 문의 후 액션">
             <Link className="stage-c-action-button" to={returnPath}>← 다른 정보 보기</Link>
             <div>
@@ -126,10 +126,10 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
       </header>
       <div className="stage-c-c5-staff-content">
         <section aria-label="나이비스 AI 도슨트" className="stage-c-c5-staff-docent"><DocentStage continuityKey={`staff-call-${callType}`} cue={completed ? 'success' : 'sending'} /></section>
-        <h1><KineticTextReveal autoPlay blur distance={16} onRevealComplete={() => setAreActionsVisible(true)} splitBy="characters" stagger={0.035} text={'직원에게 궁금한 사항에 대해\n문의 알림을 보냈어요!'} /></h1>
-        <p>더 자세한 상담을 받아보세요</p>
+        <h1><KineticTextReveal autoPlay blur className="justify-center" distance={16} onRevealComplete={() => setRevealedCompletedState(completed)} splitBy="characters" stagger={0.035} text={'직원에게 궁금한 사항에 대해\n문의 알림을 보냈어요!'} waitForDocent /></h1>
+        {revealedCompletedState === completed && <p><KineticTextReveal autoPlay blur={false} className="justify-center" distance={8} splitBy="words" stagger={0.1} text="더 자세한 상담을 받아보세요" waitForDocent /></p>}
       </div>
-      {areActionsVisible && <div className="stage-c-c5-response-actions">
+      {revealedCompletedState === completed && <div className="stage-c-c5-response-actions">
         <Link className="stage-c-action-button" to={returnPath}>다른 것도 물어보기</Link>
         <div>
           <Link className="stage-c-action-button" to={returnPath}>직원에게 문의하기</Link>

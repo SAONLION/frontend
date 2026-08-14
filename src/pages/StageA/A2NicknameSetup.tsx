@@ -27,7 +27,7 @@ export default function A2NicknameSetup({
     <main className="stage-entry-page">
       <form className="stage-entry-content stage-entry-content--nickname" onSubmit={submitNickname}>
         <div aria-hidden="true" className="stage-entry-docent stage-entry-docent--wide" />
-        <h1><KineticTextReveal autoPlay blur delay={0} distance={16} onRevealComplete={() => setIsFormVisible(true)} splitBy="characters" stagger={0.035} text={headline} /></h1>
+        <h1><KineticTextReveal autoPlay blur delay={0} distance={16} onRevealComplete={() => setIsFormVisible(true)} splitBy="characters" stagger={0.035} text={headline} waitForDocent /></h1>
         {isFormVisible && <TextInput
           ariaLabel="이름 또는 닉네임"
           className="stage-entry-nickname-input"

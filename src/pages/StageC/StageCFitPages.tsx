@@ -2,9 +2,10 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { DocentStage } from '../../components/domain/DocentStage'
 import { KineticTextReveal } from '../../components/ui/kinetic-text-reveal'
-import { GlassInfoCard, StageCDetailShell } from '../../components/domain/StageCDetailShell'
+import { StageCDetailShell } from '../../components/domain/StageCDetailShell'
+import { STAGE_A_ROUTES } from '../../constants/appRoutes'
 import { EVENT_NAMES, type SessionEvent } from '../../constants/events'
-import { STAGE_C_PRODUCT_DETAIL_ROUTES, STAGE_C_ROUTES, stageCPath } from '../../constants/stageC'
+import { STAGE_C_PRODUCT_DETAIL_ROUTES, stageCPath } from '../../constants/stageC'
 import { useProductExit } from '../../features/product-explore/useProductExit'
 import { useStageCProduct } from '../../features/product-explore/useStageCProduct'
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes'
@@ -22,19 +23,18 @@ export function StageCFitPage({ kind }: { kind: FitPageKind }) {
   const { sku = '' } = useParams()
   const location = useLocation()
   const product = useStageCProduct(sku)
-  const fitHubPath = stageCPath(STAGE_C_ROUTES.c3, sku)
 
   if (product === undefined) {
     return <StageCState title="제품 정보를 불러오는 중이에요" description="잠시만 기다려 주세요." />
   }
 
   if (!product) {
-    return <FitFallback path={fitHubPath} text="태그한 상품의 주소를 다시 확인해 주세요." />
+    return <FitFallback />
   }
 
   const selection = getFitSelection(product, new URLSearchParams(location.search))
   if (!selection) {
-    return <FitFallback path={fitHubPath} text="선택할 수 있는 기본 옵션을 찾을 수 없어요." />
+    return <FitFallback />
   }
 
   return <StageCFitContent kind={kind} product={product} selection={selection} sku={sku} />
@@ -130,11 +130,11 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
   }
 
   if ((kind === 'pending' || kind === 'completed') && !hasTryOnRequest) {
-    return <FitFallback path={fitSearchPath(paths.tryOn, selection)} text="착장 요청 정보를 찾을 수 없어요." />
+    return <FitFallback />
   }
 
   if (kind === 'purchase-completed' && !hasPurchaseInquiry) {
-    return <FitFallback path={fitSearchPath(paths.tryOn, selection)} text="구매 문의 정보를 찾을 수 없어요." />
+    return <FitFallback />
   }
 
   if (kind === 'size') {
@@ -189,7 +189,8 @@ function FitStatusScreen({
   onPurchaseInquiry?: () => void
   status: FitStatus
 }) {
-  const [areActionsVisible, setAreActionsVisible] = useState(false)
+  const [revealedStatus, setRevealedStatus] = useState<FitStatus | null>(null)
+  const [isDescriptionVisible, setIsDescriptionVisible] = useState(false)
   const content = {
     pending: { title: '직원이 제품을 준비해서\n가는 중이에요!' },
     completed: { title: '직원에게 충분한 정보를 전달했어요!', description: '착샷 촬영도 요청해보세요.' },
@@ -200,16 +201,16 @@ function FitStatusScreen({
     <StageCDetailShell className="stage-c-fit-status-shell">
       <div className="stage-c-fit-status-content">
         <section aria-label="나이비스 AI 도슨트" className="stage-c-fit-status-docent"><DocentStage continuityKey="fit-status" cue={status === 'pending' ? 'waiting' : 'success'} /></section>
-        <h1 className={status === 'pending' ? undefined : 'stage-c-fit-status-title--single-line'}><KineticTextReveal autoPlay blur distance={16} onRevealComplete={() => setAreActionsVisible(true)} splitBy="characters" stagger={0.035} text={content.title} /></h1>
-        {content.description && <p>{content.description}</p>}
+        <h1 className={status === 'pending' ? 'stage-c-fit-status-title--pending' : 'stage-c-fit-status-title--single-line'}><KineticTextReveal autoPlay blur className="justify-center" distance={16} onRevealComplete={() => { setIsDescriptionVisible(true); setRevealedStatus(status) }} splitBy="characters" stagger={0.035} text={content.title} waitForDocent /></h1>
+        {content.description && isDescriptionVisible && <p><KineticTextReveal autoPlay blur={false} className="justify-center" distance={8} splitBy="words" stagger={0.1} text={content.description} waitForDocent /></p>}
       </div>
-      {areActionsVisible && status === 'completed' && onPurchaseInquiry && onExitProduct && (
+      {revealedStatus === status && status === 'completed' && onPurchaseInquiry && onExitProduct && (
         <div className="stage-c-fit-status-actions">
           <button className="stage-c-action-button stage-c-action-button--primary" onClick={onPurchaseInquiry} type="button">구매 문의</button>
           <button className="stage-c-action-button" onClick={onExitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
         </div>
       )}
-      {areActionsVisible && status === 'purchase-completed' && onExitProduct && (
+      {revealedStatus === status && status === 'purchase-completed' && onExitProduct && (
         <div className="stage-c-fit-status-actions">
           <button className="stage-c-action-button" onClick={onExitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
         </div>
@@ -287,6 +288,18 @@ function hasMatchingTryOnRequest(events: readonly SessionEvent[], sku: string, s
   return events.some((event) => event.name === EVENT_NAMES.tryonRequest && event.sku === sku && event.size === selection.size.code && event.color === selection.color.code)
 }
 
-function FitFallback({ path, text }: { path: string; text: string }) {
-  return <StageCDetailShell><GlassInfoCard><h1>이전 선택을 찾을 수 없어요.</h1><p>{text}</p><Link className="stage-c-glass-link-button" to={path}>핏 · 취향으로 돌아가기</Link></GlassInfoCard></StageCDetailShell>
+function FitFallback() {
+  const [isDescriptionVisible, setIsDescriptionVisible] = useState(false)
+  const [isActionVisible, setIsActionVisible] = useState(false)
+
+  return (
+    <StageCDetailShell className="stage-c-fit-status-shell stage-c-fit-error-shell">
+      <div className="stage-c-fit-status-content">
+        <section aria-label="나이비스 AI 도슨트" className="stage-c-fit-status-docent"><DocentStage cue="apologize" /></section>
+        <h1><KineticTextReveal autoPlay blur className="justify-center" distance={16} onRevealComplete={() => setIsDescriptionVisible(true)} splitBy="characters" stagger={0.035} text="오류가 발생했어요" waitForDocent /></h1>
+        {isDescriptionVisible && <p><KineticTextReveal autoPlay blur={false} className="justify-center" distance={8} onRevealComplete={() => setIsActionVisible(true)} splitBy="words" stagger={0.1} text="이전 선택을 찾을 수 없어요" waitForDocent /></p>}
+      </div>
+      {isActionVisible && <div className="stage-c-fit-status-actions"><Link className="stage-c-action-button stage-c-action-button--primary" to={STAGE_A_ROUTES.intro}>메인으로</Link></div>}
+    </StageCDetailShell>
+  )
 }

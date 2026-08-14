@@ -3,6 +3,7 @@ import Card from './Card';
 interface InfoCardProps {
   image: string;
   imageVariant?: 'cover' | 'primary-cutout';
+  imageScale?: number;
   name: string;
   description: string | string[];
   variant?: 'product' | 'store';
@@ -13,6 +14,7 @@ interface InfoCardProps {
 export default function InfoCard({
   image,
   imageVariant = 'cover',
+  imageScale = 1.45,
   name,
   description,
   variant = 'product',
@@ -29,7 +31,7 @@ export default function InfoCard({
     >
       {imageVariant === 'primary-cutout' ? (
         <div className="size-13.75 shrink-0 overflow-hidden rounded-lg bg-white">
-          <img src={image} alt={name} className="size-full scale-[1.45] object-contain" />
+          <img alt={name} className="size-full object-contain" src={image} style={{ transform: `scale(${imageScale})` }} />
         </div>
       ) : (
         <img src={image} alt={name} className="size-13.75 shrink-0 rounded-lg object-cover" />

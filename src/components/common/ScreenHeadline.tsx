@@ -56,6 +56,8 @@ export default function ScreenHeadline({
                 splitBy="characters"
                 stagger={0.035}
                 text={line}
+                waitForDocent
+                className={align === 'center' ? 'justify-center' : undefined}
               />
             ) : line}
           </span>
@@ -63,7 +65,7 @@ export default function ScreenHeadline({
       </h1>
       {subtext && isSubtextVisible && (
         <p className={`font-medium text-[#d1d1d1] ${SUBTEXT_STYLES[variant]}`}>
-          {reveal ? <KineticTextReveal autoPlay blur={false} distance={8} splitBy="words" stagger={0.1} text={subtext} /> : subtext}
+          {reveal ? <KineticTextReveal autoPlay blur={false} distance={8} splitBy="words" stagger={0.1} text={subtext} waitForDocent /> : subtext}
         </p>
       )}
     </div>

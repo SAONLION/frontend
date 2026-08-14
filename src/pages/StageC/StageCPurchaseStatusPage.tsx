@@ -32,6 +32,7 @@ export function StageCPurchaseStatusPage({ kind }: { kind: PurchaseStatusKind })
   const content = STATUS_CONTENT[kind]
   const purchaseStartedRef = useRef(false)
   const [areActionsVisible, setAreActionsVisible] = useState(false)
+  const [isDescriptionVisible, setIsDescriptionVisible] = useState(false)
 
   if (product === undefined) {
     return <StageCState title="제품 정보를 불러오는 중이에요" description="잠시만 기다려 주세요." />
@@ -53,8 +54,8 @@ export function StageCPurchaseStatusPage({ kind }: { kind: PurchaseStatusKind })
     <StageCDetailShell className="stage-c-purchase-status-shell">
       <div className="stage-c-purchase-status-content">
         <section aria-label="나이비스 AI 도슨트" className="stage-c-purchase-status-docent"><DocentStage cue="present" /></section>
-        <h1 className={kind === 'price' ? 'stage-c-purchase-status-title--single-line' : undefined}><KineticTextReveal autoPlay blur distance={16} onRevealComplete={() => setAreActionsVisible(true)} splitBy="characters" stagger={0.035} text={content.title} /></h1>
-        {content.description && <p>{content.description}</p>}
+        <h1 className={kind === 'price' ? 'stage-c-purchase-status-title--single-line' : undefined}><KineticTextReveal autoPlay blur className="justify-center" distance={16} onRevealComplete={() => { setIsDescriptionVisible(true); setAreActionsVisible(true) }} splitBy="characters" stagger={0.035} text={content.title} waitForDocent /></h1>
+        {content.description && isDescriptionVisible && <p><KineticTextReveal autoPlay blur={false} className="justify-center" distance={8} splitBy="words" stagger={0.1} text={content.description} waitForDocent /></p>}
       </div>
       {areActionsVisible && <div className="stage-c-purchase-status-actions">
         {kind === 'stock' && (
