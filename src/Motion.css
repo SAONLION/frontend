@@ -1,0 +1,250 @@
+:root {
+  --motion-screen-enter: 520ms;
+  --motion-content-enter: 420ms;
+  --motion-feedback: 180ms;
+  --motion-sequence-step: 140ms;
+  --motion-ease-enter: cubic-bezier(.22, 1, .36, 1);
+  --motion-ease-feedback: cubic-bezier(.2, .8, .2, 1);
+}
+
+@keyframes service-screen-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes service-content-rise {
+  from { opacity: 0; transform: translateY(.75rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes service-media-settle {
+  from { opacity: 0; transform: translateY(.55rem) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes service-sheet-enter {
+  from { opacity: 0; transform: translateY(100%); }
+  65% { opacity: 1; }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes service-sheet-exit {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(100%); }
+}
+
+/* Backgrounds remain stable; visible page components reveal in reading order. */
+.screen-motion-shell {
+  animation: none;
+}
+
+.stage-entry-content > :not(.stage-entry-docent),
+.stage-c-page > :not(.stage-c-docent-layer),
+.stage-c-state-page > :not(.stage-c-docent-layer),
+.stage-external-page__content > :not(.stage-external-page__docent),
+.stage-f-page--center > :not(.stage-f-emblem),
+.stage-f-value-copy,
+.stage-f-bottom-actions {
+  animation: service-content-rise var(--motion-content-enter) var(--motion-ease-enter) both;
+}
+
+.stage-c-detail-shell > :not(.stage-c-product-detail-media),
+.stage-c-product-detail-summary,
+.stage-c-price-inquiry-content,
+.stage-c-price-inquiry-actions,
+.stage-c-purchase-status-content,
+.stage-c-purchase-status-actions {
+  animation: service-content-rise var(--motion-content-enter) var(--motion-ease-enter) both;
+}
+
+.stage-c-product-detail-media,
+.stage-c-gallery,
+.stage-c-glass-media-frame {
+  animation: service-media-settle var(--motion-content-enter) var(--motion-ease-enter) both;
+}
+
+.stage-c-product-media,
+.stage-external-page__media-stack,
+.stage-f-product-backdrop img,
+.stage-f-value-image,
+.stage-f-emblem {
+  animation: service-media-settle var(--motion-content-enter) var(--motion-ease-enter) both;
+}
+
+/* Stagger direct children from the top of each screen to its bottom actions. */
+.stage-entry-content > :nth-child(1),
+.stage-c-page > :nth-child(1),
+.stage-c-state-page > :nth-child(1),
+.stage-c-detail-shell > :nth-child(1),
+.stage-external-page__content > :nth-child(1),
+.stage-f-page--center > :nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.stage-entry-content > :nth-child(2),
+.stage-c-page > :nth-child(2),
+.stage-c-state-page > :nth-child(2),
+.stage-c-detail-shell > :nth-child(2),
+.stage-external-page__content > :nth-child(2),
+.stage-f-page--center > :nth-child(2) {
+  animation-delay: var(--motion-sequence-step);
+}
+
+.stage-entry-content > :nth-child(3),
+.stage-c-page > :nth-child(3),
+.stage-c-state-page > :nth-child(3),
+.stage-c-detail-shell > :nth-child(3),
+.stage-external-page__content > :nth-child(3),
+.stage-f-page--center > :nth-child(3) {
+  animation-delay: calc(var(--motion-sequence-step) * 2);
+}
+
+.stage-c-page > :nth-child(4),
+.stage-entry-content > :nth-child(4),
+.stage-c-detail-shell > :nth-child(4),
+.stage-external-page__content > :nth-child(4),
+.stage-f-page--center > :nth-child(4) {
+  animation-delay: calc(var(--motion-sequence-step) * 3);
+}
+
+.stage-c-detail-shell > :nth-child(5),
+.stage-entry-content > :nth-child(5),
+.stage-external-page__content > :nth-child(5),
+.stage-f-page--center > :nth-child(5) {
+  animation-delay: calc(var(--motion-sequence-step) * 4);
+}
+
+.stage-c-detail-shell > :nth-child(6),
+.stage-entry-content > :nth-child(6),
+.stage-external-page__content > :nth-child(6),
+.stage-f-page--center > :nth-child(6) {
+  animation-delay: calc(var(--motion-sequence-step) * 5);
+}
+
+.stage-c-product-detail-media:nth-child(2) .stage-c-gallery {
+  animation-delay: var(--motion-sequence-step);
+}
+
+/* A revealed action group keeps its own reading order; its controls never race each other. */
+.stage-entry-actions > *,
+.stage-external-page__actions > *,
+.stage-external-page__choice-grid > *,
+.stage-external-page__stack--recommendations > * {
+  animation: service-content-rise var(--motion-content-enter) var(--motion-ease-enter) both;
+}
+
+.stage-entry-actions > :nth-child(1),
+.stage-external-page__actions > :nth-child(1),
+.stage-external-page__choice-grid > :nth-child(1),
+.stage-external-page__stack--recommendations > :nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.stage-entry-actions > :nth-child(2),
+.stage-external-page__actions > :nth-child(2),
+.stage-external-page__choice-grid > :nth-child(2),
+.stage-external-page__stack--recommendations > :nth-child(2) {
+  animation-delay: var(--motion-sequence-step);
+}
+
+.stage-external-page__choice-grid > :nth-child(3),
+.stage-external-page__stack--recommendations > :nth-child(3) {
+  animation-delay: calc(var(--motion-sequence-step) * 2);
+}
+
+.stage-external-page__choice-grid > :nth-child(4) {
+  animation-delay: calc(var(--motion-sequence-step) * 3);
+}
+
+/* A control following a grid waits for every grid option in reading order. */
+.stage-external-page__actions:has(.stage-external-page__choice-grid) > :nth-child(2),
+.stage-external-page__stack:has(.stage-external-page__choice-grid) > :nth-child(2) {
+  animation: service-content-rise var(--motion-content-enter) var(--motion-ease-enter) both;
+  animation-delay: calc(var(--motion-sequence-step) * 4);
+}
+
+.stage-external-page__content:has(.stage-external-page__choice-grid) > .stage-external-page__actions {
+  animation-delay: calc(var(--motion-sequence-step) * 6);
+}
+
+/* A1 starts its greeting only when the persistent docent model is ready. */
+.stage-entry-content--intro > .stage-entry-headline {
+  animation-delay: 0ms;
+}
+
+.blocker-prompt,
+.stage-overlay .stage-external-page {
+  animation: service-sheet-enter 620ms var(--motion-ease-enter) both;
+  will-change: transform, opacity;
+}
+
+.stage-overlay .stage-external-page__content {
+  animation: service-content-rise var(--motion-content-enter) var(--motion-ease-enter) 90ms both;
+}
+
+.stage-overlay--closing {
+  pointer-events: none;
+}
+
+.stage-overlay--closing .stage-external-page {
+  animation: service-sheet-exit 420ms cubic-bezier(.4, 0, 1, 1) both;
+}
+
+.stage-overlay--closing .stage-external-page__content {
+  animation: none;
+}
+
+.screen-motion-shell button,
+.screen-motion-shell a,
+.stage-overlay button {
+  transition: transform var(--motion-feedback) var(--motion-ease-feedback), filter var(--motion-feedback) ease, background-color var(--motion-feedback) ease, border-color var(--motion-feedback) ease;
+}
+
+.screen-motion-shell button:not(:disabled):active,
+.screen-motion-shell a:active,
+.stage-overlay button:not(:disabled):active {
+  transform: translateY(.0625rem) scale(.985);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+
+  .screen-motion-shell,
+  .stage-entry-content > :not(.stage-entry-docent),
+  .stage-c-page > :not(.stage-c-docent-layer),
+  .stage-c-state-page > :not(.stage-c-docent-layer),
+  .stage-external-page__content > :not(.stage-external-page__docent),
+  .stage-f-page--center > :not(.stage-f-emblem),
+  .stage-f-value-copy,
+  .stage-f-bottom-actions,
+  .stage-c-detail-shell > :not(.stage-c-product-detail-media),
+  .stage-c-product-detail-summary,
+  .stage-c-price-inquiry-content,
+  .stage-c-price-inquiry-actions,
+  .stage-c-purchase-status-content,
+  .stage-c-purchase-status-actions,
+  .stage-c-product-detail-media,
+  .stage-c-gallery,
+  .stage-c-glass-media-frame,
+  .stage-c-product-media,
+  .stage-external-page__media-stack,
+  .stage-f-product-backdrop img,
+  .stage-f-value-image,
+  .stage-f-emblem,
+  .blocker-prompt,
+  .stage-overlay .stage-external-page,
+  .stage-overlay .stage-external-page__content {
+    animation: none;
+    will-change: auto;
+  }
+
+  .screen-motion-shell button,
+  .screen-motion-shell a,
+  .stage-overlay button {
+    transition: none;
+  }
+}

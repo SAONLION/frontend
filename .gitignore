@@ -14,6 +14,7 @@ dist-ssr
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+.claude/
 .idea
 .DS_Store
 *.suo
@@ -21,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local project context and experiments
+/AGENTS.md
+/docs/
+/ex/
+/tobackend/
+/u.glb
+/question_mark.glb
+/new_tobackend/
