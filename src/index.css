@@ -42,5 +42,11 @@ body,
 }
 
 body {
+  min-height: 100dvh;
   margin: 0;
+  background: #ffffff;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
 }
