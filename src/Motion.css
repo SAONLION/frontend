@@ -2,6 +2,7 @@
   --motion-screen-enter: 520ms;
   --motion-content-enter: 420ms;
   --motion-feedback: 180ms;
+  --motion-sequence-step: 140ms;
   --motion-ease-enter: cubic-bezier(.22, 1, .36, 1);
   --motion-ease-feedback: cubic-bezier(.2, .8, .2, 1);
 }
@@ -32,9 +33,9 @@
   to { opacity: 0; transform: translateY(100%); }
 }
 
-/* Every production route renders through AppLayout's stable motion contract. */
+/* Backgrounds remain stable; visible page components reveal in reading order. */
 .screen-motion-shell {
-  animation: service-screen-enter var(--motion-screen-enter) var(--motion-ease-enter) both;
+  animation: none;
 }
 
 .stage-entry-content > :not(.stage-entry-docent),
@@ -68,6 +69,107 @@
 .stage-f-value-image,
 .stage-f-emblem {
   animation: service-media-settle var(--motion-content-enter) var(--motion-ease-enter) both;
+}
+
+/* Stagger direct children from the top of each screen to its bottom actions. */
+.stage-entry-content > :nth-child(1),
+.stage-c-page > :nth-child(1),
+.stage-c-state-page > :nth-child(1),
+.stage-c-detail-shell > :nth-child(1),
+.stage-external-page__content > :nth-child(1),
+.stage-f-page--center > :nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.stage-entry-content > :nth-child(2),
+.stage-c-page > :nth-child(2),
+.stage-c-state-page > :nth-child(2),
+.stage-c-detail-shell > :nth-child(2),
+.stage-external-page__content > :nth-child(2),
+.stage-f-page--center > :nth-child(2) {
+  animation-delay: var(--motion-sequence-step);
+}
+
+.stage-entry-content > :nth-child(3),
+.stage-c-page > :nth-child(3),
+.stage-c-state-page > :nth-child(3),
+.stage-c-detail-shell > :nth-child(3),
+.stage-external-page__content > :nth-child(3),
+.stage-f-page--center > :nth-child(3) {
+  animation-delay: calc(var(--motion-sequence-step) * 2);
+}
+
+.stage-c-page > :nth-child(4),
+.stage-entry-content > :nth-child(4),
+.stage-c-detail-shell > :nth-child(4),
+.stage-external-page__content > :nth-child(4),
+.stage-f-page--center > :nth-child(4) {
+  animation-delay: calc(var(--motion-sequence-step) * 3);
+}
+
+.stage-c-detail-shell > :nth-child(5),
+.stage-entry-content > :nth-child(5),
+.stage-external-page__content > :nth-child(5),
+.stage-f-page--center > :nth-child(5) {
+  animation-delay: calc(var(--motion-sequence-step) * 4);
+}
+
+.stage-c-detail-shell > :nth-child(6),
+.stage-entry-content > :nth-child(6),
+.stage-external-page__content > :nth-child(6),
+.stage-f-page--center > :nth-child(6) {
+  animation-delay: calc(var(--motion-sequence-step) * 5);
+}
+
+.stage-c-product-detail-media:nth-child(2) .stage-c-gallery {
+  animation-delay: var(--motion-sequence-step);
+}
+
+/* A revealed action group keeps its own reading order; its controls never race each other. */
+.stage-entry-actions > *,
+.stage-external-page__actions > *,
+.stage-external-page__choice-grid > *,
+.stage-external-page__stack--recommendations > * {
+  animation: service-content-rise var(--motion-content-enter) var(--motion-ease-enter) both;
+}
+
+.stage-entry-actions > :nth-child(1),
+.stage-external-page__actions > :nth-child(1),
+.stage-external-page__choice-grid > :nth-child(1),
+.stage-external-page__stack--recommendations > :nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.stage-entry-actions > :nth-child(2),
+.stage-external-page__actions > :nth-child(2),
+.stage-external-page__choice-grid > :nth-child(2),
+.stage-external-page__stack--recommendations > :nth-child(2) {
+  animation-delay: var(--motion-sequence-step);
+}
+
+.stage-external-page__choice-grid > :nth-child(3),
+.stage-external-page__stack--recommendations > :nth-child(3) {
+  animation-delay: calc(var(--motion-sequence-step) * 2);
+}
+
+.stage-external-page__choice-grid > :nth-child(4) {
+  animation-delay: calc(var(--motion-sequence-step) * 3);
+}
+
+/* A control following a grid waits for every grid option in reading order. */
+.stage-external-page__actions:has(.stage-external-page__choice-grid) > :nth-child(2),
+.stage-external-page__stack:has(.stage-external-page__choice-grid) > :nth-child(2) {
+  animation: service-content-rise var(--motion-content-enter) var(--motion-ease-enter) both;
+  animation-delay: calc(var(--motion-sequence-step) * 4);
+}
+
+.stage-external-page__content:has(.stage-external-page__choice-grid) > .stage-external-page__actions {
+  animation-delay: calc(var(--motion-sequence-step) * 6);
+}
+
+/* A1 starts its greeting only when the persistent docent model is ready. */
+.stage-entry-content--intro > .stage-entry-headline {
+  animation-delay: 0ms;
 }
 
 .blocker-prompt,

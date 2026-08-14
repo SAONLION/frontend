@@ -106,14 +106,14 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
   }
 
   return (
-    <StageCDetailShell className="stage-c-product-detail-shell">
+    <StageCDetailShell className={`stage-c-product-detail-shell stage-c-product-detail-shell--${topic}`}>
       <header className="stage-c-product-detail-topbar">
         <span>{topicTitles[topic]}</span>
         <button aria-label="제품 이해 닫기" className="stage-c-close-control" onClick={() => navigate(productHubPath)} type="button">×</button>
       </header>
 
       <section className={`stage-c-product-detail-media stage-c-product-detail-media--${topic}`} aria-label={`${topicTitles[topic]} 안내 미디어`}>
-        {topic !== 'styling' && <img alt={product.name} src={product.imageUrl} />}
+        {topic !== 'styling' && <img alt={product.name} className="stage-c-primary-cutout" src={product.imageUrl} />}
         {topic === 'styling' && imageCount > 0 && (
           <div className="stage-c-gallery">
             <div
@@ -153,7 +153,7 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
             </div>
           </div>
         )}
-        {topic === 'styling' && imageCount === 0 && <img alt={product.name} src={product.imageUrl} />}
+        {topic === 'styling' && imageCount === 0 && <img alt={product.name} className="stage-c-primary-cutout" src={product.imageUrl} />}
       </section>
 
       <section className="stage-c-product-detail-summary">

@@ -1,6 +1,7 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { DocentStage } from '../../components/domain/DocentStage'
+import { KineticTextReveal } from '../../components/ui/kinetic-text-reveal'
 import { StageCDetailShell } from '../../components/domain/StageCDetailShell'
 import { STAGE_C_PRODUCT_DETAIL_ROUTES, stageCPath } from '../../constants/stageC'
 import { useProductExit } from '../../features/product-explore/useProductExit'
@@ -30,6 +31,8 @@ export function StageCPurchaseStatusPage({ kind }: { kind: PurchaseStatusKind })
   const exitProduct = useProductExit(sku)
   const content = STATUS_CONTENT[kind]
   const purchaseStartedRef = useRef(false)
+  const [areActionsVisible, setAreActionsVisible] = useState(false)
+  const [isDescriptionVisible, setIsDescriptionVisible] = useState(false)
 
   if (product === undefined) {
     return <StageCState title="제품 정보를 불러오는 중이에요" description="잠시만 기다려 주세요." />
@@ -51,17 +54,17 @@ export function StageCPurchaseStatusPage({ kind }: { kind: PurchaseStatusKind })
     <StageCDetailShell className="stage-c-purchase-status-shell">
       <div className="stage-c-purchase-status-content">
         <section aria-label="나이비스 AI 도슨트" className="stage-c-purchase-status-docent"><DocentStage cue="present" /></section>
-        <h1 className={kind === 'price' ? 'stage-c-purchase-status-title--single-line' : undefined}>{content.title}</h1>
-        {content.description && <p>{content.description}</p>}
+        <h1 className={kind === 'price' ? 'stage-c-purchase-status-title--single-line' : undefined}><KineticTextReveal autoPlay blur className="justify-center" distance={16} onRevealComplete={() => { setIsDescriptionVisible(true); setAreActionsVisible(true) }} splitBy="characters" stagger={0.035} text={content.title} waitForDocent /></h1>
+        {content.description && isDescriptionVisible && <p><KineticTextReveal autoPlay blur={false} className="justify-center" distance={8} splitBy="words" stagger={0.1} text={content.description} waitForDocent /></p>}
       </div>
-      <div className="stage-c-purchase-status-actions">
+      {areActionsVisible && <div className="stage-c-purchase-status-actions">
         {kind === 'stock' && (
           <button className="stage-c-action-button stage-c-action-button--primary" onClick={requestPurchase} type="button">
             구매 문의
           </button>
         )}
         <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
-      </div>
+      </div>}
     </StageCDetailShell>
   )
 }

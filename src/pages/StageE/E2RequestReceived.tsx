@@ -37,6 +37,7 @@ export default function E2RequestReceived({
         <ScreenHeadline
           headline={[`요청하신 ${requestSummary}에 대해`, '직원이 곧 안내드릴 예정이에요!']}
           subtext={subtext}
+          reveal
           variant="md"
           className="stage-external-page__headline"
         />

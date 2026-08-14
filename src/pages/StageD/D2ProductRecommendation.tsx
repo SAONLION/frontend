@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import backgroundImage from '../../assets/images/stage-a-background.png';
 import { DocentStage } from '../../components/domain/DocentStage';
 import ScreenHeadline from '../../components/common/ScreenHeadline';
@@ -40,6 +41,8 @@ export default function D2ProductRecommendation({
   onTagOtherProduct,
   onCallStaff,
 }: D2ProductRecommendationProps) {
+  const [isRecommendationVisible, setIsRecommendationVisible] = useState(false);
+
   return (
     <div className="stage-external-page">
       <img src={backgroundImage} alt="" className="stage-external-page__background" />
@@ -47,22 +50,24 @@ export default function D2ProductRecommendation({
         <section aria-label="나이비스 AI 도슨트" className="stage-external-page__docent stage-external-page__docent--recommendation">
           <DocentStage cue="present" />
         </section>
-        <ScreenHeadline headline={getHeadlineForPurpose(purpose)} variant="md" className="stage-external-page__headline" />
-        <div className="stage-external-page__stack stage-external-page__stack--recommendations">
+        <ScreenHeadline headline={getHeadlineForPurpose(purpose)} onRevealComplete={() => setIsRecommendationVisible(true)} reveal variant="md" className="stage-external-page__headline" />
+        {isRecommendationVisible && <div className="stage-external-page__stack stage-external-page__stack--recommendations">
           {products.map((product) => (
             <InfoCard
               key={product.id}
               image={product.image}
+              imageScale={1.25}
+              imageVariant="primary-cutout"
               name={product.name}
               description={product.description}
               onSelect={onSelectProduct ? () => onSelectProduct(product) : undefined}
             />
           ))}
-        </div>
-        <div className="stage-external-page__actions">
+        </div>}
+        {isRecommendationVisible && <div className="stage-external-page__actions">
           <SecondaryButton label={secondaryButtonLabel} onClick={onTagOtherProduct} />
           <PrimaryButton label={primaryButtonLabel} onClick={onCallStaff} />
-        </div>
+        </div>}
       </div>
     </div>
   );

@@ -25,6 +25,7 @@ export default function D1VisitPurpose({
   onCallStaff,
 }: D1VisitPurposeProps) {
   const [selectedPurpose, setSelectedPurpose] = useState<string | null>(null);
+  const [areActionsVisible, setAreActionsVisible] = useState(false);
 
   const handleSelect = (value: string) => {
     setSelectedPurpose(value);
@@ -36,8 +37,8 @@ export default function D1VisitPurpose({
       <img src={backgroundImage} alt="" className="stage-external-page__background" />
       <div className="stage-external-page__content stage-external-page__content--docent stage-external-page__content--d1">
         <DocentStage cue="listen" className="stage-external-page__docent" />
-        <ScreenHeadline headline={headline} subtext={subtext} variant="md" className="stage-external-page__headline" />
-        <div className="stage-external-page__actions">
+        <ScreenHeadline headline={headline} onRevealComplete={() => setAreActionsVisible(true)} reveal subtext={subtext} variant="md" className="stage-external-page__headline" />
+        {areActionsVisible && <div className="stage-external-page__actions">
           <div className="stage-external-page__choice-grid">
             {purposeOptions.map((option) => (
               <SecondaryButton
@@ -50,7 +51,7 @@ export default function D1VisitPurpose({
             ))}
           </div>
           <PrimaryButton label={buttonLabel} onClick={onCallStaff} />
-        </div>
+        </div>}
       </div>
     </div>
   );

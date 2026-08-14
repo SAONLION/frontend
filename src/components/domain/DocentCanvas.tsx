@@ -125,7 +125,7 @@ function applyStudioGoldMaterial(scene: THREE.Group) {
   }
 }
 
-function Model({ cue, continuityKey, reducedMotion }: { cue: DocentCue; continuityKey?: string; reducedMotion: boolean }) {
+function Model({ cue, continuityKey, reducedMotion, onReady }: { cue: DocentCue; continuityKey?: string; reducedMotion: boolean; onReady?: () => void }) {
   const { scene } = useGLTF(MODEL_URL)
   const group = useRef<THREE.Group>(null)
   const wings = useRef<THREE.Object3D[]>([])
@@ -140,6 +140,10 @@ function Model({ cue, continuityKey, reducedMotion }: { cue: DocentCue; continui
   const initialPoseApplied = useRef(false)
 
   useEffect(() => applyStudioGoldMaterial(scene), [scene])
+
+  useEffect(() => {
+    onReady?.()
+  }, [onReady])
 
   useLayoutEffect(() => {
     const foundWings = WING_NAMES.map((name) => scene.getObjectByName(name)).filter(
@@ -634,7 +638,7 @@ function smoothstep(progress: number) {
   return progress * progress * (3 - 2 * progress)
 }
 
-export default function DocentCanvas({ cue, continuityKey }: { cue: DocentCue; continuityKey?: string }) {
+export default function DocentCanvas({ cue, continuityKey, onReady }: { cue: DocentCue; continuityKey?: string; onReady?: () => void }) {
   const reducedMotion = useReducedMotionPreference()
 
   return (
@@ -645,7 +649,7 @@ export default function DocentCanvas({ cue, continuityKey }: { cue: DocentCue; c
         <pointLight color="#fff2c4" intensity={8} distance={5} position={[0, 1.4, 4]} />
         <StudioEnvironment />
       <CameraFraming cue={cue} />
-        <Model continuityKey={continuityKey} cue={cue} reducedMotion={reducedMotion} />
+        <Model continuityKey={continuityKey} cue={cue} onReady={onReady} reducedMotion={reducedMotion} />
       </Canvas>
     </>
   )

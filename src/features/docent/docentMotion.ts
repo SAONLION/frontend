@@ -61,6 +61,9 @@ export function writeDocentMotion(cue: DocentCue, elapsed: number, clockTime: nu
     case 'present':
       presentMotion(elapsed, output)
       return
+    case 'apologize':
+      apologizeMotion(clockTime, output)
+      return
     case 'idle':
       idleMotion(clockTime, output)
   }
@@ -236,6 +239,22 @@ function presentMotion(elapsed: number, output: DocentMotion) {
   output.leftWingLift = -gesture * 0.09
   output.rightWingBow = gesture * 0.065
   output.rightWingLift = gesture * 0.035
+}
+
+function apologizeMotion(time: number, output: DocentMotion) {
+  const breathe = Math.sin(time * 0.65) * 0.014
+  const settle = Math.sin(time * 0.3 + 0.5) * 0.012
+
+  // 오류 안내에서는 시선을 바닥으로 내리고 날개를 쉬게 해 과장 없이 미안함을 전달한다.
+  output.positionY += breathe - 0.035
+  output.positionZ = 0.045
+  output.rotationX = 0.17 + settle
+  output.rotationY = Math.sin(time * 0.24) * 0.018
+  output.rotationZ = -0.028 + Math.sin(time * 0.35) * 0.012
+  output.leftWingBow = -0.055 + Math.sin(time * 0.4) * 0.012
+  output.leftWingLift = 0.065
+  output.rightWingBow = -0.055 + Math.sin(time * 0.4) * 0.012
+  output.rightWingLift = -0.065
 }
 
 function oneShotProgress(elapsed: number, duration: number): number {

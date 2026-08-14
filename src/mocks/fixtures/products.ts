@@ -1,20 +1,19 @@
-import starkBackpackImage from '../../assets/mock/stark-visetos-backpack.jpg'
-import detail02 from '../../assets/mock/stark-visetos-detail-02.jpg'
-import detail03 from '../../assets/mock/stark-visetos-detail-03.jpg'
-import detail04 from '../../assets/mock/stark-visetos-detail-04.jpg'
-import blackImage from '../../assets/mock/fit-colors/stark-black.jpg'
-import beigeImage from '../../assets/mock/fit-colors/stark-beige.jpg'
-import cinnamonImage from '../../assets/mock/fit-colors/stark-cinnamon.jpg'
-import cognacImage from '../../assets/mock/fit-colors/stark-cognac.jpg'
-import softPinkImage from '../../assets/mock/fit-colors/stark-soft-pink.jpg'
-import whiteImage from '../../assets/mock/fit-colors/stark-white.jpg'
+import blackImage from '../../assets/mock/stark-primary/stark-black-primary.png'
+import beigeImage from '../../assets/mock/stark-primary/stark-beige-primary.png'
+import cinnamonImage from '../../assets/mock/stark-primary/stark-cinnamon-primary.png'
+import cognacImage from '../../assets/mock/stark-primary/stark-cognac-primary.png'
+import softPinkImage from '../../assets/mock/stark-primary/stark-soft-pink-primary.png'
+import whiteImage from '../../assets/mock/stark-primary/stark-white-primary.png'
+import detail02 from '../../assets/mock/stark-visetos-detail-02-new.jpg'
+import detail03 from '../../assets/mock/stark-visetos-detail-03-new.jpg'
+import detail04 from '../../assets/mock/stark-visetos-detail-04-new.jpg'
 import type { Product } from '../../types/product'
 
 export const mockProducts: readonly Product[] = [
   {
     sku: 'MMKEAVE15CO001',
     name: 'S Stark 사이드 스터드 비세토스 백팩',
-    imageUrl: starkBackpackImage,
+    imageUrl: cognacImage,
     dimensions: '약 13 × 26 × 33cm',
     detailImages: [detail02, detail03, detail04],
     productDetail: { craft: ['비세토스 모노그램 캔버스', '천연 나파 가죽 트림', '24K 도금 금속 장식 · 인조 나파 안감', '대한민국 제조'], heritage: ['비세토스 패턴과 제품 이야기는 직원에게 더 자세히 안내받을 수 있어요.'], styling: ['제품의 앞·옆·디테일 이미지를 가로로 살펴보세요.'] },
