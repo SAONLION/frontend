@@ -450,6 +450,12 @@
   background: transparent;
 }
 
+.stage-c-page:has(.stage-c-docent-layer),
+.stage-c-state-page:has(.stage-c-docent-layer),
+.stage-c-detail-shell:has(.stage-c-docent-layer) {
+  overflow: visible;
+}
+
 .stage-c-page::before {
   display: none;
 }
@@ -1087,12 +1093,14 @@
   position: absolute;
   inset: 0;
   z-index: 1;
+  overflow: visible;
   pointer-events: none;
 }
 
 .stage-c-docent-layer canvas {
   width: 100% !important;
   height: 100% !important;
+  overflow: visible;
   pointer-events: none;
 }
 

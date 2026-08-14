@@ -33,7 +33,7 @@ function PersistentEntryDocent() {
     : pathname === '/stage-a/nickname'
       ? 'listen'
       : pathname === '/stage-b/nfc'
-        ? 'guide'
+        ? 'nfc-guide'
         : 'scan'
 
   return (

@@ -2,7 +2,7 @@
   position: relative;
   width: 100%;
   min-height: 100dvh;
-  overflow: hidden;
+  overflow: visible;
   background:
     radial-gradient(ellipse at 50% 28%, rgb(139 85 23 / 44%) 0%, rgb(70 41 13 / 30%) 34%, transparent 66%),
     linear-gradient(160deg, #17110a 0%, #080604 58%, #120b04 100%);
@@ -74,6 +74,14 @@
   position: relative;
   width: min(85.8%, 21.5625rem);
   aspect-ratio: 345 / 216;
+}
+
+.stage-external-page__docent--recommendation {
+  width: min(64%, 15.5rem);
+}
+
+.stage-external-page__content--d2 .stage-external-page__headline {
+  margin-top: 0.875rem;
 }
 
 .stage-external-page__headline {
