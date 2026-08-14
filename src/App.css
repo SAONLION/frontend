@@ -28,6 +28,24 @@
   z-index: 0;
 }
 
+.app-shell > .cosmic-gold-dust {
+  position: fixed;
+  z-index: 1;
+}
+
+.cosmic-gold-dust {
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cosmic-gold-dust canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none;
+}
+
 .app-shell__content {
   position: relative;
   z-index: 1;
@@ -414,6 +432,10 @@
 @media (prefers-reduced-motion: reduce) {
   .ambient-bronze-background__glow {
     animation: none;
+  }
+
+  .cosmic-gold-dust {
+    display: none;
   }
 
   .stage-entry-circle-button {

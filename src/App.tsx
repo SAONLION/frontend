@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, useLocation } from 'react-router'
 import { AppRoutes } from './app/routes'
 import { SessionProvider } from './features/session/SessionProvider'
@@ -20,6 +21,11 @@ import './App.css'
 import './StageExternal.css'
 import './StageF.css'
 import './Motion.css'
+
+const CosmicGoldDust = lazy(async () => {
+  const module = await import('./components/common/CosmicGoldDust')
+  return { default: module.CosmicGoldDust }
+})
 
 function PersistentEntryDocent() {
   const { pathname } = useLocation()
@@ -48,6 +54,7 @@ function AppContent() {
     <div className="app-shell">
       <LiquidGlassFilterDefinitions />
       <AmbientBronzeBackground />
+      <Suspense fallback={null}><CosmicGoldDust /></Suspense>
       <div className="app-shell__content">
         <PersistentEntryDocent />
       <ProductContentProvider value={mockProductContentProvider}>

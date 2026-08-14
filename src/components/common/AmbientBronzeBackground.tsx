@@ -30,7 +30,7 @@ function createBronzeGlow(): BronzeGlowStyle {
   }
 }
 
-/** Decorative bronze light with a unique, softly shifting layout per visit. */
+/** Soft bronze light under the transparent Cosmic Dust particle field. */
 export function AmbientBronzeBackground() {
   const [glowStyles] = useState(() => Array.from({ length: glowCount }, createBronzeGlow))
 

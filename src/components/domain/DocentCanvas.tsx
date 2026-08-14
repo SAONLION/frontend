@@ -8,6 +8,7 @@ import type { DocentCue } from '../../features/docent/docentCue'
 
 const MODEL_URL = '/models/docent/u.glb'
 const QUESTION_MARK_URL = '/models/docent/question_mark.glb'
+const CHECKMARK_URL = '/models/docent/checkmark.glb'
 const WING_NAMES = ['joint1_L', 'joint1_R'] as const
 const QUESTION_MARK_BASE_ROTATION = -0.1 + Math.PI / 36
 const QUESTION_MARK_SCALE = 0.14 * (2 / 3)
@@ -265,9 +266,53 @@ function Model({ cue, continuityKey, reducedMotion }: { cue: DocentCue; continui
           <ListeningQuestion reducedMotion={reducedMotion} />
         </Suspense>
       ) : null}
-      {cue === 'nfc-guide' ? <NfcGuideSignal reducedMotion={reducedMotion} /> : null}
-      {cue === 'scan' ? <ProductScanSignal reducedMotion={reducedMotion} /> : null}
-      {cue === 'success' ? <SuccessSparkles reducedMotion={reducedMotion} /> : null}
+      {cue === 'scan' ? <ProductRecognitionHalo reducedMotion={reducedMotion} /> : null}
+      {cue === 'success' || cue === 'request-success' ? <SuccessSparkles reducedMotion={reducedMotion} /> : null}
+      {cue === 'request-success' ? <RequestCheckmark reducedMotion={reducedMotion} /> : null}
+    </group>
+  )
+}
+
+function RequestCheckmark({ reducedMotion }: { reducedMotion: boolean }) {
+  const { scene } = useGLTF(CHECKMARK_URL)
+  const mark = useRef<THREE.Group>(null)
+  const startedAt = useRef(performance.now())
+
+  useEffect(() => {
+    scene.traverse((object) => {
+      if (!(object instanceof THREE.Mesh)) return
+      const materials = Array.isArray(object.material) ? object.material : [object.material]
+
+      materials.forEach((material) => {
+        if (!(material instanceof THREE.MeshStandardMaterial)) return
+        material.color.set('#e7c16a')
+        material.emissive.set('#5b3a09')
+        material.emissiveIntensity = 0.16
+        material.metalness = Math.max(material.metalness, 0.68)
+        material.roughness = Math.min(material.roughness, 0.28)
+        material.needsUpdate = true
+      })
+    })
+  }, [scene])
+
+  useFrame(({ clock }) => {
+    const model = mark.current
+    if (!model) return
+
+    const elapsed = (performance.now() - startedAt.current) / 1000
+    const progress = reducedMotion ? 1 : Math.min(elapsed / 0.72, 1)
+    const spring = reducedMotion ? 0 : Math.sin(progress * Math.PI * 3) * (1 - progress) * 0.18
+    const scale = reducedMotion ? 0.1 : 0.08 + progress * 0.02
+
+    model.position.y = 2.35 + spring + Math.sin(clock.elapsedTime * 1.1) * (reducedMotion ? 0 : 0.018)
+    model.scale.setScalar(scale)
+  })
+
+  return (
+    <group ref={mark} position={[0.294, 2.35, 0.42]} scale={0.08}>
+      <Center>
+        <primitive object={scene} />
+      </Center>
     </group>
   )
 }
@@ -327,82 +372,27 @@ function SuccessSparkles({ reducedMotion }: { reducedMotion: boolean }) {
   )
 }
 
-function NfcGuideSignal({ reducedMotion }: { reducedMotion: boolean }) {
-  const group = useRef<THREE.Group>(null)
-  const materials = useRef<THREE.MeshBasicMaterial[]>([])
+function ProductRecognitionHalo({ reducedMotion }: { reducedMotion: boolean }) {
+  const halo = useRef<THREE.Group>(null)
+  const material = useRef<THREE.MeshBasicMaterial>(null)
 
   useFrame(({ clock }) => {
-    const signal = group.current
-    if (!signal) return
+    const group = halo.current
+    if (!group) return
 
-    const phase = reducedMotion ? 0.5 : (clock.elapsedTime % 2.2) / 2.2
-    signal.position.y = -0.28 + (reducedMotion ? 0 : Math.sin(clock.elapsedTime * 2.85) * 0.025)
-
-    signal.children.forEach((child, index) => {
-      const offset = (phase + index / signal.children.length) % 1
-      const scale = 0.72 + offset * 0.76
-      child.scale.setScalar(scale)
-      const material = materials.current[index]
-      if (material) material.opacity = reducedMotion ? 0.3 : (1 - offset) * 0.36
-    })
+    const breathe = reducedMotion ? 0.5 : (Math.sin(clock.elapsedTime * 0.58) + 1) / 2
+    const scale = 0.94 + breathe * 0.09
+    group.scale.set(scale, scale * 0.42, 1)
+    group.position.y = -1.18 + (reducedMotion ? 0 : breathe * 0.035)
+    if (material.current) material.current.opacity = reducedMotion ? 0.1 : 0.075 + breathe * 0.075
   })
 
   return (
-    <group ref={group} position={[0.98, -0.28, 0.45]} rotation={[0, 0, -0.36]}>
-      {[0, 1, 2].map((index) => (
-        <mesh key={index}>
-          <ringGeometry args={[0.33, 0.37, 48]} />
-          <meshBasicMaterial
-            ref={(material) => {
-              if (material) materials.current[index] = material
-            }}
-            color="#ffe3a0"
-            transparent
-            opacity={0.3}
-            depthWrite={false}
-          />
-        </mesh>
-      ))}
-    </group>
-  )
-}
-
-function ProductScanSignal({ reducedMotion }: { reducedMotion: boolean }) {
-  const group = useRef<THREE.Group>(null)
-  const materials = useRef<THREE.MeshBasicMaterial[]>([])
-
-  useFrame(({ clock }) => {
-    const signal = group.current
-    if (!signal) return
-
-    const phase = reducedMotion ? 0.35 : (clock.elapsedTime % 1.9) / 1.9
-    signal.position.y = -0.16 + (reducedMotion ? 0 : phase * 0.36)
-
-    signal.children.forEach((child, index) => {
-      const offset = (phase + index / signal.children.length) % 1
-      const scale = 0.85 + offset * 1.15
-      child.scale.set(scale, scale * 0.7, 1)
-      const material = materials.current[index]
-      if (material) material.opacity = reducedMotion ? 0.24 : (1 - offset) * 0.42
-    })
-  })
-
-  return (
-    <group ref={group} position={[0, -0.16, 1.35]}>
-      {[0, 1, 2].map((index) => (
-        <mesh key={index}>
-          <ringGeometry args={[0.62, 0.66, 64]} />
-          <meshBasicMaterial
-            ref={(material) => {
-              if (material) materials.current[index] = material
-            }}
-            color="#f5c862"
-            transparent
-            opacity={0.34}
-            depthWrite={false}
-          />
-        </mesh>
-      ))}
+    <group ref={halo} position={[0, -1.18, 0.7]}>
+      <mesh>
+        <ringGeometry args={[1.14, 1.17, 96]} />
+        <meshBasicMaterial ref={material} color="#f2d68a" transparent opacity={0.12} depthWrite={false} />
+      </mesh>
     </group>
   )
 }
@@ -662,3 +652,4 @@ export default function DocentCanvas({ cue, continuityKey }: { cue: DocentCue; c
 }
 
 useGLTF.preload(MODEL_URL)
+useGLTF.preload(CHECKMARK_URL)
