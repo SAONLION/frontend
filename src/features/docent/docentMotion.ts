@@ -17,6 +17,7 @@ const oneShotDurations: Partial<Record<DocentCue, number>> = {
   greet: 2.5,
   present: 1.45,
   success: 1.5,
+  'request-success': 1.65,
 }
 
 export function getDocentCueDuration(cue: DocentCue): number | null {
@@ -52,6 +53,9 @@ export function writeDocentMotion(cue: DocentCue, elapsed: number, clockTime: nu
       waitingMotion(elapsed, output)
       return
     case 'success':
+      successMotion(elapsed, output)
+      return
+    case 'request-success':
       successMotion(elapsed, output)
       return
     case 'present':
@@ -161,21 +165,20 @@ function guideMotion(time: number, output: DocentMotion) {
 }
 
 function scanMotion(time: number, output: DocentMotion) {
-  const local = time % 3.8
-  const scanSweep = Math.sin((local / 3.8) * Math.PI * 2)
-  const pulse = local < 0.92 ? Math.sin((local / 0.92) * Math.PI) : 0
-  const confirm = local > 2.72 ? Math.sin(((local - 2.72) / 1.08) * Math.PI) : 0
+  const local = time % 5.4
+  const observe = Math.sin((local / 5.4) * Math.PI * 2)
+  const acknowledge = local > 4.15 ? Math.sin(((local - 4.15) / 1.25) * Math.PI) : 0
 
-  // B2는 짧게 좌우로 살핀 후, 한 번 끄덕여 인식 진행 상태를 전달한다.
-  output.positionX = scanSweep * 0.07
-  output.positionZ = -pulse * 0.085
-  output.rotationX = pulse * 0.07 - confirm * 0.1
-  output.rotationY = scanSweep * 0.13
-  output.rotationZ = scanSweep * 0.026
-  output.leftWingBow = pulse * 0.09 + confirm * 0.06
-  output.leftWingLift = -pulse * 0.15
-  output.rightWingBow = pulse * 0.09 + confirm * 0.06
-  output.rightWingLift = pulse * 0.15
+  // B2는 진동하는 로딩 대신, 제품을 차분히 살핀 뒤 미세하게 확인하는 동작만 남긴다.
+  output.positionX = observe * 0.035
+  output.positionY += acknowledge * 0.028
+  output.rotationX = -acknowledge * 0.045
+  output.rotationY = observe * 0.065
+  output.rotationZ = observe * 0.012
+  output.leftWingBow = acknowledge * 0.045
+  output.leftWingLift = -acknowledge * 0.03
+  output.rightWingBow = acknowledge * 0.045
+  output.rightWingLift = acknowledge * 0.03
 }
 
 function sendingMotion(time: number, output: DocentMotion) {

@@ -1,1 +1,1 @@
-export type DocentCue = 'idle' | 'greet' | 'listen' | 'nfc-guide' | 'guide' | 'scan' | 'sending' | 'waiting' | 'success' | 'present'
+export type DocentCue = 'idle' | 'greet' | 'listen' | 'nfc-guide' | 'guide' | 'scan' | 'sending' | 'waiting' | 'success' | 'request-success' | 'present'

@@ -32,7 +32,7 @@ export default function E2RequestReceived({
       />
       <div className="stage-external-page__content stage-external-page__content--docent stage-external-page__content--e2">
         <section aria-label="나이비스 AI 도슨트" className="stage-external-page__docent stage-external-page__docent--entry">
-          <DocentStage cue="success" />
+          <DocentStage cue="request-success" />
         </section>
         <ScreenHeadline
           headline={[`요청하신 ${requestSummary}에 대해`, '직원이 곧 안내드릴 예정이에요!']}
