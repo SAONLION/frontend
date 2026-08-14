@@ -1,29 +1,18 @@
-type TextInputProps = {
-  ariaLabel?: string
-  className?: string
-  maxLength?: number
-  onChange: (value: string) => void
-  placeholder: string
-  value: string
+interface TextInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  className?: string;
 }
 
-export default function TextInput({
-  ariaLabel = '텍스트 입력',
-  className = '',
-  maxLength,
-  onChange,
-  placeholder,
-  value,
-}: TextInputProps) {
+export default function TextInput({ value, onChange, placeholder, className = '' }: TextInputProps) {
   return (
     <input
-      aria-label={ariaLabel}
-      className={`stage-entry-text-input ${className}`.trim()}
-      maxLength={maxLength}
-      onChange={(event) => onChange(event.target.value)}
-      placeholder={placeholder}
       type="text"
       value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className={`h-[46px] rounded-xl bg-[rgba(217,217,217,0.38)] pl-[19px] text-[14px] font-medium leading-[1.5] text-white outline-none placeholder:text-[#d4d4d4] ${className}`}
     />
-  )
+  );
 }

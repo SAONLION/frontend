@@ -13,3 +13,17 @@ export const STAGE_B_ROUTES = {
 export function stageBRecognizingPath(sku: string): string {
   return `${STAGE_B_ROUTES.recognizing}?sku=${encodeURIComponent(sku)}`
 }
+
+export const STAGE_D_ROUTES = {
+  recommend: '/stage-d/recommend',
+  locationGuide: '/stage-d/location-guide',
+} as const
+
+export const STAGE_G_ROUTES = {
+  content: '/stage-g/content',
+  interestFollowup: '/stage-g/interest-followup',
+  email: '/stage-g/email',
+  complete: '/stage-g/complete',
+} as const
+
+export const SESSION_END_ROUTE = '/session-end'

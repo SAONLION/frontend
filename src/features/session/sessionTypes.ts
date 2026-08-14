@@ -16,7 +16,13 @@ export const SESSION_ACTIONS = {
   setCurrentSku: 'set_current_sku',
   setNickname: 'set_nickname',
   recordTabView: 'record_tab_view', recordSaCall: 'record_sa_call',
+  setVisitPurpose: 'set_visit_purpose',
+  incrementLoopCount: 'increment_loop_count',
+  markStageGShown: 'mark_stage_g_shown',
+  setActiveOverlay: 'set_active_overlay',
 } as const
+
+export type ActiveOverlay = 'E' | 'F' | null
 
 export type SessionState = {
   currentSku: string | null
@@ -26,6 +32,10 @@ export type SessionState = {
   freeQueryContexts: Readonly<Record<string, { sku: string }>>
   aiAnswerContexts: Readonly<Record<string, { queryId: string; sku: string }>>
   intentScore: number
+  visitPurpose: string | null
+  loopCount: number
+  hasShownStageG: boolean
+  activeOverlay: ActiveOverlay
 }
 
 export type SessionAction =
@@ -44,3 +54,7 @@ export type SessionAction =
   | { type: typeof SESSION_ACTIONS.setNickname; nickname: string }
   | { type: typeof SESSION_ACTIONS.recordTabView; topic: 'craft' | 'heritage' | 'styling'; sku: string }
   | { type: typeof SESSION_ACTIONS.recordSaCall; sku: string; callType: StaffCallType; queryId?: string }
+  | { type: typeof SESSION_ACTIONS.setVisitPurpose; visitPurpose: string }
+  | { type: typeof SESSION_ACTIONS.incrementLoopCount }
+  | { type: typeof SESSION_ACTIONS.markStageGShown }
+  | { type: typeof SESSION_ACTIONS.setActiveOverlay; overlay: ActiveOverlay }

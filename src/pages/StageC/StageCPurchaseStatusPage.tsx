@@ -1,53 +1,40 @@
-import { useNavigate, useParams } from 'react-router'
-import { DocentStage } from '../../components/domain/DocentStage'
-import { StageCDetailShell } from '../../components/domain/StageCDetailShell'
-import { STAGE_C_PRODUCT_DETAIL_ROUTES, stageCPath } from '../../constants/stageC'
-import { useProductExit } from '../../features/product-explore/useProductExit'
-import { useStageCProduct } from '../../features/product-explore/useStageCProduct'
-import { StageCState } from './StageCHubPage'
+import { useParams } from 'react-router';
+import backgroundImage from '../../assets/images/stage-a-background.png';
+import { DocentStage } from '../../components/domain/DocentStage';
+import ScreenHeadline from '../../components/common/ScreenHeadline';
+import SecondaryButton from '../../components/common/SecondaryButton';
+import { useProductExit } from '../../features/product-explore/useProductExit';
+import { useStageCProduct } from '../../features/product-explore/useStageCProduct';
+import { StageCState } from './StageCHubPage';
 
-type PurchaseStatusKind = 'price' | 'stock'
-
-const STATUS_CONTENT: Record<PurchaseStatusKind, { title: string; description?: string }> = {
-  price: {
-    title: '직원에게 구매 안내 요청을 보냈어요!',
-    description: '가격과 관련 정보들을 곧 안내해 드릴게요!',
-  },
-  stock: {
-    title: '직원에게 해당 제품의 재고를 문의하고,\n다른 제품들을 추천받아보세요!',
-  },
-}
-
-export function StageCPurchaseStatusPage({ kind }: { kind: PurchaseStatusKind }) {
-  const { sku = '' } = useParams()
-  const navigate = useNavigate()
-  const product = useStageCProduct(sku)
-  const exitProduct = useProductExit(sku)
-  const content = STATUS_CONTENT[kind]
+// dev 원본은 'price' | 'stock' 두 kind였지만, 'stock'은 재고확인 F 오버레이로
+// 대체되어 이 화면은 이제 'price' 한 가지 문구만 보여준다.
+export default function StageCPurchaseStatusPage() {
+  const { sku = '' } = useParams();
+  const product = useStageCProduct(sku);
+  const exitProduct = useProductExit(sku);
 
   if (product === undefined) {
-    return <StageCState title="제품 정보를 불러오는 중이에요" description="잠시만 기다려 주세요." />
+    return <StageCState title="제품 정보를 불러오는 중이에요" description="잠시만 기다려 주세요." />;
   }
 
   if (product === null) {
-    return <StageCState title="상품을 찾을 수 없어요" description="태그한 상품의 주소를 다시 확인해 주세요." />
+    return <StageCState title="상품을 찾을 수 없어요" description="태그한 상품의 주소를 다시 확인해 주세요." />;
   }
 
   return (
-    <StageCDetailShell className="stage-c-purchase-status-shell">
-      <div className="stage-c-purchase-status-content">
-        <section aria-label="나이비스 AI 도슨트" className="stage-c-purchase-status-docent"><DocentStage cue="idle" /></section>
-        <h1 className={kind === 'price' ? 'stage-c-purchase-status-title--single-line' : undefined}>{content.title}</h1>
-        {content.description && <p>{content.description}</p>}
+    <div className="relative min-h-dvh w-full overflow-hidden bg-black">
+      <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-100.5 flex-col items-center px-6 pt-69.25 pb-16.25">
+        <DocentStage cue="greet" className="mx-auto aspect-345/216 w-[85.8%] max-w-86.25" />
+        <ScreenHeadline
+          headline="직원에게 구매 안내 요청을 보냈어요!"
+          subtext="가격과 관련 정보들을 곧 안내해 드릴게요!"
+          variant="md"
+          className="mt-1.75"
+        />
+        <SecondaryButton label="다른 제품 보기 →" onClick={exitProduct} className="mt-auto" />
       </div>
-      <div className="stage-c-purchase-status-actions">
-        {kind === 'stock' && (
-          <button className="stage-c-action-button stage-c-action-button--primary" onClick={() => navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiry, sku))} type="button">
-            구매 문의
-          </button>
-        )}
-        <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
-      </div>
-    </StageCDetailShell>
-  )
+    </div>
+  );
 }
