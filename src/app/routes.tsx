@@ -6,16 +6,16 @@ import { StageAIntroPage, StageANicknamePage } from '../pages/StageA/StageAFlowP
 import { StageBNfcPromptPage, StageBRecognizingPage } from '../pages/StageB/StageBFlowPages';
 import { StageD1Page, StageD2Page, StageD21Page } from '../pages/StageD/StageDFlowPages';
 import { StageG1Page, StageG2Page, StageG3Page, StageG4Page } from '../pages/StageG/StageGFlowPages';
-import StageCHubPage from '../pages/StageC/StageCHubPage';
-import StageCProductDetailPage from '../pages/StageC/StageCProductDetailPage';
+import { StageCHubPage } from '../pages/StageC/StageCHubPage';
+import { StageCProductDetailPage } from '../pages/StageC/StageCProductDetailPage';
 import { StageCFitPage } from '../pages/StageC/StageCFitPages';
-import StageCPriceInquiryPage from '../pages/StageC/StageCPriceInquiryPage';
-import StageCPurchaseStatusPage from '../pages/StageC/StageCPurchaseStatusPage';
-import StageCOtherPage from '../pages/StageC/StageCOtherPage';
-import StageCAiAnswerPage from '../pages/StageC/StageCAiAnswerPage';
-import StaffCallPage from '../pages/StageC/StaffCallPage';
-import ComingSoonPage from '../pages/StageC/ComingSoonPage';
-import { StageCStaffCallTriggerPage, StageCStockOverlayTriggerPage } from '../pages/StageC/StageCOverlayTriggers';
+import { StageCPriceInquiryPage } from '../pages/StageC/StageCPriceInquiryPage';
+import { StageCPurchaseStatusPage } from '../pages/StageC/StageCPurchaseStatusPage';
+import { StageCOtherPage } from '../pages/StageC/StageCOtherPage';
+import { StageCAiAnswerPage } from '../pages/StageC/StageCAiAnswerPage';
+import { StaffCallPage } from '../pages/StageC/StaffCallPage';
+import { ComingSoonPage } from '../pages/StageC/ComingSoonPage';
+import { StageCStaffCallTriggerPage } from '../pages/StageC/StageCOverlayTriggers';
 import SessionEndPage from '../pages/SessionEndPage';
 import NotFoundPage from '../pages/NotFoundPage';
 
@@ -58,15 +58,15 @@ export function AppRoutes() {
         <Route element={<StageCFitPage kind="purchase-completed" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.fitPurchaseInquiryCompleted} />
 
         {/* dev 원본 라우트 테이블과 동일하게, priceInquiry(request)/completed는 정적 상태 화면을 재사용한다 */}
-        <Route element={<StageCPurchaseStatusPage />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiry} />
+        <Route element={<StageCPurchaseStatusPage kind="price" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiry} />
         <Route element={<StageCPriceInquiryPage state="pending" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryPending} />
-        <Route element={<StageCPurchaseStatusPage />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryCompleted} />
+        <Route element={<StageCPurchaseStatusPage kind="price" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryCompleted} />
 
         {/* StageC의 제품 이탈 핸드오프 지점: 이 두 경로에 우리 화면을 매핑한다 */}
         <Route element={<StageD1Page />} path={STAGE_D1_HANDOFF_PATH} />
         <Route element={<StageCStaffCallTriggerPage />} path={STAGE_E1_HANDOFF_PATH} />
         {/* StageC 허브 "이 매장 재고 확인" 메뉴 핸드오프: F 오버레이로 교체 */}
-        <Route element={<StageCStockOverlayTriggerPage />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.stockInquiry} />
+        <Route element={<StageCPurchaseStatusPage kind="stock" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.stockInquiry} />
 
         <Route element={<StageD2Page />} path={STAGE_D_ROUTES.recommend} />
         <Route element={<StageD21Page />} path={STAGE_D_ROUTES.locationGuide} />

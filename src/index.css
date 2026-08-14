@@ -50,3 +50,49 @@ body {
 button {
   -webkit-tap-highlight-color: transparent;
 }
+
+@layer components {
+  .stage-entry-page, .stage-c-shell { @apply relative min-h-dvh w-full overflow-hidden bg-black text-white; }
+  .stage-entry-page { @apply flex items-center justify-center px-6; background: radial-gradient(circle at 50% 20%, #4a2a10, #050403 62%); }
+  .stage-entry-content { @apply flex min-h-dvh w-full max-w-100.5 flex-col items-center justify-center py-12; }
+  .stage-entry-content--nickname { @apply items-stretch; }
+  .stage-entry-docent { @apply pointer-events-none aspect-345/216 w-[85.8%] max-w-86.25; }
+  .stage-entry-headline { @apply mt-5 text-center; }
+  .stage-entry-headline--left { @apply text-left; }
+  .stage-entry-headline h1 { @apply text-[25px] font-semibold leading-tight; }
+  .stage-entry-headline h1 span { @apply block; }
+  .stage-entry-headline p { @apply mt-1 text-[16px] text-[#d1d1d1]; }
+  .stage-entry-text-input { @apply h-12 w-full rounded-xl bg-white/20 px-5 text-white outline-none placeholder:text-white/60; }
+  .stage-entry-actions { @apply mt-auto flex w-full flex-col gap-3; }
+  .stage-entry-primary-button, .stage-c-action-button, .stage-c-choice-button, .stage-c-send-button { @apply flex min-h-12 w-full items-center justify-center rounded-full bg-white/15 px-4 text-center text-[16px] font-medium text-white transition hover:bg-white/25; }
+  .stage-c-action-button--primary, .stage-c-send-button { @apply bg-[#8a5111] hover:bg-[#a96823]; }
+  .stage-entry-circle-button { @apply flex size-12 items-center justify-center self-center rounded-full bg-[#8a5111] disabled:cursor-not-allowed disabled:opacity-40; }
+  .stage-entry-circle-button img { @apply size-4; }
+  .stage-c-shell { @apply mx-auto max-w-100.5 px-6; background: radial-gradient(circle at 50% 0%, #4a2a10, #050403 58%); }
+  .stage-c-page, .stage-c-detail-shell { @apply flex min-h-dvh flex-col py-8; }
+  .stage-c-product-context-pill { @apply self-start rounded-lg border border-white/20 bg-white/10 px-3 py-1 text-sm; }
+  .stage-c-product-media { @apply flex h-64 items-center justify-center; }
+  .stage-c-product-media img { @apply h-full max-w-full object-contain; }
+  .stage-c-hub-content { @apply flex flex-col gap-4; }
+  .stage-c-hub-content h1, .stage-c-state-page h1 { @apply text-[24px] font-semibold leading-tight; }
+  .stage-c-heading--intro span { @apply block; }
+  .stage-c-intro { @apply text-sm text-[#d1d1d1]; }
+  .stage-c-choice-list { @apply flex flex-col gap-3; }
+  .stage-c-choice-button--muted { @apply text-white/60; }
+  .stage-c-bottom-action-bar, .stage-c-fit-status-actions, .stage-c-purchase-status-actions, .stage-c-staff-call-actions { @apply mt-auto flex gap-3 pt-6; }
+  .stage-c-bottom-action-bar > *, .stage-c-fit-status-actions > *, .stage-c-purchase-status-actions > * { @apply flex-1; }
+  .stage-c-state-page { @apply flex min-h-dvh flex-col items-center justify-center text-center; }
+  .stage-c-detail-shell { @apply gap-4; }
+  .stage-c-glass-topbar, .stage-c-glass-action-dock { @apply flex items-center justify-between rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur; }
+  .stage-c-glass-card, .stage-c-glass-speech, .stage-c-glass-media-frame { @apply rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur; }
+  .stage-c-glass-media-frame { @apply min-h-48; }
+  .stage-c-glass-link-button { @apply rounded-full bg-white/10 px-4 py-2 text-sm text-white; }
+  .stage-c-docent-layer { @apply h-52 w-full; }
+  .stage-c-docent-layer canvas { @apply size-full; }
+  .stage-c-docent-fallback { @apply flex h-full items-center justify-center text-center text-sm text-[#d1d1d1]; }
+  .stage-c-other-card, .stage-c-product-detail-summary, .stage-c-fit-reference-options { @apply rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur; }
+  .stage-c-query-form { @apply flex flex-col gap-3; }
+  .stage-c-query-form textarea { @apply min-h-28 rounded-xl bg-black/20 p-3 text-white outline-none placeholder:text-white/60; }
+  .stage-c-quick-chips { @apply flex flex-wrap gap-2; }
+  .stage-c-quick-chips button { @apply rounded-full bg-white/10 px-3 py-2 text-sm; }
+}
