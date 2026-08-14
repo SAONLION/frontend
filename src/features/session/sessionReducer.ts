@@ -10,6 +10,10 @@ export const initialSessionState: SessionState = {
   freeQueryContexts: {},
   aiAnswerContexts: {},
   intentScore: 0,
+  visitPurpose: null,
+  loopCount: 1,
+  hasShownStageG: false,
+  activeOverlay: null,
 }
 
 function createEventId(): string {
@@ -134,5 +138,13 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
       }
       return { ...state, events: [...state.events, { id, name: EVENT_NAMES.saCall, type: action.callType, sku: action.sku, createdAt }] }
     }
+    case SESSION_ACTIONS.setVisitPurpose:
+      return { ...state, visitPurpose: action.visitPurpose }
+    case SESSION_ACTIONS.incrementLoopCount:
+      return { ...state, loopCount: state.loopCount + 1 }
+    case SESSION_ACTIONS.markStageGShown:
+      return { ...state, hasShownStageG: true }
+    case SESSION_ACTIONS.setActiveOverlay:
+      return { ...state, activeOverlay: action.overlay }
   }
 }

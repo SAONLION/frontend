@@ -1,142 +1,159 @@
-import { useEffect, useRef } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
-import { DocentStage } from '../../components/domain/DocentStage'
-import {
-  GlassInfoCard,
-  StageCDetailShell,
-} from '../../components/domain/StageCDetailShell'
-import { EVENT_NAMES } from '../../constants/events'
-import type { StaffCallType } from '../../constants/events'
-import {
-  STAGE_C_PRODUCT_DETAIL_ROUTES,
-  STAGE_C_ROUTES,
-  stageCPath,
-} from '../../constants/stageC'
-import { useProductExit } from '../../features/product-explore/useProductExit'
-import { findLatestFreeQueryForSku, hasOtherStaffCallForQuery } from '../../features/session/freeQueryContext'
-import { useStaffCallService } from '../../features/sa-call/useStaffCallService'
-import { useSession } from '../../features/session/useSession'
+import { useEffect, useRef } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import backgroundImage from '../../assets/images/stage-a-background.png';
+import closeIcon from '../../assets/images/icon-close.svg';
+import { DocentStage } from '../../components/domain/DocentStage';
+import CircleIconButton from '../../components/common/CircleIconButton';
+import PrimaryButton from '../../components/common/PrimaryButton';
+import SecondaryButton from '../../components/common/SecondaryButton';
+import { EVENT_NAMES, type StaffCallType } from '../../constants/events';
+import { STAGE_C_PRODUCT_DETAIL_ROUTES, STAGE_C_ROUTES, stageCPath } from '../../constants/stageC';
+import { useProductExit } from '../../features/product-explore/useProductExit';
+import { findLatestFreeQueryForSku, hasOtherStaffCallForQuery } from '../../features/session/freeQueryContext';
+import { useStaffCallService } from '../../features/sa-call/useStaffCallService';
+import { useSession } from '../../features/session/useSession';
 
-type StaffCallPageProps = {
-  completed?: boolean
-  callType?: StaffCallType
+interface StaffCallPageProps {
+  completed?: boolean;
+  callType?: StaffCallType;
 }
 
-type PendingStaffRequest = {
-  sku: string
-  type: StaffCallType
-  completion: Promise<'completed'>
+interface PendingStaffRequest {
+  sku: string;
+  type: StaffCallType;
+  completion: Promise<'completed'>;
 }
 
-const STAFF_CALL_INFO_TRANSITION_DELAY_MS = 2_000
+const STAFF_CALL_INFO_TRANSITION_DELAY_MS = 2_000;
 
-export function StaffCallPage({ completed = false, callType = 'info' }: StaffCallPageProps) {
-  const { sku = '' } = useParams()
-  const navigate = useNavigate()
-  const { state } = useSession()
-  const staffCallService = useStaffCallService()
-  const pendingRequestRef = useRef<PendingStaffRequest | null>(null)
-  const exitProduct = useProductExit(sku)
-  const returnPath = stageCPath(callType === 'info' ? STAGE_C_ROUTES.c2 : STAGE_C_ROUTES.c5, sku)
-  const completedPath = stageCPath(callType === 'info' ? STAGE_C_PRODUCT_DETAIL_ROUTES.staffCompleted : STAGE_C_PRODUCT_DETAIL_ROUTES.otherStaffCompleted, sku)
-  const purchaseInquiryPath = stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn, sku)
-  const latestQuery = callType === 'other' ? findLatestFreeQueryForSku(state, sku) : null
-  const hasRequestContext = callType === 'other'
-    ? Boolean(latestQuery && hasOtherStaffCallForQuery(state, sku, latestQuery.index))
-    : state.events.some((event) => event.name === EVENT_NAMES.saCall && event.sku === sku && event.type === callType)
+export default function StaffCallPage({ completed = false, callType = 'info' }: StaffCallPageProps) {
+  const { sku = '' } = useParams();
+  const navigate = useNavigate();
+  const { state } = useSession();
+  const staffCallService = useStaffCallService();
+  const pendingRequestRef = useRef<PendingStaffRequest | null>(null);
+  const exitProduct = useProductExit(sku);
+  const returnPath = stageCPath(callType === 'info' ? STAGE_C_ROUTES.c2 : STAGE_C_ROUTES.c5, sku);
+  const completedPath = stageCPath(
+    callType === 'info' ? STAGE_C_PRODUCT_DETAIL_ROUTES.staffCompleted : STAGE_C_PRODUCT_DETAIL_ROUTES.otherStaffCompleted,
+    sku,
+  );
+  const purchaseInquiryPath = stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn, sku);
+  const latestQuery = callType === 'other' ? findLatestFreeQueryForSku(state, sku) : null;
+  const hasRequestContext =
+    callType === 'other'
+      ? Boolean(latestQuery && hasOtherStaffCallForQuery(state, sku, latestQuery.index))
+      : state.events.some((event) => event.name === EVENT_NAMES.saCall && event.sku === sku && event.type === callType);
 
   useEffect(() => {
-    let active = true
+    let active = true;
 
     if (!hasRequestContext || completed) {
       return () => {
-        active = false
-      }
+        active = false;
+      };
     }
 
-    const previousRequest = pendingRequestRef.current
+    const previousRequest = pendingRequestRef.current;
     const request =
       previousRequest?.sku === sku && previousRequest.type === callType
         ? previousRequest
-        : {
-            sku,
-            type: callType,
-            completion: staffCallService.request({ sku, type: callType }),
-          }
+        : { sku, type: callType, completion: staffCallService.request({ sku, type: callType }) };
 
-    pendingRequestRef.current = request
+    pendingRequestRef.current = request;
 
     const minimumDisplayTime = new Promise<void>((resolve) => {
-      window.setTimeout(resolve, callType === 'info' ? STAFF_CALL_INFO_TRANSITION_DELAY_MS : 0)
-    })
+      window.setTimeout(resolve, callType === 'info' ? STAFF_CALL_INFO_TRANSITION_DELAY_MS : 0);
+    });
 
     void Promise.all([request.completion, minimumDisplayTime]).then(() => {
       if (active) {
-        navigate(completedPath, { replace: true })
+        navigate(completedPath, { replace: true });
       }
-    })
+    });
 
     return () => {
-      active = false
-    }
-  }, [callType, completed, completedPath, hasRequestContext, navigate, sku, staffCallService])
+      active = false;
+    };
+  }, [callType, completed, completedPath, hasRequestContext, navigate, sku, staffCallService]);
 
   if (!hasRequestContext) {
     return (
-      <StageCDetailShell>
-        <GlassInfoCard>
-          <h1>직원 호출 정보를 찾을 수 없어요.</h1>
-          <Link to={returnPath}>{callType === 'info' ? '제품 이해로 돌아가기' : '기타 질문으로 돌아가기'}</Link>
-        </GlassInfoCard>
-      </StageCDetailShell>
-    )
+      <div className="relative flex min-h-dvh w-full flex-col items-center justify-center gap-4 overflow-hidden bg-black px-6 text-center">
+        <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="relative z-10 flex w-full max-w-100.5 flex-col items-center">
+          <h1 className="text-[18px] font-semibold text-white">직원 호출 정보를 찾을 수 없어요.</h1>
+          <SecondaryButton
+            label={callType === 'info' ? '제품 이해로 돌아가기' : '기타 질문으로 돌아가기'}
+            onClick={() => navigate(returnPath)}
+            className="mt-4"
+          />
+        </div>
+      </div>
+    );
   }
 
   if (callType === 'info') {
     return (
-      <StageCDetailShell className="stage-c-staff-call-shell">
-        <div className="stage-c-staff-call-content">
-          <section aria-label="나이비스 AI 도슨트" className="stage-c-staff-call-docent">
-            <DocentStage continuityKey={`staff-call-${callType}`} cue={completed ? 'success' : 'sending'} />
-          </section>
-          <h1>
-            {completed
-              ? '제가 직원분께 궁금해 하시는\n부분을 잘 전달했어요!'
-              : '더 자세히 설명드리기 위해\n직원에게 알림을 보내는 중이에요!'}
+      <div className="relative min-h-dvh w-full overflow-hidden bg-black">
+        <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-100.5 flex-col items-center px-6 pt-69.25 pb-16.25">
+          <DocentStage
+            cue={completed ? 'success' : 'sending'}
+            continuityKey={`staff-call-${callType}`}
+            className="mx-auto aspect-345/216 w-[85.8%] max-w-86.25"
+          />
+          <h1 className="mt-8 text-[25px] font-semibold leading-tight text-white">
+            {(completed
+              ? ['제가 직원분께 궁금해 하시는', '부분을 잘 전달했어요!']
+              : ['더 자세히 설명드리기 위해', '직원에게 알림을 보내는 중이에요!']
+            ).map((line) => (
+              <span key={line} className="block">
+                {line}
+              </span>
+            ))}
           </h1>
-        </div>
 
-        {completed && (
-          <div className="stage-c-staff-call-actions" aria-label="직원 문의 후 액션">
-            <Link className="stage-c-action-button" to={returnPath}>← 다른 정보 보기</Link>
-            <div>
-              <Link className="stage-c-action-button stage-c-action-button--primary" to={purchaseInquiryPath}>구매 문의</Link>
-              <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
+          {completed && (
+            <div aria-label="직원 문의 후 액션" className="mt-auto flex w-full flex-col gap-4.5">
+              <SecondaryButton label="← 다른 정보 보기" onClick={() => navigate(returnPath)} />
+              <div className="flex w-full gap-2.5">
+                <PrimaryButton label="구매 문의" onClick={() => navigate(purchaseInquiryPath)} className="h-11.5 flex-1" />
+                <SecondaryButton label="다른 제품 보기 →" onClick={exitProduct} className="h-11.5 flex-1" />
+              </div>
             </div>
-          </div>
-        )}
-      </StageCDetailShell>
-    )
+          )}
+        </div>
+      </div>
+    );
   }
 
   return (
-    <StageCDetailShell className="stage-c-c5-response-shell">
-      <header className="stage-c-c5-response-topbar">
-        <Link aria-label="기타 질문 닫기" to={returnPath}>×</Link>
-      </header>
-      <div className="stage-c-c5-staff-content">
-        <section aria-label="나이비스 AI 도슨트" className="stage-c-c5-staff-docent"><DocentStage continuityKey={`staff-call-${callType}`} cue={completed ? 'success' : 'sending'} /></section>
-        <h1>직원에게 궁금한 사항에 대해<br />문의 알림을 보냈어요!</h1>
-        <p>더 자세한 상담을 받아보세요</p>
-      </div>
-      <div className="stage-c-c5-response-actions">
-        <Link className="stage-c-action-button" to={returnPath}>다른 것도 물어보기</Link>
-        <div>
-          <Link className="stage-c-action-button" to={returnPath}>직원에게 문의하기</Link>
-          <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
+    <div className="relative min-h-dvh w-full overflow-hidden bg-black">
+      <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      <CircleIconButton
+        icon={closeIcon}
+        ariaLabel="기타 질문 닫기"
+        onClick={() => navigate(returnPath)}
+        iconClassName="h-4 w-auto"
+        className="absolute right-5 top-17.25 z-10"
+      />
+      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-100.5 flex-col items-center px-6 pt-82.25 pb-16.25">
+        <DocentStage
+          cue={completed ? 'success' : 'sending'}
+          continuityKey={`staff-call-${callType}`}
+          className="mx-auto aspect-345/216 w-[85.8%] max-w-86.25"
+        />
+        <h1 className="mt-7.5 text-[25px] font-semibold leading-tight text-white">
+          <span className="block">직원에게 궁금한 사항에 대해</span>
+          <span className="block">문의 알람을 보냈어요!</span>
+        </h1>
+        <p className="mt-1 text-[18px] font-medium text-[#d1d1d1]">더 자세한 상담을 받아보세요</p>
+        <div className="mt-auto flex w-full flex-col gap-3.25">
+          <SecondaryButton label="다른 것도 물어보기" onClick={() => navigate(returnPath)} />
+          <SecondaryButton label="다른 제품 보기 →" onClick={exitProduct} />
         </div>
       </div>
-    </StageCDetailShell>
-  )
-
+    </div>
+  );
 }

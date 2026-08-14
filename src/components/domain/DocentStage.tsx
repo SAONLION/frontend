@@ -1,54 +1,56 @@
-import {
-  Component,
-  lazy,
-  Suspense,
-  useEffect,
-  useState,
-  type ErrorInfo,
-  type ReactNode,
-} from 'react'
-import type { DocentCue } from '../../features/docent/docentCue'
+import { Component, lazy, Suspense, useEffect, useState, type ErrorInfo, type ReactNode } from 'react';
+import type { DocentCue } from '../../features/docent/docentCue';
 
-const DocentCanvas = lazy(() => import('./DocentCanvas'))
+const DocentCanvas = lazy(() => import('./DocentCanvas'));
 
-export type { DocentCue } from '../../features/docent/docentCue'
+export type { DocentCue } from '../../features/docent/docentCue';
+
+const FALLBACK_CLASSNAME = 'flex h-full w-full items-center justify-center text-center text-[14px] text-[#d1d1d1]';
 
 class DocentErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
-  state = { failed: false }
+  state = { failed: false };
 
   static getDerivedStateFromError() {
-    return { failed: true }
+    return { failed: true };
   }
 
   componentDidCatch(_error: Error, _info: ErrorInfo) {}
 
   render() {
     if (this.state.failed) {
-      return <div className="stage-c-docent-fallback">도슨트 안내가 준비되어 있어요.</div>
+      return <div className={FALLBACK_CLASSNAME}>도슨트 안내가 준비되어 있어요.</div>;
     }
 
-    return this.props.children
+    return this.props.children;
   }
 }
 
-export function DocentStage({ cue, continuityKey }: { cue: DocentCue; continuityKey?: string }) {
-  const [supported, setSupported] = useState(true)
+export function DocentStage({
+  cue,
+  className = '',
+  continuityKey,
+}: {
+  cue: DocentCue;
+  className?: string;
+  continuityKey?: string;
+}) {
+  const [supported, setSupported] = useState(true);
 
   useEffect(() => {
-    setSupported(Boolean(document.createElement('canvas').getContext('webgl')))
-  }, [])
+    setSupported(Boolean(document.createElement('canvas').getContext('webgl')));
+  }, []);
 
   return (
-    <div className={`stage-c-docent-layer stage-c-docent-layer--${cue}`}>
+    <div className={`pointer-events-none relative ${className}`}>
       {!supported ? (
-        <div className="stage-c-docent-fallback">도슨트 안내가 준비되어 있어요.</div>
+        <div className={FALLBACK_CLASSNAME}>도슨트 안내가 준비되어 있어요.</div>
       ) : (
         <DocentErrorBoundary>
-          <Suspense fallback={<div className="stage-c-docent-fallback">도슨트를 불러오는 중이에요.</div>}>
-            <DocentCanvas continuityKey={continuityKey} cue={cue} />
+          <Suspense fallback={<div className={FALLBACK_CLASSNAME}>도슨트를 불러오는 중이에요.</div>}>
+            <DocentCanvas cue={cue} continuityKey={continuityKey} />
           </Suspense>
         </DocentErrorBoundary>
       )}
     </div>
-  )
+  );
 }
