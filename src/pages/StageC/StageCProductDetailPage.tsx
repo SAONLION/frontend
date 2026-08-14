@@ -20,12 +20,6 @@ const topicTitles: Record<Topic, string> = {
   styling: '스타일링 · 코디',
 }
 
-const topicSummaries: Record<Topic, readonly string[]> = {
-  craft: ['소재 : 비세토스 코티드 캔버스', '공정 : 6단계 핸드 피니싱, 엣지 코팅 3회 반복', '내구성 : 스크래치 저항 테스트 통과', '지속가능성 : 업사이클 소재 부분 적용'],
-  heritage: ['1976 뮌헨 창립 — 여행 가방에서 출발한 브랜드', '브랜드가 추구하는 가치와 방향성', '비세토스 패턴의 유래와 로고 각인의 의미'],
-  styling: ['LOOK 1 — 데일리 · 데님 + 니트', 'LOOK 2 — 트래블 · 셋업 + 스니커즈', 'LOOK 3 — 오피스 · 코트 + 로퍼'],
-}
-
 type StageCProductDetailPageProps = {
   topic: Topic
 }
@@ -66,7 +60,7 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
   }
 
   const images = product.detailImages ?? []
-  const lines = topicSummaries[topic]
+  const lines = product.productDetail?.[topic] ?? ['정확한 제품 안내는 직원에게 문의해 주세요.']
   const imageCount = images.length
 
   const scrollToImage = (nextIndex: number) => {
@@ -106,11 +100,16 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
     navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn, sku))
   }
 
+  const requestStaffDetails = () => {
+    dispatch({ type: SESSION_ACTIONS.recordSaCall, sku, callType: 'info' })
+    navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.staffPending, sku))
+  }
+
   return (
     <StageCDetailShell className="stage-c-product-detail-shell">
       <header className="stage-c-product-detail-topbar">
         <span>{topicTitles[topic]}</span>
-        <button aria-label="제품 이해 닫기" onClick={() => navigate(productHubPath)} type="button">×</button>
+        <button aria-label="제품 이해 닫기" className="stage-c-close-control" onClick={() => navigate(productHubPath)} type="button">×</button>
       </header>
 
       <section className={`stage-c-product-detail-media stage-c-product-detail-media--${topic}`} aria-label={`${topicTitles[topic]} 안내 미디어`}>
@@ -163,6 +162,11 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
         ))}
       </section>
 
+      {topic !== 'styling' && (
+        <button className="stage-c-product-detail-more-button" onClick={requestStaffDetails} type="button">
+          더 자세한 내용이 궁금하다면
+        </button>
+      )}
       <div className="stage-c-product-detail-actions">
         <button className="stage-c-action-button stage-c-action-button--primary" onClick={openPurchaseInquiry} type="button">
           착용 및 구매 문의

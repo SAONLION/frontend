@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import CircleButton from '../../components/common/CircleButton'
 import TextInput from '../../components/common/TextInput'
-import { DocentStage } from '../../components/domain/DocentStage'
 
 type A2NicknameSetupProps = {
   headline?: string
@@ -25,7 +24,7 @@ export default function A2NicknameSetup({
   return (
     <main className="stage-entry-page">
       <form className="stage-entry-content stage-entry-content--nickname" onSubmit={submitNickname}>
-        <DocentStage cue="listen" className="stage-entry-docent stage-entry-docent--wide" />
+        <div aria-hidden="true" className="stage-entry-docent stage-entry-docent--wide" />
         <h1>{headline}</h1>
         <TextInput
           ariaLabel="이름 또는 닉네임"

@@ -20,9 +20,10 @@ const hubFallbackByScreenId: Record<string, { label: string; path: (sku: string)
   [STAGE_C_SCREEN_IDS.stageE1]: { label: '제품 태그 안내로 돌아가기', path: () => STAGE_B_ROUTES.nfcPrompt },
 }
 
-export function ComingSoonPage() {
+export function ComingSoonPage({ screenId: explicitScreenId }: { screenId?: string }) {
   const { screenId = '', sku = '' } = useParams()
-  const fallback = hubFallbackByScreenId[screenId] ?? {
+  const resolvedScreenId = explicitScreenId ?? screenId
+  const fallback = hubFallbackByScreenId[resolvedScreenId] ?? {
     label: '제품 상세 허브로 돌아가기',
     path: (currentSku: string) => `/stage-c/${currentSku}`,
   }
@@ -30,7 +31,7 @@ export function ComingSoonPage() {
   return (
     <MobileShell>
       <section className="stage-c-state-page stage-c-coming-soon-page">
-        <p className="stage-c-target-id">{screenId || '다음 화면'}</p>
+        <p className="stage-c-target-id">{resolvedScreenId || '다음 화면'}</p>
         <h1>이 안내는 준비 중이에요</h1>
         <p>선택하신 내용을 더 잘 안내할 수 있도록 곧 연결할게요.</p>
         <Link className="stage-c-action-button stage-c-action-button--primary" to={fallback.path(sku)}>

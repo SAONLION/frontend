@@ -49,6 +49,12 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
       return
     }
 
+    if (choice.id === STAGE_C_SCREEN_IDS.c41) {
+      dispatch({ type: SESSION_ACTIONS.recordPriceInquiryRequest, sku })
+      navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryCompleted, sku))
+      return
+    }
+
     dispatch({ type: SESSION_ACTIONS.recordSubhubSelect, sub: choice.id })
     const detailRouteKey = STAGE_C_PRODUCT_DETAIL_ROUTE_KEYS[
       choice.id as keyof typeof STAGE_C_PRODUCT_DETAIL_ROUTE_KEYS
@@ -66,6 +72,9 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
     navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn, sku))
   }
 
+  const otherChoice = isProductIntro ? screen.choices.find((choice) => choice.id === 'other') : undefined
+  const primaryChoices = otherChoice ? screen.choices.filter((choice) => choice.id !== otherChoice.id) : screen.choices
+
   return (
     <MobileShell>
       <section className="stage-c-page" aria-labelledby="stage-c-heading">
@@ -81,7 +90,12 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
               </>
             ) : screen.heading}
           </h1>
-          <ChoiceList choices={screen.choices} onSelect={selectChoice} />
+          <ChoiceList choices={primaryChoices} onSelect={selectChoice} />
+          {otherChoice && (
+            <button className="stage-c-other-link" onClick={() => selectChoice(otherChoice)} type="button">
+              {otherChoice.label} <span aria-hidden="true">→</span>
+            </button>
+          )}
         </div>
         <div className="stage-c-bottom-action-bar" aria-label="제품 탐색 액션">
           <button className="stage-c-action-button stage-c-action-button--primary" onClick={requestPurchase} type="button">

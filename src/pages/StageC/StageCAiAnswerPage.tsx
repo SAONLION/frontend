@@ -34,7 +34,6 @@ export function StageCAiAnswerPage() {
   const contextKey = query ? `${query.id}:${sku}` : `missing:${sku}`
   const hasOtherStaffCall = queryContext ? hasOtherStaffCallForQuery(state, sku, queryContext.index) : false
   const [answerView, setAnswerView] = useState<AnswerView>(() => initialAnswerView(contextKey))
-  const [retryAttempt, setRetryAttempt] = useState(0)
   const requestRef = useRef<PendingAnswerRequest | null>(null)
   const staffRequested = useRef(false)
   const otherPath = stageCPath(STAGE_C_ROUTES.c5, sku)
@@ -81,27 +80,20 @@ export function StageCAiAnswerPage() {
     })
 
     return () => { active = false }
-  }, [contextKey, dispatch, hasOtherStaffCall, navigate, product, query, requestStaff, retryAttempt, service, sku, staffPendingPath])
+  }, [contextKey, dispatch, hasOtherStaffCall, navigate, product, query, requestStaff, service, sku, staffPendingPath])
 
   if (product === undefined) return <StageCState title="제품 정보를 불러오는 중이에요" description="잠시만 기다려 주세요." />
   if (product === null) return <StageCState title="상품을 찾을 수 없어요" description="태그한 상품의 주소를 다시 확인해 주세요." />
   if (!query) return <MissingQuestion path={otherPath} />
 
-  const retry = () => {
-    requestRef.current = null
-    staffRequested.current = false
-    setAnswerView(initialAnswerView(contextKey))
-    setRetryAttempt((attempt) => attempt + 1)
-  }
-
   return <StageCDetailShell className="stage-c-c5-response-shell">
     <header className="stage-c-c5-response-topbar">
-      <Link aria-label="기타 질문 닫기" to={otherPath}>×</Link>
+      <Link aria-label="기타 질문 닫기" className="stage-c-close-control" to={otherPath}>×</Link>
     </header>
     <div className="stage-c-c5-ai-content">
       <h1>{view.title}</h1>
       {view.status === 'loading' && <p aria-live="polite">답변을 준비하고 있어요.</p>}
-      {view.status === 'error' && <p>잠시 후 다시 시도하거나 직원에게 문의해 주세요.</p>}
+      {view.status === 'error' && <p>잠시 후 다시 시도하거나 다른 질문을 남겨주세요.</p>}
       {view.status === 'resolved' && (
         <section className="stage-c-c5-answer-card" aria-label="AI 답변">
           {view.lines.map((line) => <p key={line}>· {line}</p>)}
@@ -109,11 +101,8 @@ export function StageCAiAnswerPage() {
       )}
     </div>
     <div className="stage-c-c5-response-actions">
-      {view.status === 'error' ? <button className="stage-c-action-button" onClick={retry} type="button">다시 시도하기</button> : <Link className="stage-c-action-button" to={otherPath}>다른 것도 물어보기</Link>}
-      <div>
-        <button className="stage-c-action-button" onClick={requestStaff} type="button">직원에게 문의하기</button>
-        <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
-      </div>
+      <Link className="stage-c-action-button" to={otherPath}>다른 것도 물어보기</Link>
+      <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
     </div>
   </StageCDetailShell>
 }

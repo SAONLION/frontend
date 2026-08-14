@@ -54,7 +54,9 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
   const requestRef = useRef<{ key: string; completion: Promise<'completed'> } | null>(null)
   const paths = getFitPaths(sku)
   const hasTryOnRequest = hasMatchingTryOnRequest(state.events, sku, selection)
-  const hasPurchaseInquiryAfterTryOn = hasPurchaseAfterMatchingTryOn(state.events, sku, selection)
+  const hasPurchaseInquiry = state.events.some(
+    (event) => event.name === EVENT_NAMES.purchaseInquiry && event.sku === sku,
+  )
 
   useEffect(() => {
     let active = true
@@ -120,7 +122,7 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
   }
 
   const requestPurchase = () => {
-    if (!hasPurchaseInquiryAfterTryOn) {
+    if (!hasPurchaseInquiry) {
       dispatch({ type: SESSION_ACTIONS.recordPurchaseInquiry, sku })
     }
     navigate(fitSearchPath(paths.purchaseCompleted, selection))
@@ -130,18 +132,18 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
     return <FitFallback path={fitSearchPath(paths.tryOn, selection)} text="착장 요청 정보를 찾을 수 없어요." />
   }
 
-  if (kind === 'purchase-completed' && !hasPurchaseInquiryAfterTryOn) {
-    return <FitFallback path={fitSearchPath(paths.tryOn, selection)} text="이번 착장 요청의 구매 문의 정보를 찾을 수 없어요." />
+  if (kind === 'purchase-completed' && !hasPurchaseInquiry) {
+    return <FitFallback path={fitSearchPath(paths.tryOn, selection)} text="구매 문의 정보를 찾을 수 없어요." />
   }
 
   if (kind === 'size') {
     return <FitShell kind={kind} selection={selection} sku={sku}>
       <SizeOptions onSelect={setSize} product={product} selection={selection} />
       <dl className="stage-c-fit-reference-facts">
-        <div><dt>사이즈</dt><dd>미디엄 (W30 × H40 × D14 cm)</dd></div>
-        <div><dt>용량</dt><dd>15L · 노트북 14인치 수납</dd></div>
-        <div><dt>무게</dt><dd>780 g</dd></div>
-        <div><dt>기내 반입</dt><dd>가능 · TSA 규격 대응</dd></div>
+        <div><dt>선택 사이즈</dt><dd>{selection.size.label}</dd></div>
+        <div><dt>제품 치수</dt><dd>{selection.size.dimensions}</dd></div>
+        <div><dt>수납 구성</dt><dd>{product.fitDetail?.storage ?? '정확한 수납 안내는 직원에게 문의해 주세요.'}</dd></div>
+        <div><dt>스트랩</dt><dd>{product.fitDetail?.strap ?? '제품 상태에 따라 직원이 안내해 드려요.'}</dd></div>
       </dl>
       <FitActionRow onExitProduct={exitProduct} onPrimaryAction={confirmSize} />
     </FitShell>
@@ -281,11 +283,6 @@ function getFitPaths(sku: string) {
 
 function hasMatchingTryOnRequest(events: readonly SessionEvent[], sku: string, selection: FitSelection): boolean {
   return events.some((event) => event.name === EVENT_NAMES.tryonRequest && event.sku === sku && event.size === selection.size.code && event.color === selection.color.code)
-}
-
-function hasPurchaseAfterMatchingTryOn(events: readonly SessionEvent[], sku: string, selection: FitSelection): boolean {
-  const tryOnIndex = events.map((event, index) => ({ event, index })).findLast(({ event }) => event.name === EVENT_NAMES.tryonRequest && event.sku === sku && event.size === selection.size.code && event.color === selection.color.code)?.index
-  return tryOnIndex !== undefined && events.slice(tryOnIndex + 1).some((event) => event.name === EVENT_NAMES.purchaseInquiry && event.sku === sku)
 }
 
 function FitFallback({ path, text }: { path: string; text: string }) {

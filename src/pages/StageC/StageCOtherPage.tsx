@@ -38,8 +38,8 @@ export function StageCOtherPage() {
   }
 
   return (
-    <StageCDetailShell>
-      <GlassTopBar action={<button aria-label="기타 질문 닫기" onClick={() => navigate(stageCPath(STAGE_C_ROUTES.c1, sku))} type="button">×</button>} context="" />
+    <StageCDetailShell className="stage-c-other-shell">
+      <GlassTopBar action={<button aria-label="기타 질문 닫기" className="stage-c-close-control" onClick={() => navigate(stageCPath(STAGE_C_ROUTES.c1, sku))} type="button">×</button>} context="" />
       <GlassInfoCard className="stage-c-other-card">
         <h1>선택지에 없는 게 궁금하시면</h1>
         <p>아래에 편하게 적어주세요.</p>

@@ -38,6 +38,7 @@ export function StageD1Page() {
 export function StageD2Page() {
   const navigate = useNavigate();
   const { state, dispatch } = useSession();
+  const returnToB1 = useReturnToB1();
 
   return (
     <D2ProductRecommendation
@@ -50,6 +51,7 @@ export function StageD2Page() {
         };
         navigate(STAGE_D_ROUTES.locationGuide, { state: selectedProduct });
       }}
+      onTagOtherProduct={returnToB1}
       onCallStaff={() => dispatch({ type: SESSION_ACTIONS.setActiveOverlay, overlay: 'E' })}
     />
   );

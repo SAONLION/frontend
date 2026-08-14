@@ -9,10 +9,11 @@ import type { DocentCue } from '../../features/docent/docentCue'
 const MODEL_URL = '/models/docent/u.glb'
 const QUESTION_MARK_URL = '/models/docent/question_mark.glb'
 const WING_NAMES = ['joint1_L', 'joint1_R'] as const
-const LISTEN_CANVAS_TOP_EXTENSION = 80
 const QUESTION_MARK_BASE_ROTATION = -0.1 + Math.PI / 36
 const QUESTION_MARK_SCALE = 0.14 * (2 / 3)
 const QUESTION_MARK_HEIGHT = 3.25
+const LISTEN_CAMERA_FOV = 60
+const LISTEN_CAMERA_DISTANCE = 5.5
 const CUE_TRANSITION_DURATION = 0.42
 const CONTINUITY_WINDOW_MS = 1_000
 const neutralMotion: DocentMotion = {
@@ -341,26 +342,22 @@ function useReducedMotionPreference() {
 }
 
 function CameraFraming({ cue }: { cue: DocentCue }) {
-  const { camera, size } = useThree()
+  const { camera } = useThree()
 
   useEffect(() => {
     if (!(camera instanceof THREE.PerspectiveCamera)) return
 
-    if (cue !== 'listen') {
+    if (cue === 'listen') {
+      // 물음표까지 담을 만큼 세로 프레임을 넓히되, 카메라를 가까이 옮겨
+      // A1의 greet cue와 도슨트 본체가 같은 크기로 보이도록 보정한다.
+      camera.fov = LISTEN_CAMERA_FOV
+      camera.position.set(0, 0.6, LISTEN_CAMERA_DISTANCE)
+    } else {
       camera.fov = 36
-      camera.position.y = 0
-      camera.updateProjectionMatrix()
-      return
+      camera.position.set(0, 0, 9.75)
     }
-
-    const baseHeight = Math.max(size.height - LISTEN_CANVAS_TOP_EXTENSION, 1)
-    const viewportScale = size.height / baseHeight
-    const baseHalfFov = THREE.MathUtils.degToRad(36) * 0.5
-
-    camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(baseHalfFov) * viewportScale))
-    camera.position.y = 0.6
     camera.updateProjectionMatrix()
-  }, [camera, cue, size.height])
+  }, [camera, cue])
 
   return null
 }
@@ -519,7 +516,7 @@ export default function DocentCanvas({ cue, continuityKey }: { cue: DocentCue; c
         <directionalLight color="#ffe7a6" intensity={2.2} position={[3, 4, 4]} />
         <pointLight color="#fff2c4" intensity={8} distance={5} position={[0, 1.4, 4]} />
         <StudioEnvironment />
-        <CameraFraming cue={cue} />
+      <CameraFraming cue={cue} />
         <Model continuityKey={continuityKey} cue={cue} reducedMotion={reducedMotion} />
       </Canvas>
     </>

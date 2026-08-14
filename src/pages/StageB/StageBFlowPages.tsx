@@ -11,18 +11,12 @@ const TAG_RECOGNITION_DELAY_MS = 900
 
 export function StageBNfcPromptPage() {
   const navigate = useNavigate()
-  const startRecognition = () => navigate(stageBRecognizingPath(DEFAULT_PRODUCT_SKU))
 
   return (
-    <div className="relative">
-      <B1NfcPrompt
-        onCallStaff={() => navigate(stageCComingSoonPath(DEFAULT_PRODUCT_SKU, STAGE_C_SCREEN_IDS.stageE1))}
-        onNfcDetected={startRecognition}
-      />
-      <button className="fixed bottom-6 left-5 z-40 rounded-full bg-white/10 px-4 py-2 text-[12px] text-white/70" onClick={startRecognition} type="button">
-        [임시] NFC 인식
-      </button>
-    </div>
+    <B1NfcPrompt
+      onCallStaff={() => navigate(stageCComingSoonPath(DEFAULT_PRODUCT_SKU, STAGE_C_SCREEN_IDS.stageE1))}
+      onNfcDetected={() => navigate(stageBRecognizingPath(DEFAULT_PRODUCT_SKU))}
+    />
   )
 }
 

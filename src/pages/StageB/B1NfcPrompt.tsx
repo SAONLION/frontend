@@ -1,6 +1,5 @@
 import PrimaryButton from '../../components/common/PrimaryButton'
 import ScreenHeadline from '../../components/common/ScreenHeadline'
-import { DocentStage } from '../../components/domain/DocentStage'
 
 type B1NfcPromptProps = {
   buttonLabel?: string
@@ -18,11 +17,11 @@ export default function B1NfcPrompt({
   subtext = '제품에 대해 알려드릴게요',
 }: B1NfcPromptProps) {
   return (
-    <main className="stage-entry-page">
+    <main className="stage-entry-page stage-entry-page--stage-b stage-entry-page--nfc">
       <div className="stage-entry-content stage-entry-content--nfc">
-        <DocentStage cue="guide" className="stage-entry-docent stage-entry-docent--wide" />
+        <div aria-hidden="true" className="stage-entry-docent stage-entry-docent--wide" />
         <ScreenHeadline className="stage-entry-nfc-headline" headline={headline} subtext={subtext} variant="md" />
-        <div className="stage-entry-actions">
+        <div className="stage-entry-actions stage-entry-actions--nfc">
           <PrimaryButton label="제품 태그 인식하기" onClick={onNfcDetected} />
           <PrimaryButton label={buttonLabel} onClick={onCallStaff} />
         </div>

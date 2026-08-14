@@ -1,5 +1,4 @@
 import ScreenHeadline from '../../components/common/ScreenHeadline'
-import { DocentStage } from '../../components/domain/DocentStage'
 
 type B2TagRecognizingProps = {
   headline?: string
@@ -11,9 +10,9 @@ export default function B2TagRecognizing({
   subtext = '잠시만 기다려주세요',
 }: B2TagRecognizingProps) {
   return (
-    <main aria-live="polite" className="stage-entry-page">
+    <main aria-live="polite" className="stage-entry-page stage-entry-page--stage-b">
       <div className="stage-entry-content stage-entry-content--recognizing">
-        <DocentStage cue="scan" className="stage-entry-docent stage-entry-docent--wide" />
+        <div aria-hidden="true" className="stage-entry-docent stage-entry-docent--wide" />
         <ScreenHeadline className="stage-entry-intro-headline" headline={headline} subtext={subtext} />
       </div>
     </main>

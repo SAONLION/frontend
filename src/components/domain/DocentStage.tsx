@@ -5,7 +5,7 @@ const DocentCanvas = lazy(() => import('./DocentCanvas'));
 
 export type { DocentCue } from '../../features/docent/docentCue';
 
-const FALLBACK_CLASSNAME = 'flex h-full w-full items-center justify-center text-center text-[14px] text-[#d1d1d1]';
+const FALLBACK_CLASSNAME = 'stage-c-docent-fallback';
 
 class DocentErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
@@ -41,7 +41,7 @@ export function DocentStage({
   }, []);
 
   return (
-    <div className={`pointer-events-none relative ${className}`}>
+    <div className={`stage-c-docent-layer stage-c-docent-layer--${cue} ${className}`}>
       {!supported ? (
         <div className={FALLBACK_CLASSNAME}>도슨트 안내가 준비되어 있어요.</div>
       ) : (

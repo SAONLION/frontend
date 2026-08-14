@@ -122,7 +122,7 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
   return (
     <StageCDetailShell className="stage-c-c5-response-shell">
       <header className="stage-c-c5-response-topbar">
-        <Link aria-label="기타 질문 닫기" to={returnPath}>×</Link>
+        <Link aria-label="기타 질문 닫기" className="stage-c-close-control" to={returnPath}>×</Link>
       </header>
       <div className="stage-c-c5-staff-content">
         <section aria-label="나이비스 AI 도슨트" className="stage-c-c5-staff-docent"><DocentStage continuityKey={`staff-call-${callType}`} cue={completed ? 'success' : 'sending'} /></section>

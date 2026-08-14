@@ -1,6 +1,5 @@
 import type { KeyboardEvent } from 'react'
-import ScreenHeadline from '../../components/common/ScreenHeadline'
-import { DocentStage } from '../../components/domain/DocentStage'
+import { KineticTextReveal } from '../../components/ui/kinetic-text-reveal'
 
 type A1DocentIntroProps = {
   headline?: string
@@ -29,8 +28,21 @@ export default function A1DocentIntro({
       tabIndex={0}
     >
       <div className="stage-entry-content stage-entry-content--intro">
-        <DocentStage cue="greet" className="stage-entry-docent stage-entry-docent--wide" />
-        <ScreenHeadline className="stage-entry-intro-headline" headline={headline} subtext={subtext} />
+        <div aria-hidden="true" className="stage-entry-docent stage-entry-docent--wide" />
+        <div className="stage-entry-headline stage-entry-intro-headline flex flex-col items-center gap-1 text-center">
+          <h1 className="text-[32px] font-semibold leading-normal text-white">
+            <KineticTextReveal
+              autoPlay
+              blur
+              delay={0.2}
+              distance={16}
+              splitBy="characters"
+              stagger={0.055}
+              text={headline}
+            />
+          </h1>
+          <p className="text-[18px] font-medium leading-normal text-[#d1d1d1]">{subtext}</p>
+        </div>
       </div>
     </main>
   )

@@ -1,0 +1,148 @@
+:root {
+  --motion-screen-enter: 520ms;
+  --motion-content-enter: 420ms;
+  --motion-feedback: 180ms;
+  --motion-ease-enter: cubic-bezier(.22, 1, .36, 1);
+  --motion-ease-feedback: cubic-bezier(.2, .8, .2, 1);
+}
+
+@keyframes service-screen-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes service-content-rise {
+  from { opacity: 0; transform: translateY(.75rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes service-media-settle {
+  from { opacity: 0; transform: translateY(.55rem) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes service-sheet-enter {
+  from { opacity: 0; transform: translateY(100%); }
+  65% { opacity: 1; }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes service-sheet-exit {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(100%); }
+}
+
+/* Every production route renders through AppLayout's stable motion contract. */
+.screen-motion-shell {
+  animation: service-screen-enter var(--motion-screen-enter) var(--motion-ease-enter) both;
+}
+
+.stage-entry-content > :not(.stage-entry-docent),
+.stage-c-page > :not(.stage-c-docent-layer),
+.stage-c-state-page > :not(.stage-c-docent-layer),
+.stage-external-page__content > :not(.stage-external-page__docent),
+.stage-f-page--center > :not(.stage-f-emblem),
+.stage-f-value-copy,
+.stage-f-bottom-actions {
+  animation: service-content-rise var(--motion-content-enter) var(--motion-ease-enter) both;
+}
+
+.stage-c-detail-shell > :not(.stage-c-product-detail-media),
+.stage-c-product-detail-summary,
+.stage-c-price-inquiry-content,
+.stage-c-price-inquiry-actions,
+.stage-c-purchase-status-content,
+.stage-c-purchase-status-actions {
+  animation: service-content-rise var(--motion-content-enter) var(--motion-ease-enter) both;
+}
+
+.stage-c-product-detail-media,
+.stage-c-gallery,
+.stage-c-glass-media-frame {
+  animation: service-media-settle var(--motion-content-enter) var(--motion-ease-enter) both;
+}
+
+.stage-c-product-media,
+.stage-external-page__media-stack,
+.stage-f-product-backdrop img,
+.stage-f-value-image,
+.stage-f-emblem {
+  animation: service-media-settle var(--motion-content-enter) var(--motion-ease-enter) both;
+}
+
+.blocker-prompt,
+.stage-overlay .stage-external-page {
+  animation: service-sheet-enter 620ms var(--motion-ease-enter) both;
+  will-change: transform, opacity;
+}
+
+.stage-overlay .stage-external-page__content {
+  animation: service-content-rise var(--motion-content-enter) var(--motion-ease-enter) 90ms both;
+}
+
+.stage-overlay--closing {
+  pointer-events: none;
+}
+
+.stage-overlay--closing .stage-external-page {
+  animation: service-sheet-exit 420ms cubic-bezier(.4, 0, 1, 1) both;
+}
+
+.stage-overlay--closing .stage-external-page__content {
+  animation: none;
+}
+
+.screen-motion-shell button,
+.screen-motion-shell a,
+.stage-overlay button {
+  transition: transform var(--motion-feedback) var(--motion-ease-feedback), filter var(--motion-feedback) ease, background-color var(--motion-feedback) ease, border-color var(--motion-feedback) ease;
+}
+
+.screen-motion-shell button:not(:disabled):active,
+.screen-motion-shell a:active,
+.stage-overlay button:not(:disabled):active {
+  transform: translateY(.0625rem) scale(.985);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+
+  .screen-motion-shell,
+  .stage-entry-content > :not(.stage-entry-docent),
+  .stage-c-page > :not(.stage-c-docent-layer),
+  .stage-c-state-page > :not(.stage-c-docent-layer),
+  .stage-external-page__content > :not(.stage-external-page__docent),
+  .stage-f-page--center > :not(.stage-f-emblem),
+  .stage-f-value-copy,
+  .stage-f-bottom-actions,
+  .stage-c-detail-shell > :not(.stage-c-product-detail-media),
+  .stage-c-product-detail-summary,
+  .stage-c-price-inquiry-content,
+  .stage-c-price-inquiry-actions,
+  .stage-c-purchase-status-content,
+  .stage-c-purchase-status-actions,
+  .stage-c-product-detail-media,
+  .stage-c-gallery,
+  .stage-c-glass-media-frame,
+  .stage-c-product-media,
+  .stage-external-page__media-stack,
+  .stage-f-product-backdrop img,
+  .stage-f-value-image,
+  .stage-f-emblem,
+  .blocker-prompt,
+  .stage-overlay .stage-external-page,
+  .stage-overlay .stage-external-page__content {
+    animation: none;
+    will-change: auto;
+  }
+
+  .screen-motion-shell button,
+  .screen-motion-shell a,
+  .stage-overlay button {
+    transition: none;
+  }
+}

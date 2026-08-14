@@ -41,21 +41,20 @@ export default function E1StaffCallTray({
   };
 
   return (
-    <div className="relative min-h-dvh w-full overflow-hidden bg-black">
-      <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
+    <div className="stage-external-page">
+      <img src={backgroundImage} alt="" className="stage-external-page__background" />
       <CircleIconButton
         icon={closeIcon}
         ariaLabel="닫기"
         onClick={onClose}
         iconClassName="h-4 w-auto"
-        className="absolute right-5 top-17.25 z-10"
+        className="stage-external-page__close"
       />
-      <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-100.5 flex-col items-center px-[7.71%] pt-82.25 pb-16.25">
-        <ScreenHeadline headline={headline} subtext={subtext} variant="md" />
-        <div className="mt-6 flex w-full flex-col gap-3.25">
-          {[0, 1].map((row) => (
-            <div key={row} className="flex gap-2.5">
-              {requestOptions.slice(row * 2, row * 2 + 2).map((option) => (
+      <div className="stage-external-page__content">
+        <ScreenHeadline headline={headline} subtext={subtext} variant="md" className="stage-external-page__headline" />
+        <div className="stage-external-page__stack">
+          <div className="stage-external-page__choice-grid stage-e-staff-call-tray__choice-grid">
+            {requestOptions.map((option) => (
                 <SecondaryButton
                   key={option}
                   label={option}
@@ -63,12 +62,11 @@ export default function E1StaffCallTray({
                   onClick={() => toggleRequest(option)}
                   fullWidth={false}
                 />
-              ))}
-            </div>
-          ))}
+            ))}
+          </div>
           <SecondaryButton label={otherLabel} onClick={onSelectOther} textColor="text-[#b8b8b8]" />
         </div>
-        <SecondaryButton label={viewOtherProductsLabel} onClick={onViewOtherProducts} className="mt-auto" />
+        <div className="stage-external-page__actions"><SecondaryButton label={viewOtherProductsLabel} onClick={onViewOtherProducts} /></div>
       </div>
     </div>
   );
