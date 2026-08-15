@@ -18,7 +18,7 @@ export default function CircleIconButton({
       type="button"
       onClick={onClick}
       aria-label={ariaLabel}
-      className={`flex h-10.5 w-10.5 items-center justify-center rounded-full bg-[#d9d9d9]/20 transition hover:bg-[#d9d9d9]/30 ${className}`}
+      className={`flex h-10.5 w-10.5 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20 ${className}`}
     >
       <img src={icon} alt="" className={iconClassName} />
     </button>
