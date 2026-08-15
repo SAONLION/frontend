@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { useParams } from 'react-router'
+import { usePreparedNavigate } from '../../app/usePreparedNavigate'
+import { PreparedLink } from '../../components/common/PreparedLink'
 import { DocentStage } from '../../components/domain/DocentStage'
 import { KineticTextReveal } from '../../components/ui/kinetic-text-reveal'
 import {
@@ -33,7 +35,7 @@ const STAFF_CALL_INFO_TRANSITION_DELAY_MS = 2_000
 
 export function StaffCallPage({ completed = false, callType = 'info' }: StaffCallPageProps) {
   const { sku = '' } = useParams()
-  const navigate = useNavigate()
+  const navigate = usePreparedNavigate()
   const { state } = useSession()
   const staffCallService = useStaffCallService()
   const pendingRequestRef = useRef<PendingStaffRequest | null>(null)
@@ -88,7 +90,7 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
       <StageCDetailShell>
         <GlassInfoCard>
           <h1>직원 호출 정보를 찾을 수 없어요.</h1>
-          <Link to={returnPath}>{callType === 'info' ? '제품 이해로 돌아가기' : '기타 질문으로 돌아가기'}</Link>
+          <PreparedLink to={returnPath}>{callType === 'info' ? '제품 이해로 돌아가기' : '기타 질문으로 돌아가기'}</PreparedLink>
         </GlassInfoCard>
       </StageCDetailShell>
     )
@@ -108,9 +110,9 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
 
         {completed && revealedCompletedState === completed && (
           <div className="stage-c-staff-call-actions" aria-label="직원 문의 후 액션">
-            <Link className="stage-c-action-button" to={returnPath}>← 다른 정보 보기</Link>
+            <PreparedLink className="stage-c-action-button" to={returnPath}>← 다른 정보 보기</PreparedLink>
             <div>
-              <Link className="stage-c-action-button stage-c-action-button--primary" to={purchaseInquiryPath}>구매 문의</Link>
+              <PreparedLink className="stage-c-action-button stage-c-action-button--primary" to={purchaseInquiryPath}>구매 문의</PreparedLink>
               <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
             </div>
           </div>
@@ -122,7 +124,7 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
   return (
     <StageCDetailShell className="stage-c-c5-response-shell">
       <header className="stage-c-c5-response-topbar">
-        <Link aria-label="기타 질문 닫기" className="stage-c-close-control" to={returnPath}>×</Link>
+        <PreparedLink aria-label="기타 질문 닫기" className="stage-c-close-control" to={returnPath}>×</PreparedLink>
       </header>
       <div className="stage-c-c5-staff-content">
         <section aria-label="나이비스 AI 도슨트" className="stage-c-c5-staff-docent"><DocentStage continuityKey={`staff-call-${callType}`} cue={completed ? 'success' : 'sending'} /></section>
@@ -130,9 +132,9 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
         {revealedCompletedState === completed && <p><KineticTextReveal autoPlay blur={false} className="justify-center" distance={8} splitBy="words" stagger={0.1} text="더 자세한 상담을 받아보세요" waitForDocent /></p>}
       </div>
       {revealedCompletedState === completed && <div className="stage-c-c5-response-actions">
-        <Link className="stage-c-action-button" to={returnPath}>다른 것도 물어보기</Link>
+        <PreparedLink className="stage-c-action-button" to={returnPath}>다른 것도 물어보기</PreparedLink>
         <div>
-          <Link className="stage-c-action-button" to={returnPath}>직원에게 문의하기</Link>
+          <PreparedLink className="stage-c-action-button" to={returnPath}>직원에게 문의하기</PreparedLink>
           <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
         </div>
       </div>}

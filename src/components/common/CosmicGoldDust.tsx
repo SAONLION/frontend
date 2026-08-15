@@ -2,7 +2,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 
-const PARTICLE_COUNT = 940
+const PARTICLE_COUNT = 480
 const FIELD_DEPTH = 3.7
 const DRIFT_SPEED = 0.252
 const WARP_SPEED = 0.63
@@ -126,7 +126,11 @@ interface CosmicGoldDustProps {
 export function CosmicGoldDust({ isExiting = false }: CosmicGoldDustProps) {
   return (
     <div aria-hidden="true" className={`cosmic-gold-dust${isExiting ? ' cosmic-gold-dust--exiting' : ''}`}>
-      <Canvas camera={{ fov: 45, position: [0, 0, 3] }} dpr={window.devicePixelRatio} gl={{ alpha: true, antialias: true }}>
+      <Canvas
+        camera={{ fov: 45, position: [0, 0, 3] }}
+        dpr={[1, 1.25]}
+        gl={{ alpha: true, antialias: false, powerPreference: 'high-performance' }}
+      >
         <DustField />
       </Canvas>
     </div>

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, Navigate, useNavigate, useParams } from 'react-router'
+import { Navigate, useParams } from 'react-router'
+import { usePreparedNavigate } from '../../app/usePreparedNavigate'
+import { PreparedLink } from '../../components/common/PreparedLink'
 import { DocentStage } from '../../components/domain/DocentStage'
 import { KineticTextReveal } from '../../components/ui/kinetic-text-reveal'
 import { GlassInfoCard, StageCDetailShell } from '../../components/domain/StageCDetailShell'
@@ -41,7 +43,7 @@ type PriceInquiryContentProps = {
 }
 
 function PriceInquiryContent({ pageState, sku }: PriceInquiryContentProps) {
-  const navigate = useNavigate()
+  const navigate = usePreparedNavigate()
   const { dispatch, state } = useSession()
   const requestService = usePriceInquiryRequestService()
   const requestStartedRef = useRef(false)
@@ -97,8 +99,8 @@ function PriceInquiryContent({ pageState, sku }: PriceInquiryContentProps) {
       </div>
       {areActionsVisible && <div className="stage-c-price-inquiry-actions">
         {pageState === 'request' && <button className="stage-c-action-button stage-c-action-button--primary" onClick={submitRequest} type="button">직원에게 가격 안내 요청하기</button>}
-        {pageState === 'request' && <Link className="stage-c-action-button" to={purchaseHubPath}>구매 조건으로 돌아가기</Link>}
-        {pageState === 'pending' && <Link className="stage-c-action-button" to={purchaseHubPath}>다른 정보 보기</Link>}
+        {pageState === 'request' && <PreparedLink className="stage-c-action-button" to={purchaseHubPath}>구매 조건으로 돌아가기</PreparedLink>}
+        {pageState === 'pending' && <PreparedLink className="stage-c-action-button" to={purchaseHubPath}>다른 정보 보기</PreparedLink>}
         {pageState === 'completed' && <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>}
       </div>}
     </StageCDetailShell>
@@ -106,5 +108,5 @@ function PriceInquiryContent({ pageState, sku }: PriceInquiryContentProps) {
 }
 
 function PriceInquiryFallback({ path }: { path: string }) {
-  return <StageCDetailShell><GlassInfoCard><h1>가격 안내 요청 정보를 찾을 수 없어요.</h1><p>가격 안내를 원하시면 먼저 요청해 주세요.</p><Link className="stage-c-glass-link-button" to={path}>가격 안내 요청하기</Link></GlassInfoCard></StageCDetailShell>
+  return <StageCDetailShell><GlassInfoCard><h1>가격 안내 요청 정보를 찾을 수 없어요.</h1><p>가격 안내를 원하시면 먼저 요청해 주세요.</p><PreparedLink className="stage-c-glass-link-button" to={path}>가격 안내 요청하기</PreparedLink></GlassInfoCard></StageCDetailShell>
 }

@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from 'react-router';
 import { useSession } from '../features/session/useSession';
+import { rememberNavigationTrigger } from './navigationTrigger';
 import EOverlay from './EOverlay';
 
 export default function AppLayout() {
@@ -10,7 +11,7 @@ export default function AppLayout() {
     .replace(/\/fit\/(?:try-on\/(?:pending|completed)|purchase-inquiry\/completed)$/, '/fit/status');
 
   return (
-    <div className="relative min-h-dvh w-full">
+    <div className="relative min-h-dvh w-full" onPointerDownCapture={(event) => rememberNavigationTrigger(event.target)}>
       <div className="screen-motion-shell" data-motion-screen key={motionKey}>
         <Outlet />
       </div>

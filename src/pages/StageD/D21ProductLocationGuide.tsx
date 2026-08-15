@@ -38,6 +38,7 @@ export default function D21ProductLocationGuide({
           {isProductVisible && <InfoCard
             image={selectedProduct.image}
             imageScale={1.25}
+            imageSurface="transparent"
             imageVariant="primary-cutout"
             name={selectedProduct.name}
             description={selectedProduct.description}
@@ -45,7 +46,7 @@ export default function D21ProductLocationGuide({
           />}
         </div>
         {isProductVisible && <div className="stage-external-page__actions">
-          <SecondaryButton label={buttonLabel} onClick={onViewOtherProducts} />
+          <SecondaryButton label={buttonLabel} onClick={onViewOtherProducts} pendingOnClick />
         </div>}
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router'
+import { usePreparedNavigate } from '../../app/usePreparedNavigate'
 import { EVENT_NAMES } from '../../constants/events'
 import { STAGE_B_ROUTES, STAGE_F_ROUTES } from '../../constants/appRoutes'
 import { getCb6TriggerId } from '../blocker/shouldOfferCb6'
@@ -9,7 +9,7 @@ import { useSession } from '../session/useSession'
 // 첫 제품 이탈은 D1 방문 목적 확인으로, 이후 이탈은 B1 재태그로 이어진다.
 export function useProductExit(sku: string) {
   const { state, dispatch } = useSession()
-  const navigate = useNavigate()
+  const navigate = usePreparedNavigate()
 
   return () => {
     const exitCount = state.events.filter((event) => event.name === EVENT_NAMES.productExit).length

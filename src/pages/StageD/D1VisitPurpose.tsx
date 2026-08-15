@@ -46,6 +46,7 @@ export default function D1VisitPurpose({
                 label={option}
                 selected={selectedPurpose === option}
                 onClick={() => handleSelect(option)}
+                pendingOnClick
                 fullWidth={false}
               />
             ))}

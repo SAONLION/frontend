@@ -57,6 +57,7 @@ export default function D2ProductRecommendation({
               key={product.id}
               image={product.image}
               imageScale={1.25}
+              imageSurface="transparent"
               imageVariant="primary-cutout"
               name={product.name}
               description={product.description}
@@ -65,7 +66,7 @@ export default function D2ProductRecommendation({
           ))}
         </div>}
         {isRecommendationVisible && <div className="stage-external-page__actions">
-          <SecondaryButton label={secondaryButtonLabel} onClick={onTagOtherProduct} />
+          <SecondaryButton label={secondaryButtonLabel} onClick={onTagOtherProduct} pendingOnClick />
           <PrimaryButton label={primaryButtonLabel} onClick={onCallStaff} />
         </div>}
       </div>

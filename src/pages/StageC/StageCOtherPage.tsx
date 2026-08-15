@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate, useParams } from 'react-router'
-import { GlassBottomActionDock, GlassChoiceChip, GlassInfoCard, GlassTopBar, StageCDetailShell } from '../../components/domain/StageCDetailShell'
+import { useParams } from 'react-router'
+import { usePreparedNavigate } from '../../app/usePreparedNavigate'
+import { GlassBottomActionDock, GlassChoiceChip, GlassInfoCard, StageCDetailShell } from '../../components/domain/StageCDetailShell'
 import { FREE_QUERY_TOPICS, type FreeQueryTopic } from '../../constants/events'
-import { STAGE_C_PRODUCT_DETAIL_ROUTES, STAGE_C_ROUTES, stageCPath } from '../../constants/stageC'
+import { STAGE_C_PRODUCT_DETAIL_ROUTES, stageCPath } from '../../constants/stageC'
 import { useProductExit } from '../../features/product-explore/useProductExit'
 import { useStageCProduct } from '../../features/product-explore/useStageCProduct'
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes'
@@ -14,7 +15,7 @@ const piiPattern = /(?:\b[\w.+-]+@[\w-]+\.[\w.-]+\b)|(?:\b(?:\+?82[- ]?)?0?1[0-9
 
 export function StageCOtherPage() {
   const { sku = '' } = useParams()
-  const navigate = useNavigate()
+  const navigate = usePreparedNavigate()
   const { dispatch } = useSession()
   const product = useStageCProduct(sku)
   const exitProduct = useProductExit(sku)
@@ -39,7 +40,6 @@ export function StageCOtherPage() {
 
   return (
     <StageCDetailShell className="stage-c-other-shell">
-      <GlassTopBar action={<button aria-label="기타 질문 닫기" className="stage-c-close-control" onClick={() => navigate(stageCPath(STAGE_C_ROUTES.c1, sku))} type="button">×</button>} context="" />
       <GlassInfoCard className="stage-c-other-card">
         <h1>선택지에 없는 게 궁금하시면</h1>
         <p>아래에 편하게 적어주세요.</p>
