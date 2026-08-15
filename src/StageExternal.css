@@ -23,7 +23,7 @@
   width: min(100%, 25.125rem);
   min-height: 100dvh;
   margin: 0 auto;
-  padding: max(4.875rem, env(safe-area-inset-top)) clamp(1rem, 7.7vw, 1.9375rem) max(1.875rem, env(safe-area-inset-bottom));
+  padding: max(4.875rem, env(safe-area-inset-top)) clamp(1rem, 7.7vw, 1.9375rem) var(--app-content-edge-inset);
 }
 
 .stage-external-page__content--docent {
@@ -254,7 +254,10 @@
   background-image: linear-gradient(135deg, rgb(255 239 202 / 26%), transparent 54%, rgb(108 57 9 / 12%));
 }
 
-.stage-external-page .liquid-glass-button--secondary,
+.stage-external-page .liquid-glass-button--secondary {
+  background-color: rgb(255 255 255 / 10%);
+}
+
 .stage-external-page .liquid-glass-card {
   background-color: rgb(38 30 20 / 42%);
   background-image: linear-gradient(135deg, rgb(255 255 255 / 18%), transparent 44%, rgb(255 255 255 / 4%));

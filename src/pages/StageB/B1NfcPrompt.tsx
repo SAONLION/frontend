@@ -26,7 +26,7 @@ export default function B1NfcPrompt({
         <ScreenHeadline className="stage-entry-nfc-headline" headline={headline} onRevealComplete={() => setAreActionsVisible(true)} reveal subtext={subtext} variant="md" />
         {areActionsVisible && <div className="stage-entry-actions stage-entry-actions--nfc">
           <PrimaryButton label="제품 태그 인식하기" onClick={onNfcDetected} />
-          <PrimaryButton label={buttonLabel} onClick={onCallStaff} />
+          <PrimaryButton className="stage-b-staff-call-button" label={buttonLabel} onClick={onCallStaff} />
         </div>}
       </div>
     </main>

@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { BrowserRouter, useLocation } from 'react-router'
 import { AppRoutes } from './app/routes'
 import { SessionProvider } from './features/session/SessionProvider'
@@ -28,6 +28,45 @@ const CosmicGoldDust = lazy(async () => {
   return { default: module.CosmicGoldDust }
 })
 
+const DUST_EXIT_DURATION_MS = 700
+
+function StageAGoldDust() {
+  const { pathname } = useLocation()
+  const isStageA = pathname.startsWith('/stage-a/')
+  const [isVisible, setIsVisible] = useState(isStageA)
+  const [isExiting, setIsExiting] = useState(false)
+
+  useEffect(() => {
+    if (isStageA) {
+      setIsVisible(true)
+      setIsExiting(false)
+      return
+    }
+
+    if (!isVisible) {
+      return
+    }
+
+    setIsExiting(true)
+    const exitTimer = window.setTimeout(() => {
+      setIsVisible(false)
+      setIsExiting(false)
+    }, DUST_EXIT_DURATION_MS)
+
+    return () => window.clearTimeout(exitTimer)
+  }, [isStageA, isVisible])
+
+  if (!isVisible) {
+    return null
+  }
+
+  return (
+    <Suspense fallback={null}>
+      <CosmicGoldDust isExiting={isExiting} />
+    </Suspense>
+  )
+}
+
 function PersistentEntryDocent() {
   const { pathname } = useLocation()
 
@@ -55,7 +94,7 @@ function AppContent() {
     <div className="app-shell">
       <LiquidGlassFilterDefinitions />
       <AmbientBronzeBackground />
-      <Suspense fallback={null}><CosmicGoldDust /></Suspense>
+      <StageAGoldDust />
       <div className="app-shell__content">
         <PersistentEntryDocent />
       <ProductContentProvider value={mockProductContentProvider}>
