@@ -17,6 +17,8 @@ const oneShotDurations: Partial<Record<DocentCue, number>> = {
   greet: 2.5,
   present: 1.45,
   success: 1.5,
+  handoff: 0.82,
+  'return-nfc': 0.9,
   'request-success': 2.15,
 }
 
@@ -40,6 +42,9 @@ export function writeDocentMotion(cue: DocentCue, elapsed: number, clockTime: nu
     case 'nfc-guide':
       nfcGuideMotion(elapsed, output)
       return
+    case 'return-nfc':
+      returnNfcMotion(elapsed, output)
+      return
     case 'guide':
       guideMotion(elapsed, output)
       return
@@ -48,6 +53,9 @@ export function writeDocentMotion(cue: DocentCue, elapsed: number, clockTime: nu
       return
     case 'sending':
       sendingMotion(elapsed, output)
+      return
+    case 'handoff':
+      handoffMotion(elapsed, output)
       return
     case 'waiting':
       waitingMotion(elapsed, output)
@@ -154,6 +162,24 @@ function nfcGuideMotion(time: number, output: DocentMotion) {
   output.rightWingLift = gesture * 0.035
 }
 
+function returnNfcMotion(elapsed: number, output: DocentMotion) {
+  const progress = oneShotProgress(elapsed, 0.9)
+  const arrival = smoothstep(progress)
+  const flightEnvelope = Math.sin(progress * Math.PI)
+  const flap = Math.sin(elapsed * 11.5) * flightEnvelope
+
+  // 시트가 닫힌 뒤 B1에 새로 마운트되는 짧은 귀환 비행이다.
+  output.positionZ = -(1 - arrival) * 5.4
+  output.positionY += (1 - arrival) * 0.22 + flightEnvelope * 0.12
+  output.positionX = Math.sin(progress * Math.PI * 1.15) * 0.18 * flightEnvelope
+  output.rotationY = Math.sin(progress * Math.PI) * -0.18
+  output.rotationZ = Math.sin(progress * Math.PI * 1.65) * 0.1 * flightEnvelope
+  output.leftWingBow = flap * 0.12
+  output.rightWingBow = flap * 0.12
+  output.leftWingLift = -Math.cos(elapsed * 11.5) * flightEnvelope * 0.08
+  output.rightWingLift = Math.cos(elapsed * 11.5) * flightEnvelope * 0.08
+}
+
 function guideMotion(time: number, output: DocentMotion) {
   const local = time % 5.6
   const gesture = local < 1.5 ? Math.sin((local / 1.5) * Math.PI) : 0
@@ -198,6 +224,23 @@ function sendingMotion(time: number, output: DocentMotion) {
   output.leftWingLift = -(reach * 0.075 + dispatch * 0.04)
   output.rightWingBow = reach * 0.17 + dispatch * 0.12
   output.rightWingLift = reach * 0.075 + dispatch * 0.04
+}
+
+function handoffMotion(elapsed: number, output: DocentMotion) {
+  const progress = oneShotProgress(elapsed, 0.82)
+  const turn = smoothstep(normalizedProgress(progress, 0, 0.42))
+  const departure = smoothstep(normalizedProgress(progress, 0.32, 1))
+  const wingFold = Math.sin(departure * Math.PI)
+
+  // 먼저 완전히 뒤돈 뒤에 출발해, 뒷걸음치는 것처럼 보이지 않게 한다.
+  output.positionY += departure * 0.06
+  output.positionZ = -departure * 3.1
+  output.rotationY = turn * Math.PI
+  output.rotationZ = departure * 0.08
+  output.leftWingBow = wingFold * 0.06
+  output.leftWingLift = -wingFold * 0.07
+  output.rightWingBow = wingFold * 0.06
+  output.rightWingLift = wingFold * 0.07
 }
 
 function waitingMotion(time: number, output: DocentMotion) {

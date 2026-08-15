@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { useLocation, useParams } from 'react-router'
+import stylingLifestyleImage from '../../assets/images/product-styling-lifestyle.webp'
+import { usePreparedNavigate } from '../../app/usePreparedNavigate'
+import { PreparedLink } from '../../components/common/PreparedLink'
 import { GlassInfoCard, StageCDetailShell } from '../../components/domain/StageCDetailShell'
 import {
   STAGE_C_PRODUCT_DETAIL_ROUTES,
@@ -11,6 +14,7 @@ import { useStageCProduct } from '../../features/product-explore/useStageCProduc
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes'
 import { useSession } from '../../features/session/useSession'
 import { StageCState } from './StageCHubPage'
+import { StageFDevFlowOverlay, type StageFDevScenario } from '../StageF/StageFDevFlowOverlay'
 
 type Topic = 'craft' | 'heritage' | 'styling'
 
@@ -26,13 +30,17 @@ type StageCProductDetailPageProps = {
 
 export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps) {
   const { sku = '' } = useParams()
+  const location = useLocation()
   const product = useStageCProduct(sku)
   const { dispatch } = useSession()
-  const navigate = useNavigate()
+  const navigate = usePreparedNavigate()
   const exitProduct = useProductExit(sku)
   const viewed = useRef(false)
   const galleryTrackRef = useRef<HTMLDivElement>(null)
   const [activeImageIndex, setActiveImageIndex] = useState(0)
+  const devScenario = import.meta.env.DEV && isStageFDevScenario(location.state)
+    ? location.state.stageFDevScenario
+    : null
 
   useEffect(() => {
     if (product && !viewed.current) {
@@ -53,13 +61,15 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
         <GlassInfoCard>
           <h1>상품을 찾을 수 없어요</h1>
           <p>태그한 상품의 주소를 다시 확인해 주세요.</p>
-          <Link to={productHubPath}>제품 이해로 돌아가기</Link>
+          <PreparedLink to={productHubPath}>제품 이해로 돌아가기</PreparedLink>
         </GlassInfoCard>
       </StageCDetailShell>
     )
   }
 
-  const images = product.detailImages ?? []
+  const images = topic === 'styling'
+    ? [stylingLifestyleImage, ...(product.detailImages ?? [])]
+    : product.detailImages ?? []
   const lines = product.productDetail?.[topic] ?? ['정확한 제품 안내는 직원에게 문의해 주세요.']
   const imageCount = images.length
 
@@ -109,11 +119,10 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
     <StageCDetailShell className={`stage-c-product-detail-shell stage-c-product-detail-shell--${topic}`}>
       <header className="stage-c-product-detail-topbar">
         <span>{topicTitles[topic]}</span>
-        <button aria-label="제품 이해 닫기" className="stage-c-close-control" onClick={() => navigate(productHubPath)} type="button">×</button>
       </header>
 
       <section className={`stage-c-product-detail-media stage-c-product-detail-media--${topic}`} aria-label={`${topicTitles[topic]} 안내 미디어`}>
-        {topic !== 'styling' && <img alt={product.name} className="stage-c-primary-cutout" src={product.imageUrl} />}
+        {topic !== 'styling' && <img alt={product.name} className="stage-c-primary-cutout" decoding="async" fetchPriority="high" src={product.imageUrl} />}
         {topic === 'styling' && imageCount > 0 && (
           <div className="stage-c-gallery">
             <div
@@ -127,7 +136,9 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
               {images.map((image, imageIndex) => (
                 <img
                   alt={`${product.name} ${imageIndex + 1}번째 이미지`}
+                  decoding="async"
                   key={image}
+                  loading={imageIndex === 0 ? 'eager' : 'lazy'}
                   src={image}
                 />
               ))}
@@ -140,9 +151,6 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
               >
                 ‹
               </button>
-              <span aria-live="polite" className="stage-c-gallery-indicators">
-                {images.map((image, imageIndex) => <i aria-hidden="true" className={imageIndex === activeImageIndex ? 'is-active' : ''} key={image} />)}
-              </span>
               <button
                 aria-label="다음 제품 이미지"
                 onClick={() => scrollToImage(activeImageIndex + 1)}
@@ -151,9 +159,12 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
                 ›
               </button>
             </div>
+            <span aria-label={`${activeImageIndex + 1}번째 이미지, 전체 ${imageCount}개`} className="stage-c-gallery-dots">
+              {images.map((image, imageIndex) => <i aria-hidden="true" className={imageIndex === activeImageIndex ? 'is-active' : ''} key={image} />)}
+            </span>
           </div>
         )}
-        {topic === 'styling' && imageCount === 0 && <img alt={product.name} className="stage-c-primary-cutout" src={product.imageUrl} />}
+        {topic === 'styling' && imageCount === 0 && <img alt={product.name} className="stage-c-primary-cutout" decoding="async" fetchPriority="high" src={product.imageUrl} />}
       </section>
 
       <section className="stage-c-product-detail-summary">
@@ -175,6 +186,13 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
           다른 제품 보기 <span aria-hidden="true">→</span>
         </button>
       </div>
+      {devScenario && <StageFDevFlowOverlay product={product} scenario={devScenario} onExit={() => navigate('/__dev/stage-f')} />}
     </StageCDetailShell>
   )
+}
+
+function isStageFDevScenario(state: unknown): state is { stageFDevScenario: StageFDevScenario } {
+  if (typeof state !== 'object' || state === null || !('stageFDevScenario' in state)) return false
+  const scenario = state.stageFDevScenario
+  return scenario === 'f2' || scenario === 'f3' || scenario === 'f4'
 }

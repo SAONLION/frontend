@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
-import { GlassInfoCard, StageCDetailShell } from '../../components/domain/StageCDetailShell'
+import { useParams } from 'react-router'
+import { usePreparedNavigate } from '../../app/usePreparedNavigate'
+import { PreparedLink } from '../../components/common/PreparedLink'
+import { DocentStage } from '../../components/domain/DocentStage'
+import { StageCDetailShell } from '../../components/domain/StageCDetailShell'
+import { KineticTextReveal } from '../../components/ui/kinetic-text-reveal'
 import type { AiAnswerResult } from '../../features/ai-answer/AiAnswerService'
 import { useAiAnswerService } from '../../features/ai-answer/useAiAnswerService'
 import { useProductExit } from '../../features/product-explore/useProductExit'
@@ -21,10 +25,11 @@ const initialAnswerView = (contextKey: string): AnswerView => ({
   title: '답변을 준비하고 있어요.',
   lines: [],
 })
+const AI_WRITING_MINIMUM_MS = 2_000
 
 export function StageCAiAnswerPage() {
   const { sku = '' } = useParams()
-  const navigate = useNavigate()
+  const navigate = usePreparedNavigate()
   const { state, dispatch } = useSession()
   const service = useAiAnswerService()
   const product = useStageCProduct(sku)
@@ -63,7 +68,9 @@ export function StageCAiAnswerPage() {
       setAnswerView(initialAnswerView(contextKey))
     }
 
-    void request.completion.then((result) => {
+    const writingDuration = new Promise<void>((resolve) => window.setTimeout(resolve, AI_WRITING_MINIMUM_MS))
+
+    void Promise.all([request.completion, writingDuration]).then(([result]) => {
       if (!active || requestRef.current !== request) return
       if (!result.resolved) {
         dispatch({ type: SESSION_ACTIONS.recordAiAnswer, queryId: query.id, sku, topic: query.topic, resolved: false })
@@ -88,25 +95,43 @@ export function StageCAiAnswerPage() {
 
   return <StageCDetailShell className="stage-c-c5-response-shell">
     <header className="stage-c-c5-response-topbar">
-      <Link aria-label="기타 질문 닫기" className="stage-c-close-control" to={otherPath}>×</Link>
+      <PreparedLink aria-label="기타 질문 닫기" className="stage-c-close-control" to={otherPath}>×</PreparedLink>
     </header>
     <div className="stage-c-c5-ai-content">
-      <h1>{view.title}</h1>
-      {view.status === 'loading' && <p aria-live="polite">답변을 준비하고 있어요.</p>}
-      {view.status === 'error' && <p>잠시 후 다시 시도하거나 다른 질문을 남겨주세요.</p>}
-      {view.status === 'resolved' && (
-        <section className="stage-c-c5-answer-card" aria-label="AI 답변">
-          {view.lines.map((line) => <p key={line}>· {line}</p>)}
+      <h1>{`${query.text}에 대해서는\n이렇게 안내드릴 수 있어요`}</h1>
+      <div className="stage-c-c5-answer-slot">
+        <section aria-busy={view.status === 'loading'} className="stage-c-c5-answer-card" aria-label="AI 답변">
+          {view.status === 'loading' && (
+            <span aria-label="AI 답변 작성 중" className="stage-c-ai-writing-indicator" role="status">
+              <i /><i /><i />
+            </span>
+          )}
+          {view.status === 'resolved' && (
+            <p><KineticTextReveal autoPlay blur={false} delay={0.2} distance={0} splitBy="characters" stagger={0.018} text={view.lines.join(' ')} /></p>
+          )}
+          {view.status === 'error' && <p>잠시 후 다시 시도하거나 다른 질문을 남겨주세요.</p>}
         </section>
-      )}
+      </div>
     </div>
     <div className="stage-c-c5-response-actions">
-      <Link className="stage-c-action-button" to={otherPath}>다른 것도 물어보기</Link>
-      <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
+      <PreparedLink className="stage-c-action-button" to={otherPath}>다른 것도 물어보기</PreparedLink>
+      <div>
+        <button className="stage-c-action-button" onClick={requestStaff} type="button">직원에게 문의하기</button>
+        <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
+      </div>
     </div>
   </StageCDetailShell>
 }
 
 function MissingQuestion({ path }: { path: string }) {
-  return <StageCDetailShell><GlassInfoCard><h1>질문 내용을 찾을 수 없어요.</h1><p>궁금한 점을 다시 입력해 주세요.</p><Link className="stage-c-glass-link-button" to={path}>기타 질문으로 돌아가기</Link></GlassInfoCard></StageCDetailShell>
+  return (
+    <StageCDetailShell className="stage-c-missing-question-shell">
+      <div className="stage-c-missing-question-content">
+        <section aria-label="나이비스 AI 도슨트" className="stage-c-missing-question-docent"><DocentStage cue="apologize" /></section>
+        <h1>질문 내용을 찾을 수 없어요</h1>
+        <p>궁금한 점을 다시 입력해 주세요</p>
+      </div>
+      <div className="stage-c-missing-question-actions"><PreparedLink className="stage-c-action-button" to={path}>돌아가기</PreparedLink></div>
+    </StageCDetailShell>
+  )
 }

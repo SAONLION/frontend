@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useEffect, useRef, useState, type PointerEvent } from 'react';
+import { usePreparedNavigate } from './usePreparedNavigate';
 import { STAGE_B_ROUTES } from '../constants/appRoutes';
 import { useSession } from '../features/session/useSession';
 import { SESSION_ACTIONS } from '../features/session/sessionTypes';
@@ -10,11 +10,15 @@ import E2RequestReceived from '../pages/StageE/E2RequestReceived';
 // 화면 상단은 계속 보이며 클릭도 가능하다(시트 바깥에 백드롭을 깔지 않음).
 export default function EOverlay() {
   const { dispatch } = useSession();
-  const navigate = useNavigate();
+  const navigate = usePreparedNavigate();
   const [selectedRequests, setSelectedRequests] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const closeTimerRef = useRef<number | null>(null);
+  const dragStartYRef = useRef<number | null>(null);
+  const dragOffsetRef = useRef(0);
 
   useEffect(() => () => {
     if (closeTimerRef.current !== null) window.clearTimeout(closeTimerRef.current);
@@ -38,12 +42,44 @@ export default function EOverlay() {
     navigate(STAGE_B_ROUTES.nfcPrompt);
   };
 
+  const startSheetDrag = (event: PointerEvent<HTMLSpanElement>) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    dragStartYRef.current = event.clientY;
+    setIsDragging(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const moveSheetDrag = (event: PointerEvent<HTMLSpanElement>) => {
+    const startY = dragStartYRef.current;
+    if (startY === null) return;
+    const nextOffset = Math.max(0, event.clientY - startY);
+    dragOffsetRef.current = nextOffset;
+    setDragOffset(nextOffset);
+  };
+
+  const endSheetDrag = (event: PointerEvent<HTMLSpanElement>) => {
+    if (dragStartYRef.current === null) return;
+    dragStartYRef.current = null;
+    setIsDragging(false);
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    const sheetHeight = event.currentTarget.closest('.stage-external-page')?.clientHeight ?? 0;
+    if (dragOffsetRef.current >= Math.max(96, sheetHeight * 0.24)) {
+      close();
+      return;
+    }
+    dragOffsetRef.current = 0;
+    setDragOffset(0);
+  };
+
+  const sheetHandle = <span aria-label="아래로 끌어 직원 호출 시트 닫기" className="stage-overlay__drag-handle" onPointerCancel={endSheetDrag} onPointerDown={startSheetDrag} onPointerMove={moveSheetDrag} onPointerUp={endSheetDrag} />;
+
   return (
     <div className={`stage-overlay${isClosing ? ' stage-overlay--closing' : ''}`}>
       {submitted ? (
-        <E2RequestReceived selectedRequests={selectedRequests} onClose={close} />
+        <E2RequestReceived isDragging={isDragging} selectedRequests={selectedRequests} sheetHandle={sheetHandle} sheetOffset={dragOffset} />
       ) : (
         <E1StaffCallTray
+          isDragging={isDragging}
           onChangeSelectedRequests={(selected) => {
             const latest = selected[selected.length - 1];
             if (latest) {
@@ -56,7 +92,8 @@ export default function EOverlay() {
             setSubmitted(true);
           }}
           onViewOtherProducts={viewOtherProducts}
-          onClose={close}
+          sheetHandle={sheetHandle}
+          sheetOffset={dragOffset}
         />
       )}
     </div>

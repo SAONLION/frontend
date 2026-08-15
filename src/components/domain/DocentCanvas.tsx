@@ -232,7 +232,9 @@ function Model({ cue, continuityKey, reducedMotion, onReady }: { cue: DocentCue;
 
     const elapsed = (performance.now() - cueStartedAt.current) / 1000
     const duration = getDocentCueDuration(cue)
-    const activeCue = duration !== null && elapsed >= duration ? 'idle' : cue
+    const activeCue = duration !== null && elapsed >= duration
+      ? cue === 'return-nfc' ? 'nfc-guide' : 'idle'
+      : cue
     writeDocentMotion(activeCue, elapsed, clock.elapsedTime, targetMotion.current)
     const transitionProgress = Math.min((performance.now() - cueTransitionStartedAt.current) / 1000 / CUE_TRANSITION_DURATION, 1)
     blendMotion(appliedMotion.current, transitionFromMotion.current, targetMotion.current, smoothstep(transitionProgress))
@@ -242,9 +244,9 @@ function Model({ cue, continuityKey, reducedMotion, onReady }: { cue: DocentCue;
     motionGroup.position.x = THREE.MathUtils.lerp(motionGroup.position.x, rest.position.x + nextMotion.positionX, blend)
     motionGroup.position.y = THREE.MathUtils.lerp(motionGroup.position.y, rest.position.y + nextMotion.positionY, blend)
     motionGroup.position.z = THREE.MathUtils.lerp(motionGroup.position.z, rest.position.z + nextMotion.positionZ, blend)
-    motionGroup.rotation.x = THREE.MathUtils.lerp(motionGroup.rotation.x, rest.rotation.x + nextMotion.rotationX, blend)
-    motionGroup.rotation.y = THREE.MathUtils.lerp(motionGroup.rotation.y, rest.rotation.y + nextMotion.rotationY, blend)
-    motionGroup.rotation.z = THREE.MathUtils.lerp(motionGroup.rotation.z, rest.rotation.z + nextMotion.rotationZ, blend)
+    motionGroup.rotation.x = lerpAngle(motionGroup.rotation.x, rest.rotation.x + nextMotion.rotationX, blend)
+    motionGroup.rotation.y = lerpAngle(motionGroup.rotation.y, rest.rotation.y + nextMotion.rotationY, blend)
+    motionGroup.rotation.z = lerpAngle(motionGroup.rotation.z, rest.rotation.z + nextMotion.rotationZ, blend)
 
     wings.current.forEach((wing, index) => {
       const wingTransform = wingRest.current[index]
@@ -588,6 +590,13 @@ function blendMotion(target: DocentMotion, from: DocentMotion, to: DocentMotion,
   target.rightWingLift = THREE.MathUtils.lerp(from.rightWingLift, to.rightWingLift, progress)
 }
 
+// Euler angles that differ by a full turn describe the same pose. Interpolating
+// their raw values makes E2's completed spin unwind at the end of its cue.
+function lerpAngle(from: number, to: number, progress: number) {
+  const shortestDelta = THREE.MathUtils.euclideanModulo(to - from + Math.PI, Math.PI * 2) - Math.PI
+  return from + shortestDelta * progress
+}
+
 function smoothstep(progress: number) {
   return progress * progress * (3 - 2 * progress)
 }
@@ -597,7 +606,13 @@ export default function DocentCanvas({ cue, continuityKey, onReady }: { cue: Doc
 
   return (
     <>
-      <Canvas aria-hidden camera={{ fov: 36, position: [0, 0, 9.75] }} dpr={[1, 1.5]} gl={{ alpha: true }}>
+      <Canvas
+        aria-hidden
+        camera={{ fov: 36, position: [0, 0, 9.75] }}
+        dpr={[1, 1.25]}
+        gl={{ alpha: true, antialias: false, powerPreference: 'high-performance' }}
+        performance={{ min: 0.65 }}
+      >
         <ambientLight intensity={0.4} />
         <directionalLight color="#ffe7a6" intensity={2.2} position={[3, 4, 4]} />
         <pointLight color="#fff2c4" intensity={8} distance={5} position={[0, 1.4, 4]} />

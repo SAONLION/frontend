@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { useParams } from 'react-router'
+import { usePreparedNavigate } from '../../app/usePreparedNavigate'
 import { DocentStage } from '../../components/domain/DocentStage'
 import { KineticTextReveal } from '../../components/ui/kinetic-text-reveal'
 import { StageCDetailShell } from '../../components/domain/StageCDetailShell'
@@ -25,7 +26,7 @@ const STATUS_CONTENT: Record<PurchaseStatusKind, { title: string; description?: 
 
 export function StageCPurchaseStatusPage({ kind }: { kind: PurchaseStatusKind }) {
   const { sku = '' } = useParams()
-  const navigate = useNavigate()
+  const navigate = usePreparedNavigate()
   const { dispatch } = useSession()
   const product = useStageCProduct(sku)
   const exitProduct = useProductExit(sku)

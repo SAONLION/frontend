@@ -1,4 +1,5 @@
-import { useNavigate, useParams } from 'react-router'
+import { useParams } from 'react-router'
+import { usePreparedNavigate } from '../../app/usePreparedNavigate'
 import { ChoiceList } from '../../components/common/ChoiceList'
 import { MobileShell } from '../../components/common/MobileShell'
 import { ProductMedia } from '../../components/domain/ProductMedia'
@@ -22,7 +23,7 @@ type StageCHubPageProps = {
 
 export function StageCHubPage({ screenId }: StageCHubPageProps) {
   const { sku = '' } = useParams()
-  const navigate = useNavigate()
+  const navigate = usePreparedNavigate()
   const { dispatch } = useSession()
   const exitProduct = useProductExit(sku)
   const product = useStageCProduct(sku)

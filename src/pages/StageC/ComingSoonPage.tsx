@@ -1,4 +1,5 @@
-import { Link, useParams } from 'react-router'
+import { useParams } from 'react-router'
+import { PreparedLink } from '../../components/common/PreparedLink'
 import { MobileShell } from '../../components/common/MobileShell'
 import { STAGE_B_ROUTES } from '../../constants/appRoutes'
 import { STAGE_C_SCREEN_IDS } from '../../constants/stageC'
@@ -34,9 +35,9 @@ export function ComingSoonPage({ screenId: explicitScreenId }: { screenId?: stri
         <p className="stage-c-target-id">{resolvedScreenId || '다음 화면'}</p>
         <h1>이 안내는 준비 중이에요</h1>
         <p>선택하신 내용을 더 잘 안내할 수 있도록 곧 연결할게요.</p>
-        <Link className="stage-c-action-button stage-c-action-button--primary" to={fallback.path(sku)}>
+        <PreparedLink className="stage-c-action-button stage-c-action-button--primary" to={fallback.path(sku)}>
           {fallback.label}
-        </Link>
+        </PreparedLink>
       </section>
     </MobileShell>
   )

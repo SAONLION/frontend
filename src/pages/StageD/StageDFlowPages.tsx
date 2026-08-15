@@ -1,4 +1,5 @@
-import { useNavigate, useLocation } from 'react-router';
+import { useLocation } from 'react-router';
+import { usePreparedNavigate } from '../../app/usePreparedNavigate';
 import { STAGE_D_ROUTES } from '../../constants/appRoutes';
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes';
 import { useSession } from '../../features/session/useSession';
@@ -21,7 +22,7 @@ const FALLBACK_SELECTED_PRODUCT: SelectedProduct = {
 
 // StageC의 useProductExit가 첫 이탈 시 이동시키는 comingSoon 스텁 경로에 매핑된다.
 export function StageD1Page() {
-  const navigate = useNavigate();
+  const navigate = usePreparedNavigate();
   const { dispatch } = useSession();
 
   return (
@@ -36,7 +37,7 @@ export function StageD1Page() {
 }
 
 export function StageD2Page() {
-  const navigate = useNavigate();
+  const navigate = usePreparedNavigate();
   const { state, dispatch } = useSession();
   const returnToB1 = useReturnToB1();
 

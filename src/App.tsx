@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { BrowserRouter, useLocation } from 'react-router'
 import { AppRoutes } from './app/routes'
 import { SessionProvider } from './features/session/SessionProvider'
@@ -18,6 +18,7 @@ import { LiquidGlassFilterDefinitions } from './components/common/LiquidGlassFil
 import { DocentStage } from './components/domain/DocentStage'
 import type { DocentCue } from './components/domain/DocentStage'
 import { markDocentReady } from './features/docent/docentReadiness'
+import { useSession } from './features/session/useSession'
 import './App.css'
 import './StageExternal.css'
 import './StageF.css'
@@ -29,18 +30,19 @@ const CosmicGoldDust = lazy(async () => {
 })
 
 const DUST_EXIT_DURATION_MS = 700
+const DUST_START_DELAY_MS = 550
 
 function StageAGoldDust() {
   const { pathname } = useLocation()
   const isStageA = pathname.startsWith('/stage-a/')
-  const [isVisible, setIsVisible] = useState(isStageA)
+  const [isVisible, setIsVisible] = useState(false)
   const [isExiting, setIsExiting] = useState(false)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isStageA) {
-      setIsVisible(true)
       setIsExiting(false)
-      return
+      const startTimer = window.setTimeout(() => setIsVisible(true), DUST_START_DELAY_MS)
+      return () => window.clearTimeout(startTimer)
     }
 
     if (!isVisible) {
@@ -69,12 +71,38 @@ function StageAGoldDust() {
 
 function PersistentEntryDocent() {
   const { pathname } = useLocation()
+  const { state } = useSession()
+  const [isReturningFromHandoff, setIsReturningFromHandoff] = useState(false)
+  const [docentInstance, setDocentInstance] = useState(0)
+  const previousOverlay = useRef(state.activeOverlay)
+
+  const isB1Handoff = pathname === '/stage-b/nfc' && state.activeOverlay === 'E'
+
+  useEffect(() => {
+    const didCloseB1Overlay = previousOverlay.current === 'E'
+      && state.activeOverlay !== 'E'
+      && pathname === '/stage-b/nfc'
+    previousOverlay.current = state.activeOverlay
+
+    if (isB1Handoff) {
+      setIsReturningFromHandoff(false)
+      return
+    }
+    if (!didCloseB1Overlay) return
+    setIsReturningFromHandoff(true)
+    setDocentInstance((current) => current + 1)
+    const timer = window.setTimeout(() => setIsReturningFromHandoff(false), 950)
+    return () => window.clearTimeout(timer)
+  }, [isB1Handoff, pathname, state.activeOverlay])
 
   if (!pathname.startsWith('/stage-a/') && !pathname.startsWith('/stage-b/')) {
     return null
   }
-
-  const cue: DocentCue = pathname === '/stage-a/intro'
+  const cue: DocentCue = isB1Handoff
+    ? 'handoff'
+    : isReturningFromHandoff && pathname === '/stage-b/nfc'
+      ? 'return-nfc'
+    : pathname === '/stage-a/intro'
     ? 'greet'
     : pathname === '/stage-a/nickname'
       ? 'listen'
@@ -83,8 +111,12 @@ function PersistentEntryDocent() {
         : 'scan'
 
   return (
-    <section aria-label="나이비스 AI 도슨트" className="stage-entry-persistent-docent">
-      <DocentStage cue={cue} onReady={markDocentReady} />
+    <section
+      aria-label="나이비스 AI 도슨트"
+      className={`stage-entry-persistent-docent${isB1Handoff ? ' stage-entry-persistent-docent--handoff' : ''}${isReturningFromHandoff ? ' stage-entry-persistent-docent--returning' : ''}`}
+      style={isB1Handoff ? undefined : { opacity: 1, visibility: 'visible' }}
+    >
+      <DocentStage immediate={isReturningFromHandoff} key={docentInstance} cue={cue} onReady={markDocentReady} />
     </section>
   )
 }
@@ -96,7 +128,6 @@ function AppContent() {
       <AmbientBronzeBackground />
       <StageAGoldDust />
       <div className="app-shell__content">
-        <PersistentEntryDocent />
       <ProductContentProvider value={mockProductContentProvider}>
         <AiAnswerProvider value={mockAiAnswerService}>
           <StaffCallProvider value={mockStaffCallService}>
@@ -104,6 +135,7 @@ function AppContent() {
               <TryOnRequestProvider value={mockTryOnRequestService}>
                 <ContactProvider>
                   <SessionProvider>
+                    <PersistentEntryDocent />
                     <AppRoutes />
                   </SessionProvider>
                 </ContactProvider>
