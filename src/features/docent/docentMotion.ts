@@ -17,7 +17,7 @@ const oneShotDurations: Partial<Record<DocentCue, number>> = {
   greet: 2.5,
   present: 1.45,
   success: 1.5,
-  'request-success': 1.65,
+  'request-success': 2.15,
 }
 
 export function getDocentCueDuration(cue: DocentCue): number | null {
@@ -56,7 +56,7 @@ export function writeDocentMotion(cue: DocentCue, elapsed: number, clockTime: nu
       successMotion(elapsed, output)
       return
     case 'request-success':
-      successMotion(elapsed, output)
+      requestSuccessMotion(elapsed, output)
       return
     case 'present':
       presentMotion(elapsed, output)
@@ -228,6 +228,26 @@ function successMotion(elapsed: number, output: DocentMotion) {
   output.rightWingLift = open * 0.11
 }
 
+function requestSuccessMotion(elapsed: number, output: DocentMotion) {
+  const progress = oneShotProgress(elapsed, 2.15)
+  const spinProgress = Math.min(progress / 0.52, 1)
+  const spin = smoothstep(spinProgress)
+  const mainJumpProgress = normalizedProgress(progress, 0.52, 0.82)
+  const landingBounceProgress = normalizedProgress(progress, 0.82, 0.97)
+  const mainJump = Math.sin(mainJumpProgress * Math.PI)
+  const landingBounce = Math.sin(landingBounceProgress * Math.PI)
+
+  // 체크마크 대신 도슨트 본체가 한 바퀴 돌아 성공을 알리고, 착지 전 가볍게 튀어 오른다.
+  output.rotationY = spin * Math.PI * 2
+  output.positionY += mainJump * 0.24 + landingBounce * 0.075
+  output.positionZ = -mainJump * 0.07
+  output.rotationZ = Math.sin(mainJumpProgress * Math.PI) * -0.055
+  output.leftWingBow = mainJump * 0.16
+  output.leftWingLift = -mainJump * 0.09
+  output.rightWingBow = mainJump * 0.16
+  output.rightWingLift = mainJump * 0.09
+}
+
 function presentMotion(elapsed: number, output: DocentMotion) {
   const progress = oneShotProgress(elapsed, 1.45)
   const gesture = bell(progress, 0.08, 0.76)
@@ -264,6 +284,10 @@ function oneShotProgress(elapsed: number, duration: number): number {
 function bell(progress: number, start: number, end: number): number {
   if (progress <= start || progress >= end) return 0
   return Math.sin(((progress - start) / (end - start)) * Math.PI)
+}
+
+function normalizedProgress(progress: number, start: number, end: number): number {
+  return Math.min(Math.max((progress - start) / (end - start), 0), 1)
 }
 
 function smoothstep(progress: number): number {

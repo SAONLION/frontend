@@ -10,7 +10,7 @@
     inset -0.0625rem -0.0625rem 0.125rem rgb(0 0 0 / 28%),
     inset 0 0 0.75rem rgb(255 255 255 / 7%);
   position: relative;
-  min-height: 100dvh;
+  min-height: var(--app-viewport-height);
   background: #000;
   isolation: isolate;
 }
@@ -39,11 +39,21 @@
   pointer-events: none;
 }
 
+.cosmic-gold-dust--exiting {
+  animation: cosmic-gold-dust-exit 700ms ease-out both;
+  will-change: opacity;
+}
+
 .cosmic-gold-dust canvas {
   display: block;
   width: 100% !important;
   height: 100% !important;
   pointer-events: none;
+}
+
+@keyframes cosmic-gold-dust-exit {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 .app-shell__content {
@@ -454,7 +464,7 @@
   --stage-c-product-media-top-space: clamp(0.75rem, 2.25dvh, 1.25rem);
   --stage-c-primary-cutout-scale: 1.38;
   --stage-c-close-inline-inset: 0.375rem;
-  --stage-c-close-shift-inline: 1.375rem;
+  --stage-c-close-shift-inline: 0.125rem;
   --stage-c-close-shift-block: 0;
   /* The close control shares the topbar pill's visual center line. */
   --stage-c-close-top: -0.25rem;
@@ -990,7 +1000,7 @@
 
 .stage-c-glass-speech button {
   width: 100%;
-  background: transparent;
+  background: rgb(255 255 255 / 10%);
   text-align: left;
 }
 
@@ -1106,7 +1116,7 @@
   min-width: 0;
   padding-inline: 0.35rem;
   border-color: rgb(255 255 255 / 14%);
-  background: rgb(255 255 255 / 15%);
+  background: rgb(255 255 255 / 10%);
   text-wrap: nowrap;
 }
 
@@ -1229,7 +1239,7 @@
   border: 0;
   border-radius: 0.75rem;
   padding: 0.375rem 0.5rem;
-  background: transparent;
+  background: rgb(255 255 255 / 10%);
   color: inherit;
   font: inherit;
   cursor: pointer;
@@ -1476,8 +1486,8 @@
 
 .stage-c-close-control {
   display: grid;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 1.75rem;
+  height: 1.75rem;
   place-items: center;
   padding: 0 0 0.1875rem;
   border: 1px solid var(--stage-c-glass-border);
@@ -1485,7 +1495,8 @@
   background: rgb(255 255 255 / 12%);
   box-shadow: inset 0 1px 0 var(--stage-c-glass-highlight), var(--stage-c-glass-shadow);
   color: var(--stage-c-glass-text);
-  font-size: 1.75rem;
+  font-size: 1.65rem;
+  font-weight: 200;
   line-height: 1;
   text-decoration: none;
   backdrop-filter: var(--stage-c-glass-blur) var(--stage-c-glass-saturate);
@@ -1736,16 +1747,9 @@
 }
 
 .stage-c-product-detail-more-button {
+  flex: 0 0 auto;
   width: 100%;
   margin-bottom: 0.625rem;
-  padding: 0.875rem 1rem;
-  border: 1px solid var(--stage-c-glass-border);
-  border-radius: 999px;
-  background: rgb(255 255 255 / 12%);
-  color: var(--stage-c-glass-text);
-  font: inherit;
-  font-size: 0.9375rem;
-  cursor: pointer;
 }
 
 .stage-c-product-detail-shell--craft .stage-c-product-detail-more-button,
@@ -1846,7 +1850,7 @@
   min-height: 2.875rem;
   border: 0;
   border-radius: 1.75rem;
-  background: transparent;
+  background: rgb(255 255 255 / 10%);
   color: rgb(255 255 255 / 62%);
   font: inherit;
   font-size: 0.875rem;
@@ -1919,7 +1923,7 @@
   align-items: center;
   gap: 0.375rem;
   border: 0;
-  background: transparent;
+  background: rgb(255 255 255 / 10%);
   color: rgb(255 255 255 / 52%);
   font: inherit;
   font-size: 0.75rem;
@@ -2210,19 +2214,82 @@
 }
 
 .stage-entry-page--stage-b .liquid-glass-button--secondary {
-  background-color: rgb(255 255 255 / 16%);
+  background-color: rgb(255 255 255 / 10%);
   background-image: linear-gradient(135deg, rgb(255 255 255 / 18%), transparent 48%, rgb(255 225 172 / 5%));
 }
 
 .stage-entry-page--stage-b .stage-entry-primary-button + .stage-entry-primary-button {
-  background-color: rgb(255 255 255 / 16%);
+  background-color: rgb(255 255 255 / 10%);
 }
 
-.stage-c-shell .stage-c-product-context-pill,
+.stage-entry-page--stage-b .stage-b-staff-call-button {
+  background-color: rgb(255 255 255 / 10%);
+}
+
+/* Persistent page actions share the product context pill's top-edge rhythm. */
+.stage-entry-content,
+.stage-c-page,
+.stage-c-state-page,
+.stage-c-detail-shell,
+.stage-c-staff-call-shell,
+.stage-c-fit-status-shell,
+.stage-c-purchase-status-shell,
+.stage-c-price-inquiry-shell,
+.stage-c-c5-response-shell,
+.stage-c-product-detail-shell,
+.stage-c-fit-reference-shell {
+  padding-bottom: var(--app-content-edge-inset);
+}
+
+.stage-c-staff-call-actions,
+.stage-c-fit-status-actions,
+.stage-c-purchase-status-actions,
+.stage-c-price-inquiry-actions,
+.stage-c-c5-response-actions {
+  bottom: var(--app-content-edge-inset);
+}
+
+.stage-c-product-context-pill {
+  padding: 0.45rem 0.9rem;
+  border: 0;
+  border-radius: 0.65rem;
+  background: rgb(217 217 217 / 20%);
+  box-shadow: none;
+  font-size: 0.8rem;
+  backdrop-filter: none;
+}
+
+.stage-entry-nickname-submit {
+  background: rgb(255 255 255 / 10%);
+}
+
+/* Information is intentionally plain: glass is reserved for controls and transient status surfaces. */
+.stage-c-glass-card {
+  border: 0;
+  background: rgb(38 42 51 / 82%);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.stage-c-product-detail-summary,
+.stage-c-c5-answer-card {
+  border: 0;
+  background: rgb(54 49 42 / 74%);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.stage-c-fit-reference-pill {
+  border: 0;
+  background: rgb(217 217 217 / 20%);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
 .stage-c-shell .stage-c-choice-button,
 .stage-c-shell .stage-c-action-button {
   border-color: var(--stage-c-glass-border);
-  background-color: rgb(28 31 38 / 46%);
+  background-color: rgb(255 255 255 / 10%);
   background-image: linear-gradient(135deg, rgb(255 255 255 / 18%), transparent 43%, rgb(255 255 255 / 4%));
   box-shadow: var(--stage-c-glass-shadow);
   backdrop-filter: var(--stage-c-glass-blur) var(--stage-c-glass-saturate);
@@ -2236,7 +2303,6 @@
 }
 
 @supports (backdrop-filter: url("#liquid-glass-distortion")) {
-  .stage-c-shell .stage-c-product-context-pill,
   .stage-c-shell .stage-c-choice-button,
   .stage-c-shell .stage-c-action-button {
     backdrop-filter: url("#liquid-glass-distortion") var(--stage-c-glass-blur) var(--stage-c-glass-saturate);
@@ -2288,4 +2354,20 @@
   .stage-c-gallery-controls button:active {
     transform: none;
   }
+}
+
+/* Keep information cards flat even when the browser lacks backdrop-filter support. */
+.stage-c-glass-card {
+  border: 0;
+  background: rgb(38 42 51 / 82%);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.stage-c-product-detail-summary,
+.stage-c-c5-answer-card {
+  border: 0;
+  background: rgb(54 49 42 / 74%);
+  box-shadow: none;
+  backdrop-filter: none;
 }

@@ -119,9 +119,13 @@ function DustField() {
 }
 
 /** Transparent adaptation of the provided Cosmic Dust scene for the existing bronze surface. */
-export function CosmicGoldDust() {
+interface CosmicGoldDustProps {
+  isExiting?: boolean
+}
+
+export function CosmicGoldDust({ isExiting = false }: CosmicGoldDustProps) {
   return (
-    <div aria-hidden="true" className="cosmic-gold-dust">
+    <div aria-hidden="true" className={`cosmic-gold-dust${isExiting ? ' cosmic-gold-dust--exiting' : ''}`}>
       <Canvas camera={{ fov: 45, position: [0, 0, 3] }} dpr={window.devicePixelRatio} gl={{ alpha: true, antialias: true }}>
         <DustField />
       </Canvas>

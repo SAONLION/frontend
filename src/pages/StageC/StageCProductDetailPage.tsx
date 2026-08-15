@@ -163,7 +163,7 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
       </section>
 
       {topic !== 'styling' && (
-        <button className="stage-c-product-detail-more-button" onClick={requestStaffDetails} type="button">
+        <button className="stage-c-action-button stage-c-product-detail-more-button" onClick={requestStaffDetails} type="button">
           더 자세한 내용이 궁금하다면
         </button>
       )}

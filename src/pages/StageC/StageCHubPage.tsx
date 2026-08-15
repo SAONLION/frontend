@@ -93,7 +93,7 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
           <ChoiceList choices={primaryChoices} onSelect={selectChoice} />
           {otherChoice && (
             <button className="stage-c-other-link" onClick={() => selectChoice(otherChoice)} type="button">
-              {otherChoice.label} <span aria-hidden="true">→</span>
+              {otherChoice.label}
             </button>
           )}
         </div>
