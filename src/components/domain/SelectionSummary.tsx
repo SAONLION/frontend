@@ -12,7 +12,7 @@ export function SelectionSummary({ productName, sizeLabel, colorLabel, dimension
   return (
     <GlassInfoCard>
       <div className="stage-c-selection-summary">
-        <img alt="선택한 제품" src={imageUrl} />
+        <img alt="선택한 제품" decoding="async" src={imageUrl} />
         <div>
           <p className="stage-c-selection-summary__eyebrow">선택한 제품</p>
           <h1>{productName}</h1>

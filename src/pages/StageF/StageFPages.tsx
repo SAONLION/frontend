@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
-import { useLocation, useNavigate } from 'react-router'
+import { useLocation } from 'react-router'
+import { usePreparedNavigate } from '../../app/usePreparedNavigate'
 import emblemImage from '../../assets/images/mcm-emblem.png'
 import { BlockerPrompt } from '../../components/domain/BlockerPrompt'
 import { DEFAULT_PRODUCT_SKU, STAGE_B_ROUTES, STAGE_F_ROUTES } from '../../constants/appRoutes'
@@ -52,7 +53,7 @@ function hasAcceptedAction(state: ReturnType<typeof useSession>['state'], code: 
 }
 
 function useRouteContextGuard(allowed: boolean) {
-  const navigate = useNavigate()
+  const navigate = usePreparedNavigate()
   useEffect(() => {
     if (!allowed) navigate(STAGE_B_ROUTES.nfcPrompt, { replace: true })
   }, [allowed, navigate])
@@ -78,7 +79,7 @@ function StageFProductBackdrop({ product }: { product: Product }) {
 }
 
 export function StageFPromptPage({ variant }: { variant: BlockerPromptVariant }) {
-  const navigate = useNavigate()
+  const navigate = usePreparedNavigate()
   const location = useLocation()
   const { state, dispatch } = useSession()
   const product = useCurrentProduct()
@@ -110,7 +111,7 @@ export function StageFPromptPage({ variant }: { variant: BlockerPromptVariant })
 }
 
 export function StageFCb6OfferPage() {
-  const navigate = useNavigate()
+  const navigate = usePreparedNavigate()
   const location = useLocation()
   const { state, dispatch } = useSession()
   const { hasCapturedContact } = useContact()
@@ -144,7 +145,7 @@ export function StageFCb6OfferPage() {
 }
 
 export function StageFEmailInputPage() {
-  const navigate = useNavigate()
+  const navigate = usePreparedNavigate()
   const location = useLocation()
   const { state, dispatch } = useSession()
   const scenario = getMockScenario(location.search, location.state)
@@ -166,7 +167,7 @@ export function StageFEmailInputPage() {
 }
 
 export function StageFSendCompletePage() {
-  const navigate = useNavigate()
+  const navigate = usePreparedNavigate()
   const location = useLocation()
   const { state } = useSession()
   const product = useCurrentProduct()
@@ -177,7 +178,7 @@ export function StageFSendCompletePage() {
 }
 
 export function StageFValueContentPage() {
-  const navigate = useNavigate()
+  const navigate = usePreparedNavigate()
   const location = useLocation()
   const { state, dispatch } = useSession()
   const product = useCurrentProduct()
@@ -192,7 +193,7 @@ export function StageFValueContentPage() {
 }
 
 export function StageFStaffHandoffPage() {
-  const navigate = useNavigate()
+  const navigate = usePreparedNavigate()
   const location = useLocation()
   const { state } = useSession()
   const scenario = getMockScenario(location.search, location.state)

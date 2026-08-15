@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Link, useLocation, useNavigate, useParams } from 'react-router'
+import { useLocation, useNavigate, useParams } from 'react-router'
+import { usePreparedNavigate } from '../../app/usePreparedNavigate'
+import { PreparedLink } from '../../components/common/PreparedLink'
 import { DocentStage } from '../../components/domain/DocentStage'
 import { KineticTextReveal } from '../../components/ui/kinetic-text-reveal'
 import { StageCDetailShell } from '../../components/domain/StageCDetailShell'
@@ -48,7 +50,8 @@ type StageCFitContentProps = {
 }
 
 function StageCFitContent({ kind, product, selection, sku }: StageCFitContentProps) {
-  const navigate = useNavigate()
+  const navigate = usePreparedNavigate()
+  const navigateSelection = useNavigate()
   const { dispatch, state } = useSession()
   const tryOnRequestService = useTryOnRequestService()
   const exitProduct = useProductExit(sku)
@@ -96,13 +99,13 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
   const setSize = (next: SizeOption) => {
     if (next.code === selection.size.code) return
     dispatch({ type: SESSION_ACTIONS.recordSizeCheck, sku, size: next.code })
-    navigate(fitSearchPath(kind === 'size' ? paths.size : paths.tryOn, { ...selection, size: next }))
+    navigateSelection(fitSearchPath(kind === 'size' ? paths.size : paths.tryOn, { ...selection, size: next }))
   }
 
   const setColor = (next: ColorOption) => {
     if (next.code === selection.color.code) return
     dispatch({ type: SESSION_ACTIONS.recordColorSwitch, sku, from: selection.color.code, to: next.code })
-    navigate(fitSearchPath(kind === 'color' ? paths.color : paths.tryOn, { ...selection, color: next }))
+    navigateSelection(fitSearchPath(kind === 'color' ? paths.color : paths.tryOn, { ...selection, color: next }))
   }
 
   const confirmSize = () => {
@@ -299,7 +302,7 @@ function FitFallback() {
         <h1><KineticTextReveal autoPlay blur className="justify-center" distance={16} onRevealComplete={() => setIsDescriptionVisible(true)} splitBy="characters" stagger={0.035} text="오류가 발생했어요" waitForDocent /></h1>
         {isDescriptionVisible && <p><KineticTextReveal autoPlay blur={false} className="justify-center" distance={8} onRevealComplete={() => setIsActionVisible(true)} splitBy="words" stagger={0.1} text="이전 선택을 찾을 수 없어요" waitForDocent /></p>}
       </div>
-      {isActionVisible && <div className="stage-c-fit-status-actions"><Link className="stage-c-action-button stage-c-action-button--primary" to={STAGE_A_ROUTES.intro}>메인으로</Link></div>}
+      {isActionVisible && <div className="stage-c-fit-status-actions"><PreparedLink className="stage-c-action-button stage-c-action-button--primary" to={STAGE_A_ROUTES.intro}>메인으로</PreparedLink></div>}
     </StageCDetailShell>
   )
 }

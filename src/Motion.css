@@ -1,8 +1,8 @@
 :root {
-  --motion-screen-enter: 520ms;
-  --motion-content-enter: 420ms;
-  --motion-feedback: 180ms;
-  --motion-sequence-step: 140ms;
+  --motion-screen-enter: 380ms;
+  --motion-content-enter: 300ms;
+  --motion-feedback: 140ms;
+  --motion-sequence-step: 90ms;
   --motion-ease-enter: cubic-bezier(.22, 1, .36, 1);
   --motion-ease-feedback: cubic-bezier(.2, .8, .2, 1);
 }
@@ -31,6 +31,16 @@
 @keyframes service-sheet-exit {
   from { opacity: 1; transform: translateY(0); }
   to { opacity: 0; transform: translateY(100%); }
+}
+
+@keyframes stage-entry-docent-handoff {
+  from { opacity: 1; transform: translateX(-50%) scale(1); }
+  to { opacity: 0; transform: translateX(-50%) translateY(-.75rem) scale(.72); }
+}
+
+@keyframes stage-entry-docent-return {
+  from { opacity: 0; transform: translateX(-50%) translateY(-.75rem) scale(.72); }
+  to { opacity: 1; transform: translateX(-50%) scale(1); }
 }
 
 /* Backgrounds remain stable; visible page components reveal in reading order. */
@@ -173,10 +183,62 @@
 }
 
 .blocker-prompt,
-.stage-overlay .stage-external-page {
+.stage-overlay .stage-external-page,
+.stage-f-dev-flow__sheet {
   animation: service-sheet-enter 620ms var(--motion-ease-enter) both;
   will-change: transform, opacity;
 }
+
+/* F2–F4 sheets are shorter than the B1 tray, so a slightly longer travel keeps
+   their perceived speed and content rhythm aligned with the staff-call sheet. */
+.stage-f-dev-flow__sheet {
+  animation-duration: var(--stage-f-sheet-duration, 760ms);
+}
+
+.stage-f-dev-flow__sheet > h1 {
+  animation: service-content-rise var(--motion-content-enter) var(--motion-ease-enter) 140ms both;
+}
+
+.stage-f-dev-flow__sheet > .stage-f-dev-flow__actions > * {
+  animation: service-content-rise var(--motion-content-enter) var(--motion-ease-enter) 230ms both;
+}
+
+.stage-f-dev-flow__sheet > .stage-f-dev-flow__actions > :nth-child(2) {
+  animation-delay: calc(230ms + var(--motion-sequence-step));
+}
+
+/* F2–F4 full screens use the same media-first reading order as the other
+   customer screens. The email form then reveals its own controls in sequence. */
+.stage-f-dev-flow__full > :nth-child(1) {
+  animation: service-media-settle var(--motion-content-enter) var(--motion-ease-enter) both;
+}
+
+.stage-f-dev-flow__full > :nth-child(2) {
+  animation: service-content-rise var(--motion-content-enter) var(--motion-ease-enter) var(--motion-sequence-step) both;
+}
+
+.stage-f-dev-flow__full > :nth-child(3) {
+  animation: service-content-rise var(--motion-content-enter) var(--motion-ease-enter) calc(var(--motion-sequence-step) * 2) both;
+}
+
+.stage-f-dev-flow__full > :nth-child(4) {
+  animation: service-content-rise var(--motion-content-enter) var(--motion-ease-enter) calc(var(--motion-sequence-step) * 3) both;
+}
+
+.stage-f-dev-flow__full > :nth-child(5) {
+  animation: service-content-rise var(--motion-content-enter) var(--motion-ease-enter) calc(var(--motion-sequence-step) * 4) both;
+}
+
+.stage-f-dev-flow__form > h1,
+.stage-f-dev-flow__form > input,
+.stage-f-dev-flow__form > p,
+.stage-f-dev-flow__form > .stage-f-dev-flow__arrow {
+  animation: service-content-rise var(--motion-content-enter) var(--motion-ease-enter) both;
+}
+
+.stage-f-dev-flow__form > h1 { animation-delay: calc(var(--motion-sequence-step) * 2); }
+.stage-f-dev-flow__form > input { animation-delay: calc(var(--motion-sequence-step) * 3); }
+.stage-f-dev-flow__form > .stage-f-dev-flow__arrow { animation-delay: calc(var(--motion-sequence-step) * 4); }
 
 .stage-overlay .stage-external-page__content {
   animation: service-content-rise var(--motion-content-enter) var(--motion-ease-enter) 90ms both;
@@ -187,6 +249,10 @@
 }
 
 .stage-overlay--closing .stage-external-page {
+  animation: service-sheet-exit 420ms cubic-bezier(.4, 0, 1, 1) both;
+}
+
+.stage-f-dev-flow--closing .stage-f-dev-flow__sheet {
   animation: service-sheet-exit 420ms cubic-bezier(.4, 0, 1, 1) both;
 }
 
@@ -238,6 +304,9 @@
   .cosmic-gold-dust--exiting,
   .blocker-prompt,
   .stage-overlay .stage-external-page,
+  .stage-f-dev-flow__sheet,
+  .stage-f-dev-flow__full > *,
+  .stage-f-dev-flow__form > *,
   .stage-overlay .stage-external-page__content {
     animation: none;
     will-change: auto;

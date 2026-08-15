@@ -1,9 +1,7 @@
-import { useState } from 'react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 import backgroundImage from '../../assets/images/stage-a-background.png';
-import closeIcon from '../../assets/images/icon-close.svg';
 import ScreenHeadline from '../../components/common/ScreenHeadline';
 import SecondaryButton from '../../components/common/SecondaryButton';
-import CircleIconButton from '../../components/common/CircleIconButton';
 
 const DEFAULT_REQUEST_OPTIONS = ['가격 확인', '착장 요청', '재고 문의', '구매 요청'];
 
@@ -16,7 +14,9 @@ interface E1StaffCallTrayProps {
   onChangeSelectedRequests?: (selected: string[]) => void;
   onSelectOther?: () => void;
   onViewOtherProducts?: () => void;
-  onClose?: () => void;
+  sheetHandle?: ReactNode;
+  sheetOffset?: number;
+  isDragging?: boolean;
 }
 
 export default function E1StaffCallTray({
@@ -28,7 +28,9 @@ export default function E1StaffCallTray({
   onChangeSelectedRequests,
   onSelectOther,
   onViewOtherProducts,
-  onClose,
+  sheetHandle,
+  sheetOffset = 0,
+  isDragging = false,
 }: E1StaffCallTrayProps) {
   const [selectedRequests, setSelectedRequests] = useState<string[]>([]);
 
@@ -41,15 +43,9 @@ export default function E1StaffCallTray({
   };
 
   return (
-    <div className="stage-external-page">
+    <div className={`stage-external-page${isDragging ? ' stage-external-page--dragging' : ''}`} style={{ translate: `0 ${sheetOffset}px` } as CSSProperties}>
       <img src={backgroundImage} alt="" className="stage-external-page__background" />
-      <CircleIconButton
-        icon={closeIcon}
-        ariaLabel="닫기"
-        onClick={onClose}
-        iconClassName="h-4 w-auto"
-        className="stage-external-page__close"
-      />
+      {sheetHandle}
       <div className="stage-external-page__content">
         <ScreenHeadline headline={headline} subtext={subtext} variant="md" className="stage-external-page__headline" />
         <div className="stage-external-page__stack">
@@ -66,7 +62,7 @@ export default function E1StaffCallTray({
           </div>
           <SecondaryButton label={otherLabel} onClick={onSelectOther} textColor="text-[#b8b8b8]" />
         </div>
-        <div className="stage-external-page__actions"><SecondaryButton label={viewOtherProductsLabel} onClick={onViewOtherProducts} /></div>
+        <div className="stage-external-page__actions"><SecondaryButton label={viewOtherProductsLabel} onClick={onViewOtherProducts} pendingOnClick /></div>
       </div>
     </div>
   );

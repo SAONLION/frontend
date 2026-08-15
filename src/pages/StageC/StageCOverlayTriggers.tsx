@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useParams } from 'react-router';
+import { usePreparedNavigate } from '../../app/usePreparedNavigate';
 import { STAGE_C_ROUTES, stageCPath } from '../../constants/stageC';
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes';
 import { useSession } from '../../features/session/useSession';
@@ -8,7 +9,7 @@ import { useSession } from '../../features/session/useSession';
 // 배경은 StageC 허브로 되돌린다.
 function useOverlayTrigger() {
   const { sku = '' } = useParams();
-  const navigate = useNavigate();
+  const navigate = usePreparedNavigate();
   const { dispatch } = useSession();
 
   useEffect(() => {

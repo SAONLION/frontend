@@ -1,6 +1,6 @@
-import travelPouchImage from '../../assets/mock/d2-recommendations/ottomar-travel-pouch-primary.png'
-import weekenderImage from '../../assets/mock/d2-recommendations/ottomar-weekender-primary.png'
-import trolleyImage from '../../assets/mock/d2-recommendations/ottomar-trolley-primary.png'
+import travelPouchImage from '../../assets/mock/d2-recommendations/ottomar-travel-pouch-primary.webp'
+import weekenderImage from '../../assets/mock/d2-recommendations/ottomar-weekender-primary.webp'
+import trolleyImage from '../../assets/mock/d2-recommendations/ottomar-trolley-primary.webp'
 import type { BlockerPromptVariant } from '../../features/blocker/blockerTypes'
 
 export type DemoRecommendation = {

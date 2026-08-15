@@ -1,8 +1,10 @@
 import { Component, lazy, Suspense, useEffect, useState, type ErrorInfo, type ReactNode } from 'react';
 import type { DocentCue } from '../../features/docent/docentCue';
 import { markDocentReady } from '../../features/docent/docentReadiness';
+import { getDocentStagePreloadState } from '../../features/docent/preloadDocentStage';
 
-const DocentCanvas = lazy(() => import('./DocentCanvas'));
+const loadDocentCanvas = () => import('./DocentCanvas')
+const DocentCanvas = lazy(loadDocentCanvas);
 
 export type { DocentCue } from '../../features/docent/docentCue';
 
@@ -30,26 +32,42 @@ export function DocentStage({
   cue,
   className = '',
   continuityKey,
+  immediate = false,
   onReady,
 }: {
   cue: DocentCue;
   className?: string;
   continuityKey?: string;
+  immediate?: boolean;
   onReady?: () => void;
 }) {
-  const [supported, setSupported] = useState(true);
+  const [supported, setSupported] = useState<boolean | null>(null);
+  const [shouldMountCanvas, setShouldMountCanvas] = useState(false);
 
   useEffect(() => {
-    setSupported(Boolean(document.createElement('canvas').getContext('webgl')));
-  }, []);
+    const hasWebGl = Boolean(document.createElement('canvas').getContext('webgl'));
+    setSupported(hasWebGl);
+
+    if (!hasWebGl) {
+      return;
+    }
+
+    // Keep route text and primary imagery responsive before WebGL begins compiling shaders.
+    const startDelay = immediate || cue === 'greet' || getDocentStagePreloadState() ? 0 : 420;
+    const mountTimer = window.setTimeout(() => setShouldMountCanvas(true), startDelay);
+
+    return () => window.clearTimeout(mountTimer);
+  }, [cue, immediate]);
 
   return (
     <div className={`stage-c-docent-layer stage-c-docent-layer--${cue} ${className}`}>
-      {!supported ? (
-        <div className={FALLBACK_CLASSNAME}>도슨트 안내가 준비되어 있어요.</div>
+      {supported === false ? (
+        <div aria-hidden="true" className={FALLBACK_CLASSNAME} />
+      ) : !shouldMountCanvas ? (
+        <div aria-hidden="true" className={FALLBACK_CLASSNAME} />
       ) : (
         <DocentErrorBoundary>
-          <Suspense fallback={<div className={FALLBACK_CLASSNAME}>도슨트를 불러오는 중이에요.</div>}>
+          <Suspense fallback={<div aria-hidden="true" className={FALLBACK_CLASSNAME} />}>
             <DocentCanvas cue={cue} continuityKey={continuityKey} onReady={() => {
               markDocentReady();
               onReady?.();
