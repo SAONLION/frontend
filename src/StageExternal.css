@@ -142,6 +142,30 @@
   padding-bottom: 0;
 }
 
+/* AI 추천에 sku가 없어 데모 제품으로 대체 안내 중임을 알리는 상단 배지. */
+.stage-external-page__fallback-notice {
+  position: absolute;
+  z-index: 4;
+  top: max(1rem, env(safe-area-inset-top));
+  right: 1rem;
+  left: 1rem;
+  margin: 0;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid rgb(255 255 255 / 22%);
+  border-radius: 0.75rem;
+  background: rgb(20 15 9 / 78%);
+  color: rgb(255 255 255 / 82%);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  text-align: center;
+  backdrop-filter: blur(0.5rem);
+}
+
+.stage-external-page__fallback-notice b {
+  color: #ffffff;
+  font-weight: 600;
+}
+
 .stage-external-page__close {
   position: absolute;
   z-index: 3;

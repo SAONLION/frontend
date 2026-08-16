@@ -1,15 +1,18 @@
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
 import { usePreparedNavigate } from '../../app/usePreparedNavigate';
+import emblemImage from '../../assets/images/mcm-emblem.png';
+import { fetchRecommendations } from '../../api/recommendations';
 import { postVisitPurpose } from '../../api/visitPurpose';
 import { toVisitPurposeType } from '../../api/visitPurposeType';
 import { DEFAULT_PRODUCT_SKU, STAGE_D_ROUTES } from '../../constants/appRoutes';
 import { STAGE_C_ROUTES, stageCPath } from '../../constants/stageC';
+import { mockD2Recommendations } from '../../mocks/fixtures/demoContent';
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes';
 import { useSession } from '../../features/session/useSession';
 import { useReturnToB1 } from '../../app/useReturnToB1';
-import type { DemoRecommendation } from '../../mocks/fixtures/demoContent';
 import D1VisitPurpose from './D1VisitPurpose';
-import D2ProductRecommendation from './D2ProductRecommendation';
+import D2ProductRecommendation, { type ProductCardData } from './D2ProductRecommendation';
 import D21ProductLocationGuide from './D21ProductLocationGuide';
 
 interface SelectedProduct {
@@ -17,6 +20,8 @@ interface SelectedProduct {
   image: string;
   name: string;
   description: string | string[];
+  /** sku를 모르는 API 추천이라 데모 제품으로 대체해 안내하는 중인지 */
+  isFallbackSku?: boolean;
 }
 
 const FALLBACK_SELECTED_PRODUCT: SelectedProduct = {
@@ -24,6 +29,7 @@ const FALLBACK_SELECTED_PRODUCT: SelectedProduct = {
   image: '',
   name: '선택하신 제품',
   description: '',
+  isFallbackSku: true,
 };
 
 // D3 헤드라인의 목적 문구. D1에서 아직 디자인이 확정되지 않은 값은 같은 패턴으로 채운다.
@@ -34,8 +40,66 @@ const PURPOSE_PHRASE_MAP: Record<string, string> = {
   기타: '이런 제품',
 };
 
-function toSelectedProduct(product: DemoRecommendation): SelectedProduct {
-  return { sku: product.sku, image: product.image, name: product.name, description: product.description };
+// API 추천에는 sku가 없다. 그때는 데모 제품 sku로 대체하고 폴백임을 화면에 표시한다.
+function toSelectedProduct(product: ProductCardData): SelectedProduct {
+  return {
+    sku: product.sku ?? DEFAULT_PRODUCT_SKU,
+    image: product.image,
+    name: product.name,
+    description: product.description,
+    isFallbackSku: product.sku === undefined,
+  };
+}
+
+/**
+ * D2·D3이 공유하는 AI 추천 조회.
+ * null이면 추천 섹션을 건너뛰고 fixture 추천으로 대체하고, 빈 배열이면 "추천 없음" 안내를 띄운다.
+ */
+function useRecommendedProducts() {
+  const { state } = useSession();
+  const sessionId = state.sessionId;
+  const [isLoading, setIsLoading] = useState(true);
+  const [products, setProducts] = useState<readonly ProductCardData[] | null>(null);
+  const [hasNone, setHasNone] = useState(false);
+
+  useEffect(() => {
+    if (!sessionId) {
+      setIsLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setIsLoading(true);
+
+    fetchRecommendations(sessionId).then((recommendations) => {
+      if (cancelled) return;
+      if (recommendations === null) {
+        setProducts(null);
+        setHasNone(false);
+      } else if (recommendations.length === 0) {
+        setProducts([]);
+        setHasNone(true);
+      } else {
+        setProducts(recommendations.map((item) => ({
+          id: String(item.productId),
+          image: emblemImage,
+          name: item.productName,
+          description: item.reason ?? '',
+        })));
+        setHasNone(false);
+      }
+      setIsLoading(false);
+    }).catch((error: unknown) => {
+      console.error('추천 조회에 실패했습니다.', error);
+      if (cancelled) return;
+      setProducts(null);
+      setHasNone(false);
+      setIsLoading(false);
+    });
+
+    return () => { cancelled = true; };
+  }, [sessionId]);
+
+  return { products: products ?? mockD2Recommendations, isLoading, hasNone };
 }
 
 function getPersonalizedHeadline(nickname: string | null, purpose: string | null): [string, string] {
@@ -69,10 +133,14 @@ export function StageD2Page() {
   const navigate = usePreparedNavigate();
   const { state, dispatch } = useSession();
   const returnToB1 = useReturnToB1();
+  const { products, isLoading, hasNone } = useRecommendedProducts();
 
   return (
     <D2ProductRecommendation
       purpose={state.visitPurpose ?? '방문'}
+      products={products}
+      isLoadingRecommendations={isLoading}
+      hasNoRecommendations={hasNone}
       onSelectProduct={(product) => {
         navigate(STAGE_D_ROUTES.locationGuide, { state: toSelectedProduct(product) });
       }}
@@ -103,6 +171,7 @@ export function StageD21Page() {
   return (
     <D21ProductLocationGuide
       selectedProduct={selectedProduct}
+      isFallbackProduct={selectedProduct.isFallbackSku ?? false}
       onViewOtherProducts={returnToB1}
       onSelectProduct={() => enterTaggedProduct(selectedProduct.sku)}
     />
@@ -114,11 +183,15 @@ export function StageD3Page() {
   const navigate = usePreparedNavigate();
   const { state, dispatch } = useSession();
   const returnToB1 = useReturnToB1();
+  const { products, isLoading, hasNone } = useRecommendedProducts();
 
   return (
     <D2ProductRecommendation
       purpose={state.visitPurpose ?? '방문'}
       headline={getPersonalizedHeadline(state.nickname, state.visitPurpose)}
+      products={products}
+      isLoadingRecommendations={isLoading}
+      hasNoRecommendations={hasNone}
       onSelectProduct={(product) => {
         navigate(STAGE_D_ROUTES.personalizedLocationGuide, { state: toSelectedProduct(product) });
       }}
@@ -137,6 +210,7 @@ export function StageD4Page() {
   return (
     <D21ProductLocationGuide
       selectedProduct={selectedProduct}
+      isFallbackProduct={selectedProduct.isFallbackSku ?? false}
       onViewOtherProducts={returnToB1}
       onSelectProduct={() => enterTaggedProduct(selectedProduct.sku)}
     />
