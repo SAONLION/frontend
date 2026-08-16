@@ -11,6 +11,12 @@ dist
 dist-ssr
 *.local
 
+# Environment files: never commit these. Vite inlines every VITE_* value into the
+# client bundle at build time, so anything defined here ships to the browser.
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
