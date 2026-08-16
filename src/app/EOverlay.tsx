@@ -79,6 +79,8 @@ export default function EOverlay() {
 
   return (
     <div className={`stage-overlay${isClosing ? ' stage-overlay--closing' : ''}`}>
+      {/* 뒤 화면을 덮어 어둡게 하고 그 영역의 조작을 막는다. 눌러서 닫을 수도 있다. */}
+      <button aria-label="직원 호출 닫기" className="stage-sheet-backdrop" onClick={close} type="button" />
       {submitted ? (
         <E2RequestReceived isDragging={isDragging} selectedRequests={selectedRequests} sheetHandle={sheetHandle} sheetOffset={dragOffset} />
       ) : (

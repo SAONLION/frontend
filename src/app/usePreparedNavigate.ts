@@ -5,6 +5,13 @@ import { markNavigationTriggerPending } from './navigationTrigger'
 
 type NavigationTarget = To | number
 
+type PreparedNavigateOptions = NavigateOptions & {
+  /** 목적지 화면이 실제로 쓰는 자산을 미리 받아온다. */
+  prepare?: () => Promise<unknown>
+  /** 도슨트가 없는 화면(B1 등)으로 갈 때 2.2MB 모델 프리로드를 건너뛴다. */
+  skipDocentPreload?: boolean
+}
+
 const MINIMUM_PENDING_FEEDBACK_MS = 180
 
 function waitForMinimumFeedback() {
@@ -19,7 +26,7 @@ export function usePreparedNavigate() {
   const navigate = useNavigate()
   const isPreparing = useRef(false)
 
-  return useCallback((target: NavigationTarget, options?: NavigateOptions) => {
+  return useCallback((target: NavigationTarget, options?: PreparedNavigateOptions) => {
     if (typeof target === 'number') {
       navigate(target)
       return
@@ -32,12 +39,15 @@ export function usePreparedNavigate() {
     isPreparing.current = true
     markNavigationTriggerPending()
 
+    const { prepare, skipDocentPreload, ...navigateOptions } = options ?? {}
+
     void Promise.all([
-      preloadDocentStage().catch(() => undefined),
+      skipDocentPreload ? Promise.resolve() : preloadDocentStage().catch(() => undefined),
+      prepare?.().catch(() => undefined) ?? Promise.resolve(),
       waitForMinimumFeedback(),
     ]).then(() => {
       isPreparing.current = false
-      navigate(target, options)
+      navigate(target, navigateOptions)
     })
   }, [navigate])
 }

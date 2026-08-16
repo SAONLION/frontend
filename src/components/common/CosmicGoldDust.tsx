@@ -2,10 +2,10 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 
-const PARTICLE_COUNT = 480
+const PARTICLE_COUNT = 280
 const FIELD_DEPTH = 3.7
-const DRIFT_SPEED = 0.252
-const WARP_SPEED = 0.63
+const DRIFT_SPEED = 0.19
+const WARP_SPEED = 0.47
 const FADE_IN_MS = 2_200
 
 const VERTEX_SHADER = `

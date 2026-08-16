@@ -5,6 +5,7 @@ import * as THREE from 'three'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 import { getDocentCueDuration, writeDocentMotion, type DocentMotion } from '../../features/docent/docentMotion'
 import type { DocentCue } from '../../features/docent/docentCue'
+import { DOCENT_SURFACE, createSurfaceNormalMap, createSurfaceRoughnessMap } from '../../features/docent/docentSurface'
 
 const MODEL_URL = '/models/docent/u.glb'
 const QUESTION_MARK_URL = '/models/docent/question_mark.glb'
@@ -48,11 +49,20 @@ type MaterialRest = {
   clearcoat: number
   clearcoatRoughness: number
   envMapIntensity: number
+  normalMap: THREE.Texture | null
+  roughnessMap: THREE.Texture | null
+  normalScale: THREE.Vector2
+  anisotropy: number
+  anisotropyRotation: number
 }
 
 function applyStudioGoldMaterial(scene: THREE.Group) {
   const materialRest = new Map<THREE.MeshPhysicalMaterial, MaterialRest>()
   const materialAssignments = new Map<THREE.Mesh, THREE.Material | THREE.Material[]>()
+  // 절차적 미세 질감. 파일을 추가하지 않고 코드로 만든다. 쓰는 파트가 없으면 생성도 건너뛴다.
+  const usesTexture = DOCENT_SURFACE.texturedParts.body || DOCENT_SURFACE.texturedParts.wings
+  const normalMap = usesTexture ? createSurfaceNormalMap() : null
+  const roughnessMap = usesTexture ? createSurfaceRoughnessMap() : null
 
   scene.traverse((object) => {
     if (!(object instanceof THREE.Mesh)) return
@@ -78,27 +88,56 @@ function applyStudioGoldMaterial(scene: THREE.Group) {
         clearcoat: material.clearcoat,
         clearcoatRoughness: material.clearcoatRoughness,
         envMapIntensity: material.envMapIntensity,
+        normalMap: material.normalMap,
+        roughnessMap: material.roughnessMap,
+        normalScale: material.normalScale.clone(),
+        anisotropy: material.anisotropy,
+        anisotropyRotation: material.anisotropyRotation,
       })
 
+      const { body, cavity, wings } = DOCENT_SURFACE
+
       if (object.name === 'Mesh056_1') {
-        material.color.set('#4b2908')
-        material.roughness = 0.42
-        material.clearcoat = 0
-        material.clearcoatRoughness = 0.3
-        material.envMapIntensity = 0.32
+        material.color.set(cavity.color)
+        material.metalness = cavity.metalness
+        material.roughness = cavity.roughness
+        material.clearcoat = cavity.clearcoat
+        material.clearcoatRoughness = cavity.clearcoatRoughness
+        material.envMapIntensity = cavity.envMapIntensity
       } else if (object.name === 'Mesh056') {
-        material.color.set('#f2d68a')
-        material.metalness = 0.78
-        material.roughness = 0.34
-        material.clearcoat = Math.max(material.clearcoat, 0.18)
-        material.clearcoatRoughness = 0.18
-        material.envMapIntensity = 0.78
+        material.color.set(body.color)
+        material.metalness = body.metalness
+        material.roughness = body.roughness
+        material.clearcoat = body.clearcoat
+        material.clearcoatRoughness = body.clearcoatRoughness
+        material.envMapIntensity = body.envMapIntensity
+        material.anisotropy = body.anisotropy
+        material.anisotropyRotation = body.anisotropyRotation
       } else {
-        material.color.lerp(new THREE.Color('#d6ba70'), 0.4)
-        material.roughness = Math.min(material.roughness, 0.32)
-        material.clearcoat = Math.max(material.clearcoat, 0.16)
-        material.clearcoatRoughness = 0.2
-        material.envMapIntensity = 0.92
+        material.color.lerp(new THREE.Color(wings.color), wings.mix)
+        material.metalness = wings.metalness
+        material.roughness = wings.roughness
+        material.clearcoat = wings.clearcoat
+        material.clearcoatRoughness = wings.clearcoatRoughness
+        material.envMapIntensity = wings.envMapIntensity
+        material.anisotropy = wings.anisotropy
+        material.anisotropyRotation = wings.anisotropyRotation
+      }
+
+      // 질감 맵은 파트별로 켠다. 날개는 잎사귀마다 무늬가 반복돼 인위적으로 보여서 음영만 쓴다.
+      const isBody = object.name === 'Mesh056'
+      const isCavity = object.name === 'Mesh056_1'
+      const useTexture = isBody ? DOCENT_SURFACE.texturedParts.body : !isCavity && DOCENT_SURFACE.texturedParts.wings
+
+      if (useTexture) {
+        if (normalMap) {
+          material.normalMap = normalMap
+          material.normalScale.set(DOCENT_SURFACE.normalScale, DOCENT_SURFACE.normalScale)
+        }
+        if (roughnessMap) material.roughnessMap = roughnessMap
+      } else {
+        material.normalMap = null
+        material.roughnessMap = null
       }
       material.needsUpdate = true
     })
@@ -112,8 +151,16 @@ function applyStudioGoldMaterial(scene: THREE.Group) {
       material.clearcoat = rest.clearcoat
       material.clearcoatRoughness = rest.clearcoatRoughness
       material.envMapIntensity = rest.envMapIntensity
+      material.normalMap = rest.normalMap
+      material.roughnessMap = rest.roughnessMap
+      material.normalScale.copy(rest.normalScale)
+      material.anisotropy = rest.anisotropy
+      material.anisotropyRotation = rest.anisotropyRotation
       material.needsUpdate = true
     })
+
+    normalMap?.dispose()
+    roughnessMap?.dispose()
 
     materialAssignments.forEach((originalMaterial, mesh) => {
       const bodyMaterials = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
@@ -458,8 +505,8 @@ function StudioEnvironment() {
     const studio = new RoomEnvironment()
     studio.traverse((object) => {
       if (object instanceof THREE.PointLight) {
-        object.color.set('#f4d98f')
-        object.intensity = 260
+        object.color.set('#f0cf85')
+        object.intensity = 205
         return
       }
 
@@ -468,15 +515,31 @@ function StudioEnvironment() {
 
       materials.forEach((material) => {
         if (material instanceof THREE.MeshStandardMaterial) {
-          material.color.set('#120b03')
+          material.color.set('#0d0702')
           return
         }
 
         if (material instanceof THREE.MeshLambertMaterial) {
-          material.emissive.set('#e8cb7f')
-          material.emissiveIntensity *= 0.28
+          material.emissive.set('#e4c176')
+          material.emissiveIntensity *= 0.22
         }
       })
+    })
+
+    // 소프트박스 스트립: 금속 표면에 길쭉한 하이라이트를 만들어 제품 촬영 같은 반사를 만든다.
+    const stripDisposables: (THREE.BufferGeometry | THREE.Material)[] = []
+    DOCENT_SURFACE.studioStrips.forEach((strip) => {
+      const geometry = new THREE.PlaneGeometry(strip.size[0], strip.size[1])
+      const stripMaterial = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(strip.color).multiplyScalar(strip.intensity),
+        side: THREE.DoubleSide,
+      })
+      const mesh = new THREE.Mesh(geometry, stripMaterial)
+      mesh.position.set(strip.position[0], strip.position[1], strip.position[2])
+      if ('rotationY' in strip) mesh.rotation.y = strip.rotationY
+      if ('rotationX' in strip) mesh.rotation.x = strip.rotationX
+      studio.add(mesh)
+      stripDisposables.push(geometry, stripMaterial)
     })
 
     const environmentTarget = pmremGenerator.fromScene(studio, 0.04)
@@ -487,6 +550,7 @@ function StudioEnvironment() {
     return () => {
       scene.environment = previousEnvironment
       environmentTarget.dispose()
+      stripDisposables.forEach((item) => item.dispose())
       studio.dispose()
       pmremGenerator.dispose()
     }
@@ -613,9 +677,13 @@ export default function DocentCanvas({ cue, continuityKey, onReady }: { cue: Doc
         gl={{ alpha: true, antialias: false, powerPreference: 'high-performance' }}
         performance={{ min: 0.65 }}
       >
-        <ambientLight intensity={0.4} />
-        <directionalLight color="#ffe7a6" intensity={2.2} position={[3, 4, 4]} />
-        <pointLight color="#fff2c4" intensity={8} distance={5} position={[0, 1.4, 4]} />
+        {/* 정면 핫스팟을 줄이고 위쪽 키 + 뒤쪽 림으로 형태를 드러낸다. 레퍼런스처럼 광이 넓게 퍼진다. */}
+        <ambientLight intensity={0.18} />
+        <directionalLight color="#ffdf9e" intensity={2.75} position={[-2.6, 3.4, 3.6]} />
+        <directionalLight color="#ffc978" intensity={1.5} position={[3.4, 0.8, -2.8]} />
+        <pointLight color="#ffeec9" distance={6} intensity={2.35} position={[0, -0.4, 4.2]} />
+        {/* 하단 필: 구의 중·하단까지 빛이 돌아 들어오게 한다 */}
+        <pointLight color="#ffd79b" distance={7} intensity={1.35} position={[0, -2.6, 2.4]} />
         <StudioEnvironment />
       <CameraFraming cue={cue} />
         <Model continuityKey={continuityKey} cue={cue} onReady={onReady} reducedMotion={reducedMotion} />

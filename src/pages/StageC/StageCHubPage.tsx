@@ -150,7 +150,7 @@ type StageCStateProps = { title: string; description: string }
 export function StageCState({ title, description }: StageCStateProps) {
   return (
     <MobileShell>
-      <section className="stage-c-state-page" aria-live="polite">
+      <section className="stage-c-state-page stage-c-fallback-screen" aria-live="polite">
         <h1>{title}</h1>
         <p>{description}</p>
       </section>

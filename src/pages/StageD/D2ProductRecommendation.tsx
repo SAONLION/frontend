@@ -35,7 +35,8 @@ interface D2ProductRecommendationProps {
   headline?: [string, string];
   products?: readonly ProductCardData[];
   isLoadingRecommendations?: boolean;
-  hasNoRecommendations?: boolean;
+  /** AI 추천 대신 데모 추천을 보여주는 중이면 상단에 알린다. */
+  isFallbackData?: boolean;
   secondaryButtonLabel?: string;
   primaryButtonLabel?: string;
   onSelectProduct?: (product: ProductCardData) => void;
@@ -48,7 +49,7 @@ export default function D2ProductRecommendation({
   headline,
   products = mockD2Recommendations,
   isLoadingRecommendations = false,
-  hasNoRecommendations = false,
+  isFallbackData = false,
   secondaryButtonLabel = '추천 제품 말고 다른 제품 태그할래요',
   primaryButtonLabel = '직원 호출',
   onSelectProduct,
@@ -60,14 +61,17 @@ export default function D2ProductRecommendation({
   return (
     <div className="stage-external-page">
       <img src={backgroundImage} alt="" className="stage-external-page__background" />
+      {isFallbackData && !isLoadingRecommendations && (
+        <p className="stage-external-page__fallback-notice" role="status">
+          AI 추천이 아직 준비되지 않아 <b>데모 추천</b>을 보여드리고 있어요
+        </p>
+      )}
       {/* D2·D3은 추천 카드에 집중하도록 3D 도슨트를 두지 않는다. */}
       <div className="stage-external-page__content stage-external-page__content--d2">
         <ScreenHeadline headline={headline ?? getHeadlineForPurpose(purpose)} onRevealComplete={() => setIsRecommendationVisible(true)} reveal variant="md" waitForDocent={false} className="stage-external-page__headline" />
         {isRecommendationVisible && (
           isLoadingRecommendations ? (
             <LoadingSpinner label="추천 상품을 준비하고 있어요" />
-          ) : hasNoRecommendations ? (
-            <p className="py-8 text-center text-sm text-white/70">추천 제품이 아직 없어요</p>
           ) : (
             <div className="stage-external-page__stack stage-external-page__stack--recommendations">
               {products.map((product) => (
