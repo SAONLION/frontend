@@ -3,11 +3,12 @@ import backgroundImage from '../../assets/images/stage-a-background.png';
 import { DocentStage } from '../../components/domain/DocentStage';
 import ScreenHeadline from '../../components/common/ScreenHeadline';
 import InfoCard from '../../components/common/InfoCard';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 import SecondaryButton from '../../components/common/SecondaryButton';
 import PrimaryButton from '../../components/common/PrimaryButton';
 import { mockD2Recommendations } from '../../mocks/fixtures/demoContent';
 
-type ProductCardData = (typeof mockD2Recommendations)[number]
+export type ProductCardData = (typeof mockD2Recommendations)[number]
 
 // D1에서 아직 디자인이 확정되지 않은 목적값(선물/구경/기타)은
 // 동일 패턴을 따르는 placeholder 문구로만 채워둔 상태입니다.
@@ -25,6 +26,8 @@ function getHeadlineForPurpose(purpose: string): [string, string] {
 interface D2ProductRecommendationProps {
   purpose: string;
   products?: readonly ProductCardData[];
+  isLoadingRecommendations?: boolean;
+  hasNoRecommendations?: boolean;
   secondaryButtonLabel?: string;
   primaryButtonLabel?: string;
   onSelectProduct?: (product: ProductCardData) => void;
@@ -35,6 +38,8 @@ interface D2ProductRecommendationProps {
 export default function D2ProductRecommendation({
   purpose,
   products = mockD2Recommendations,
+  isLoadingRecommendations = false,
+  hasNoRecommendations = false,
   secondaryButtonLabel = '추천 제품 말고 다른 제품 태그할래요',
   primaryButtonLabel = '직원 호출',
   onSelectProduct,
@@ -51,20 +56,28 @@ export default function D2ProductRecommendation({
           <DocentStage cue="present" />
         </section>
         <ScreenHeadline headline={getHeadlineForPurpose(purpose)} onRevealComplete={() => setIsRecommendationVisible(true)} reveal variant="md" className="stage-external-page__headline" />
-        {isRecommendationVisible && <div className="stage-external-page__stack stage-external-page__stack--recommendations">
-          {products.map((product) => (
-            <InfoCard
-              key={product.id}
-              image={product.image}
-              imageSurface="transparent"
-              imageVariant="primary-cutout"
-              name={product.name}
-              description={product.description}
-              onSelect={onSelectProduct ? () => onSelectProduct(product) : undefined}
-            />
-          ))}
-        </div>}
-        {isRecommendationVisible && <div className="stage-external-page__actions">
+        {isRecommendationVisible && (
+          isLoadingRecommendations ? (
+            <LoadingSpinner label="추천 상품을 준비하고 있어요" />
+          ) : hasNoRecommendations ? (
+            <p className="py-8 text-center text-sm text-white/70">추천 제품이 아직 없어요</p>
+          ) : (
+            <div className="stage-external-page__stack stage-external-page__stack--recommendations">
+              {products.map((product) => (
+                <InfoCard
+                  key={product.id}
+                  image={product.image}
+                  imageSurface="transparent"
+                  imageVariant="primary-cutout"
+                  name={product.name}
+                  description={product.description}
+                  onSelect={onSelectProduct ? () => onSelectProduct(product) : undefined}
+                />
+              ))}
+            </div>
+          )
+        )}
+        {isRecommendationVisible && !isLoadingRecommendations && <div className="stage-external-page__actions">
           <SecondaryButton label={secondaryButtonLabel} onClick={onTagOtherProduct} pendingOnClick />
           <PrimaryButton label={primaryButtonLabel} onClick={onCallStaff} />
         </div>}
