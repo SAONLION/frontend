@@ -24,6 +24,8 @@ function getHeadlineForPurpose(purpose: string): [string, string] {
 
 interface D2ProductRecommendationProps {
   purpose: string;
+  /** D3처럼 목적 문구 대신 개인화 문구를 쓰는 화면에서 헤드라인을 통째로 대체한다. */
+  headline?: [string, string];
   products?: readonly ProductCardData[];
   secondaryButtonLabel?: string;
   primaryButtonLabel?: string;
@@ -34,6 +36,7 @@ interface D2ProductRecommendationProps {
 
 export default function D2ProductRecommendation({
   purpose,
+  headline,
   products = mockD2Recommendations,
   secondaryButtonLabel = '추천 제품 말고 다른 제품 태그할래요',
   primaryButtonLabel = '직원 호출',
@@ -50,7 +53,7 @@ export default function D2ProductRecommendation({
         <section aria-label="나이비스 AI 도슨트" className="stage-external-page__docent stage-external-page__docent--recommendation">
           <DocentStage cue="present" />
         </section>
-        <ScreenHeadline headline={getHeadlineForPurpose(purpose)} onRevealComplete={() => setIsRecommendationVisible(true)} reveal variant="md" className="stage-external-page__headline" />
+        <ScreenHeadline headline={headline ?? getHeadlineForPurpose(purpose)} onRevealComplete={() => setIsRecommendationVisible(true)} reveal variant="md" className="stage-external-page__headline" />
         {isRecommendationVisible && <div className="stage-external-page__stack stage-external-page__stack--recommendations">
           {products.map((product) => (
             <InfoCard

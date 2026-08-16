@@ -17,6 +17,8 @@ interface D21ProductLocationGuideProps {
   subtext?: string;
   buttonLabel?: string;
   onViewOtherProducts?: () => void;
+  /** D4에서는 안내 중인 제품을 눌러 바로 그 제품의 StageC로 넘어간다. */
+  onSelectProduct?: () => void;
 }
 
 export default function D21ProductLocationGuide({
@@ -25,6 +27,7 @@ export default function D21ProductLocationGuide({
   subtext = '제품 앞에 이름표를 태그해보세요.',
   buttonLabel = '다른 제품 보기 →',
   onViewOtherProducts,
+  onSelectProduct,
 }: D21ProductLocationGuideProps) {
   const [isProductVisible, setIsProductVisible] = useState(false);
 
@@ -41,6 +44,7 @@ export default function D21ProductLocationGuide({
             imageVariant="primary-cutout"
             name={selectedProduct.name}
             description={selectedProduct.description}
+            onSelect={onSelectProduct}
             className="stage-external-page__headline"
           />}
         </div>

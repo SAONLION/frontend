@@ -4,7 +4,7 @@ import { STAGE_C_PRODUCT_DETAIL_ROUTES, STAGE_C_ROUTES, STAGE_C_SCREEN_IDS } fro
 import AppLayout from './AppLayout';
 import { StageAIntroPage, StageANicknamePage } from '../pages/StageA/StageAFlowPages';
 import { StageBNfcPromptPage, StageBRecognizingPage } from '../pages/StageB/StageBFlowPages';
-import { StageD1Page, StageD2Page, StageD21Page } from '../pages/StageD/StageDFlowPages';
+import { StageD1Page, StageD2Page, StageD21Page, StageD3Page, StageD4Page } from '../pages/StageD/StageDFlowPages';
 import { StageCHubPage } from '../pages/StageC/StageCHubPage';
 import { StageCProductDetailPage } from '../pages/StageC/StageCProductDetailPage';
 import { StageCFitPage } from '../pages/StageC/StageCFitPages';
@@ -68,6 +68,8 @@ export function AppRoutes() {
         <Route element={<StageCStaffCallTriggerPage />} path={STAGE_E1_HANDOFF_PATH} />
         <Route element={<StageD2Page />} path={STAGE_D_ROUTES.recommend} />
         <Route element={<StageD21Page />} path={STAGE_D_ROUTES.locationGuide} />
+        <Route element={<StageD3Page />} path={STAGE_D_ROUTES.personalizedRecommend} />
+        <Route element={<StageD4Page />} path={STAGE_D_ROUTES.personalizedLocationGuide} />
 
         <Route element={<StageFCb6OfferPage />} path={STAGE_F_ROUTES.cb6Offer} />
         <Route element={<StageFEmailInputPage />} path={STAGE_F_ROUTES.emailInput} />

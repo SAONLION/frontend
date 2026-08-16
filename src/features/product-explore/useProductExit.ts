@@ -1,12 +1,13 @@
 import { usePreparedNavigate } from '../../app/usePreparedNavigate'
 import { EVENT_NAMES } from '../../constants/events'
-import { STAGE_B_ROUTES, STAGE_F_ROUTES } from '../../constants/appRoutes'
+import { STAGE_D_ROUTES, STAGE_F_ROUTES } from '../../constants/appRoutes'
 import { getCb6TriggerId } from '../blocker/shouldOfferCb6'
 import { STAGE_C_SCREEN_IDS, stageCComingSoonPath } from '../../constants/stageC'
 import { SESSION_ACTIONS } from '../session/sessionTypes'
 import { useSession } from '../session/useSession'
 
-// 첫 제품 이탈은 D1 방문 목적 확인으로, 이후 이탈은 B1 재태그로 이어진다.
+// 첫 제품 이탈은 D1 방문 목적 확인(→ D2 → D2-1)으로, 두 번째 이후 이탈은
+// D3 개인화 추천(→ D4 위치 안내)으로 이어진다.
 export function useProductExit(sku: string) {
   const { state, dispatch } = useSession()
   const navigate = usePreparedNavigate()
@@ -27,6 +28,6 @@ export function useProductExit(sku: string) {
       return
     }
 
-    navigate(STAGE_B_ROUTES.nfcPrompt)
+    navigate(STAGE_D_ROUTES.personalizedRecommend)
   }
 }

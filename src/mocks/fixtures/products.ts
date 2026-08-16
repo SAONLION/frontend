@@ -4,6 +4,9 @@ import cinnamonImage from '../../assets/mock/stark-primary/stark-cinnamon-primar
 import cognacImage from '../../assets/mock/stark-primary/stark-cognac-primary.webp'
 import softPinkImage from '../../assets/mock/stark-primary/stark-soft-pink-primary.webp'
 import whiteImage from '../../assets/mock/stark-primary/stark-white-primary.webp'
+import travelPouchImage from '../../assets/mock/d2-recommendations/ottomar-travel-pouch-primary.webp'
+import weekenderImage from '../../assets/mock/d2-recommendations/ottomar-weekender-primary.webp'
+import trolleyImage from '../../assets/mock/d2-recommendations/ottomar-trolley-primary.webp'
 import detail02 from '../../assets/mock/stark-visetos-detail-02-new.webp'
 import detail03 from '../../assets/mock/stark-visetos-detail-03-new.webp'
 import detail04 from '../../assets/mock/stark-visetos-detail-04-new.webp'
@@ -36,5 +39,43 @@ export const mockProducts: readonly Product[] = [
       { code: 'white', label: 'White', sku: 'MMKEAVE15WT001', imageUrl: whiteImage, swatch: '#ece9df' },
       { code: 'cinnamon', label: 'Cinnamon', sku: 'MMKGSVE034B001', imageUrl: cinnamonImage, swatch: '#874837' },
     ],
+  },
+  // StageD 추천 카드에서 진입하는 제품들. 이름·치수·소재는 result_tobackend 스냅샷의 실제 값이며,
+  // 사이즈·컬러 변형과 상세 컷은 아직 확보하지 않아 StageC가 optional 처리로 대응한다.
+  {
+    sku: 'MXZFSTT03CO001',
+    name: 'S Ottomar 비세토스 트래블 파우치',
+    imageUrl: travelPouchImage,
+    dimensions: '약 2 × 22 × 13cm',
+    productDetail: {
+      craft: ['비세토스 모노그램 캔버스', '천연 나파 가죽 트림', '24K 도금 브라스 금속 장식 · 패브릭 안감', '대한민국 제조'],
+      heritage: ['여권과 필수 서류를 담는 Ottomar 트래블 라인의 이야기는 직원에게 더 자세히 안내받을 수 있어요.'],
+      styling: ['큰 가방 안에 넣거나 가죽 스트랩으로 핸즈프리로 착용할 수 있어요.'],
+    },
+    fitDetail: { strap: '탈부착 가능한 가죽 스트랩 · 드롭 55cm', storage: '내부 포켓, 카드 슬롯 및 지퍼 수납공간' },
+  },
+  {
+    sku: 'MMVGATT01CO001',
+    name: '41cm / 16.14인치 Ottomar 비세토스 위켄더',
+    imageUrl: weekenderImage,
+    dimensions: '약 17 × 41 × 26cm',
+    productDetail: {
+      craft: ['비세토스 모노그램 캔버스', '나파 가죽 트림', '24K 골드 도금 브라스 하드웨어 · 스웨이드 마감 극세사 안감', '대한민국 제조'],
+      heritage: ['MCM 캐리어 수공예 전통을 기내용 크기로 재해석한 위켄더 이야기는 직원에게 안내받을 수 있어요.'],
+      styling: ['양방향 확장형 지퍼로 짐의 양에 맞춰 크기를 조절할 수 있어요.'],
+    },
+    fitDetail: { strap: '탈부착·길이 조절 가능한 위빙 스트랩 · 72~127cm', storage: '내부 포켓과 지퍼 포켓, 뒷면 트롤리 슬리브' },
+  },
+  {
+    sku: 'MMVDSTT02CO001',
+    name: 'Ottomar 비세토스 트롤리',
+    imageUrl: trolleyImage,
+    dimensions: '약 23 × 38 × 55cm',
+    productDetail: {
+      craft: ['비세토스 모노그램 캔버스', '블랙 나파 가죽 트림', '매트 블랙 메탈 하드웨어 · 옥스포드 나일론 안감', '대한민국 제조'],
+      heritage: ['뮌헨 황금기 아카이브 트렁크에서 이어진 트롤리 실루엣은 직원에게 더 자세히 안내받을 수 있어요.'],
+      styling: ['기내용 스몰 사이즈라 여행 목적에 맞는지 직원과 함께 확인해 보세요.'],
+    },
+    fitDetail: { strap: '집어넣을 수 있는 트롤리 핸들 · 드롭 45cm', storage: '전면 지퍼 수납공간과 내부 지퍼 수납공간' },
   },
 ]
