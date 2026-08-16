@@ -8,6 +8,8 @@ export const initialSessionState: SessionState = {
   productId: null,
   currentSkuId: null,
   currentSku: null,
+  selectedSizeCode: null,
+  selectedColorCode: null,
   nickname: null,
   taggedSkus: [],
   events: [],
@@ -52,13 +54,17 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
       if (state.events.some((event) => event.name === EVENT_NAMES.contentSent && event.sku === action.sku)) return state
       return { ...state, events: [...state.events, { id, name: EVENT_NAMES.contentSent, type: 'personalized_product_content', sku: action.sku, createdAt }] }
     case SESSION_ACTIONS.setCurrentSku:
-      return { ...state, currentSku: action.sku }
+      // 다른 제품으로 넘어가면 이전 제품의 사이즈·컬러 선택은 의미가 없다.
+      if (state.currentSku === action.sku) return state
+      return { ...state, currentSku: action.sku, selectedSizeCode: null, selectedColorCode: null }
     case SESSION_ACTIONS.setNickname:
       return { ...state, nickname: action.nickname }
     case SESSION_ACTIONS.recordNfcTag:
       return {
         ...state,
         currentSku: action.sku,
+        selectedSizeCode: state.currentSku === action.sku ? state.selectedSizeCode : null,
+        selectedColorCode: state.currentSku === action.sku ? state.selectedColorCode : null,
         taggedSkus: state.taggedSkus.includes(action.sku) ? state.taggedSkus : [...state.taggedSkus, action.sku],
         events: [...state.events, { id, name: EVENT_NAMES.nfcTag, sku: action.sku, createdAt }],
         intentScore: state.intentScore + 5,
@@ -114,12 +120,14 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
       return {
         ...state,
         events: [...state.events, { id, name: EVENT_NAMES.sizeCheck, sku: action.sku, size: action.size, createdAt }],
+        selectedSizeCode: action.size,
         intentScore: state.intentScore + 15,
       }
     case SESSION_ACTIONS.recordColorSwitch:
       return {
         ...state,
         events: [...state.events, { id, name: EVENT_NAMES.colorSwitch, sku: action.sku, from: action.from, to: action.to, createdAt }],
+        selectedColorCode: action.to,
       }
     case SESSION_ACTIONS.recordTryonRequest:
       return {

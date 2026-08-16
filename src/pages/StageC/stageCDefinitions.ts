@@ -56,15 +56,6 @@ export const stageCHubDefinitions: Record<StageCHubScreenId, HubScreenDefinition
     ],
     purchaseActionLabel: '구매 문의',
   },
-  [STAGE_C_SCREEN_IDS.c4]: {
-    heading: '어떤 것이 궁금하신가요?',
-    choices: [
-      { id: STAGE_C_SCREEN_IDS.c41, label: '가격 (직원 안내)', destination: STAGE_C_SCREEN_IDS.c41 },
-      { id: STAGE_C_SCREEN_IDS.c42, label: '이 매장 재고 확인', destination: STAGE_C_SCREEN_IDS.c42 },
-      { id: STAGE_C_SCREEN_IDS.c43, label: '배송 · 수령 방법', destination: STAGE_C_SCREEN_IDS.c43 },
-    ],
-    purchaseActionLabel: '구매 문의',
-  },
   [STAGE_C_SCREEN_IDS.c5]: {
     heading: '선택지에 없는 게 궁금하시면',
     intro: '아래에 편하게 적어주세요',

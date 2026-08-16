@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import backgroundImage from '../../assets/images/stage-a-background.png';
-import { DocentStage } from '../../components/domain/DocentStage';
 import ScreenHeadline from '../../components/common/ScreenHeadline';
 import InfoCard from '../../components/common/InfoCard';
 import SecondaryButton from '../../components/common/SecondaryButton';
@@ -49,11 +48,9 @@ export default function D2ProductRecommendation({
   return (
     <div className="stage-external-page">
       <img src={backgroundImage} alt="" className="stage-external-page__background" />
-      <div className="stage-external-page__content stage-external-page__content--docent stage-external-page__content--d2">
-        <section aria-label="나이비스 AI 도슨트" className="stage-external-page__docent stage-external-page__docent--recommendation">
-          <DocentStage cue="present" />
-        </section>
-        <ScreenHeadline headline={headline ?? getHeadlineForPurpose(purpose)} onRevealComplete={() => setIsRecommendationVisible(true)} reveal variant="md" className="stage-external-page__headline" />
+      {/* D2·D3은 추천 카드에 집중하도록 3D 도슨트를 두지 않는다. */}
+      <div className="stage-external-page__content stage-external-page__content--d2">
+        <ScreenHeadline headline={headline ?? getHeadlineForPurpose(purpose)} onRevealComplete={() => setIsRecommendationVisible(true)} reveal variant="md" waitForDocent={false} className="stage-external-page__headline" />
         {isRecommendationVisible && <div className="stage-external-page__stack stage-external-page__stack--recommendations">
           {products.map((product) => (
             <InfoCard

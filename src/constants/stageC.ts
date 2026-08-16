@@ -38,7 +38,6 @@ export const STAGE_C_PRODUCT_DETAIL_ROUTES = {
   priceInquiry: '/stage-c/:sku/purchase/price',
   priceInquiryPending: '/stage-c/:sku/purchase/price/pending',
   priceInquiryCompleted: '/stage-c/:sku/purchase/price/completed',
-  stockInquiry: '/stage-c/:sku/purchase/stock',
 } as const
 
 export const STAGE_C_PRODUCT_DETAIL_ROUTE_KEYS = {
@@ -49,7 +48,6 @@ export const STAGE_C_PRODUCT_DETAIL_ROUTE_KEYS = {
   [STAGE_C_SCREEN_IDS.c32]: 'fitColor',
   [STAGE_C_SCREEN_IDS.c33]: 'fitTryOn',
   [STAGE_C_SCREEN_IDS.c41]: 'priceInquiry',
-  [STAGE_C_SCREEN_IDS.c42]: 'stockInquiry',
 } as const
 
 export type StageCProductDetailRouteKey =
@@ -63,7 +61,6 @@ export type StageCHubScreenId =
   | typeof STAGE_C_SCREEN_IDS.c1
   | typeof STAGE_C_SCREEN_IDS.c2
   | typeof STAGE_C_SCREEN_IDS.c3
-  | typeof STAGE_C_SCREEN_IDS.c4
   | typeof STAGE_C_SCREEN_IDS.c5
 
 export type StageCComingSoonScreenId = Exclude<
