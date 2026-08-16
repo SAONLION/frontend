@@ -65,7 +65,7 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
         : {
             sku,
             type: callType,
-            completion: staffCallService.request({ sku, type: callType }),
+            completion: staffCallService.request({ sku, type: callType, sessionId: state.sessionId, productId: state.productId }),
           }
 
     pendingRequestRef.current = request
@@ -83,7 +83,7 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
     return () => {
       active = false
     }
-  }, [callType, completed, completedPath, hasRequestContext, navigate, sku, staffCallService])
+  }, [callType, completed, completedPath, hasRequestContext, navigate, sku, staffCallService, state.productId, state.sessionId])
 
   if (!hasRequestContext) {
     return (
