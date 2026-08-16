@@ -17,6 +17,10 @@ interface D21ProductLocationGuideProps {
   subtext?: string;
   buttonLabel?: string;
   onViewOtherProducts?: () => void;
+  /** D4에서는 안내 중인 제품을 눌러 바로 그 제품의 StageC로 넘어간다. */
+  onSelectProduct?: () => void;
+  /** AI 추천에 sku가 없어 데모 제품 정보로 대체해 안내하는 중이면 상단에 알린다. */
+  isFallbackProduct?: boolean;
 }
 
 export default function D21ProductLocationGuide({
@@ -25,12 +29,19 @@ export default function D21ProductLocationGuide({
   subtext = '제품 앞에 이름표를 태그해보세요.',
   buttonLabel = '다른 제품 보기 →',
   onViewOtherProducts,
+  onSelectProduct,
+  isFallbackProduct = false,
 }: D21ProductLocationGuideProps) {
   const [isProductVisible, setIsProductVisible] = useState(false);
 
   return (
     <div className="stage-external-page">
       <img src={backgroundImage} alt="" className="stage-external-page__background" />
+      {isFallbackProduct && (
+        <p className="stage-external-page__fallback-notice" role="status">
+          AI 추천에 제품 코드가 없어 <b>데모 제품 정보</b>로 안내 중이에요
+        </p>
+      )}
       <div className="stage-external-page__content stage-external-page__content--docent stage-external-page__content--d21">
         <div className="stage-external-page__d21-main">
           <DocentStage cue="guide" className="stage-external-page__docent" />
@@ -41,6 +52,7 @@ export default function D21ProductLocationGuide({
             imageVariant="primary-cutout"
             name={selectedProduct.name}
             description={selectedProduct.description}
+            onSelect={onSelectProduct}
             className="stage-external-page__headline"
           />}
         </div>

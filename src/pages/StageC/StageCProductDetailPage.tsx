@@ -3,6 +3,7 @@ import { useLocation, useParams } from 'react-router'
 import stylingLifestyleImage from '../../assets/images/product-styling-lifestyle.webp'
 import { usePreparedNavigate } from '../../app/usePreparedNavigate'
 import { PreparedLink } from '../../components/common/PreparedLink'
+import { ProductImageGallery } from '../../components/domain/ProductImageGallery'
 import { GlassInfoCard, StageCDetailShell } from '../../components/domain/StageCDetailShell'
 import {
   STAGE_C_PRODUCT_DETAIL_ROUTES,
@@ -10,11 +11,15 @@ import {
   stageCPath,
 } from '../../constants/stageC'
 import { useProductExit } from '../../features/product-explore/useProductExit'
+import { useSelectedProductImages } from '../../features/product-explore/useSelectedProductImages'
 import { useStageCProduct } from '../../features/product-explore/useStageCProduct'
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes'
 import { useSession } from '../../features/session/useSession'
 import { StageCState } from './StageCHubPage'
 import { StageFDevFlowOverlay, type StageFDevScenario } from '../StageF/StageFDevFlowOverlay'
+
+// 훅 순서를 지키기 위한 자리표시자. 로딩·실패 시에도 useSelectedProductImages를 호출한다.
+const EMPTY_PRODUCT = { sku: '', name: '', imageUrl: '', dimensions: '' }
 
 type Topic = 'craft' | 'heritage' | 'styling'
 
@@ -33,6 +38,7 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
   const location = useLocation()
   const product = useStageCProduct(sku)
   const { dispatch } = useSession()
+  const selectedImages = useSelectedProductImages(product ?? EMPTY_PRODUCT)
   const navigate = usePreparedNavigate()
   const exitProduct = useProductExit(sku)
   const viewed = useRef(false)
@@ -67,9 +73,10 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
     )
   }
 
+  // C2-3은 모델 착장샷만 크게 보여준다. 나머지 제품 컷은 대표 컷과 함께 이미지 갤러리로 옮겼다.
   const images = topic === 'styling'
-    ? [stylingLifestyleImage, ...(product.detailImages ?? [])]
-    : product.detailImages ?? []
+    ? product.stylingImages ?? [stylingLifestyleImage]
+    : [selectedImages.imageUrl, ...selectedImages.detailImages]
   const lines = product.productDetail?.[topic] ?? ['정확한 제품 안내는 직원에게 문의해 주세요.']
   const imageCount = images.length
 
@@ -122,9 +129,9 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
       </header>
 
       <section className={`stage-c-product-detail-media stage-c-product-detail-media--${topic}`} aria-label={`${topicTitles[topic]} 안내 미디어`}>
-        {topic !== 'styling' && <img alt={product.name} className="stage-c-primary-cutout" decoding="async" fetchPriority="high" src={product.imageUrl} />}
+        {topic !== 'styling' && <ProductImageGallery alt={product.name} images={images} />}
         {topic === 'styling' && imageCount > 0 && (
-          <div className="stage-c-gallery">
+          <div className={`stage-c-gallery${imageCount === 1 ? ' stage-c-gallery--single' : ''}`}>
             <div
               aria-label="스타일링 제품 이미지"
               className="stage-c-gallery-track"
@@ -143,7 +150,7 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
                 />
               ))}
             </div>
-            <div className="stage-c-gallery-controls">
+            {imageCount > 1 && <div className="stage-c-gallery-controls">
               <button
                 aria-label="이전 제품 이미지"
                 onClick={() => scrollToImage(activeImageIndex - 1)}
@@ -158,10 +165,10 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
               >
                 ›
               </button>
-            </div>
-            <span aria-label={`${activeImageIndex + 1}번째 이미지, 전체 ${imageCount}개`} className="stage-c-gallery-dots">
+            </div>}
+            {imageCount > 1 && <span aria-label={`${activeImageIndex + 1}번째 이미지, 전체 ${imageCount}개`} className="stage-c-gallery-dots">
               {images.map((image, imageIndex) => <i aria-hidden="true" className={imageIndex === activeImageIndex ? 'is-active' : ''} key={image} />)}
-            </span>
+            </span>}
           </div>
         )}
         {topic === 'styling' && imageCount === 0 && <img alt={product.name} className="stage-c-primary-cutout" decoding="async" fetchPriority="high" src={product.imageUrl} />}

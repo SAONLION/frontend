@@ -22,6 +22,25 @@ const PRICE_INQUIRY_COPY: Record<PriceInquiryPageState, { cue: 'present' | 'send
   completed: { cue: 'success', title: '직원에게 구매 안내 요청을 보냈어요!', description: '가격과 관련 정보들을 곧 안내해 드릴게요!' },
 }
 
+/**
+ * 폐지된 C4 구매 조건 허브의 자리. 가격 안내 요청을 기록하고 C4-1 완료 화면으로 넘긴다.
+ * C1의 `구매 조건이 궁금해요`와 이 URL의 도착점을 같게 유지한다.
+ */
+export function StageCPurchaseEntryPage() {
+  const { sku = '' } = useParams()
+  const { dispatch } = useSession()
+  const recorded = useRef(false)
+
+  // 렌더 중에 dispatch하면 다른 컴포넌트를 갱신한다는 경고가 나므로 커밋 뒤에 기록한다.
+  useEffect(() => {
+    if (recorded.current) return
+    recorded.current = true
+    dispatch({ type: SESSION_ACTIONS.recordPriceInquiryRequest, sku })
+  }, [dispatch, sku])
+
+  return <Navigate replace to={stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryCompleted, sku)} />
+}
+
 export function StageCPriceInquiryPage({ state: pageState }: { state: PriceInquiryPageState }) {
   const { sku = '' } = useParams()
   const product = useStageCProduct(sku)
@@ -34,15 +53,16 @@ export function StageCPriceInquiryPage({ state: pageState }: { state: PriceInqui
     return <StageCState title="상품을 찾을 수 없어요" description="태그한 상품의 주소를 다시 확인해 주세요." />
   }
 
-  return <PriceInquiryContent pageState={pageState} sku={sku} />
+  return <PriceInquiryContent pageState={pageState} productName={product.name} sku={sku} />
 }
 
 type PriceInquiryContentProps = {
   pageState: PriceInquiryPageState
+  productName: string
   sku: string
 }
 
-function PriceInquiryContent({ pageState, sku }: PriceInquiryContentProps) {
+function PriceInquiryContent({ pageState, productName, sku }: PriceInquiryContentProps) {
   const navigate = usePreparedNavigate()
   const { dispatch, state } = useSession()
   const requestService = usePriceInquiryRequestService()
@@ -50,7 +70,8 @@ function PriceInquiryContent({ pageState, sku }: PriceInquiryContentProps) {
   const [areActionsVisible, setAreActionsVisible] = useState(false)
   const [isDescriptionVisible, setIsDescriptionVisible] = useState(false)
   const exitProduct = useProductExit(sku)
-  const purchaseHubPath = stageCPath(STAGE_C_ROUTES.c4, sku)
+  // C4 구매 조건 허브가 폐지되어 이 화면이 그 자리를 대신하므로 되돌아갈 곳은 C1이다.
+  const productHubPath = stageCPath(STAGE_C_ROUTES.c1, sku)
   const priceRequestPath = stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiry, sku)
   const pendingPath = stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryPending, sku)
   const completedPath = stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryCompleted, sku)
@@ -91,6 +112,7 @@ function PriceInquiryContent({ pageState, sku }: PriceInquiryContentProps) {
   const copy = PRICE_INQUIRY_COPY[pageState]
   return (
     <StageCDetailShell className="stage-c-price-inquiry-shell">
+      <header className="stage-c-product-detail-topbar"><span>{productName}</span></header>
       <div className="stage-c-price-inquiry-content">
         <section aria-label="나이비스 AI 도슨트" className="stage-c-price-inquiry-docent"><DocentStage continuityKey="price-inquiry" cue={copy.cue} /></section>
         <h1><KineticTextReveal autoPlay blur className="justify-center" distance={16} onRevealComplete={() => { setIsDescriptionVisible(true); setAreActionsVisible(true) }} splitBy="characters" stagger={0.035} text={copy.title} waitForDocent /></h1>
@@ -99,8 +121,8 @@ function PriceInquiryContent({ pageState, sku }: PriceInquiryContentProps) {
       </div>
       {areActionsVisible && <div className="stage-c-price-inquiry-actions">
         {pageState === 'request' && <button className="stage-c-action-button stage-c-action-button--primary" onClick={submitRequest} type="button">직원에게 가격 안내 요청하기</button>}
-        {pageState === 'request' && <PreparedLink className="stage-c-action-button" to={purchaseHubPath}>구매 조건으로 돌아가기</PreparedLink>}
-        {pageState === 'pending' && <PreparedLink className="stage-c-action-button" to={purchaseHubPath}>다른 정보 보기</PreparedLink>}
+        {pageState === 'request' && <PreparedLink className="stage-c-action-button" to={productHubPath}>다른 정보 보기</PreparedLink>}
+        {pageState === 'pending' && <PreparedLink className="stage-c-action-button" to={productHubPath}>다른 정보 보기</PreparedLink>}
         {pageState === 'completed' && <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>}
       </div>}
     </StageCDetailShell>

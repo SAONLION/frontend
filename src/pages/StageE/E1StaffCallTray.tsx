@@ -11,6 +11,8 @@ interface E1StaffCallTrayProps {
   requestOptions?: string[];
   otherLabel?: string;
   viewOtherProductsLabel?: string;
+  /** B1처럼 이미 재태그 지점에 있는 화면에서는 `다른 제품 보기`를 감춘다. */
+  showViewOtherProducts?: boolean;
   onChangeSelectedRequests?: (selected: string[]) => void;
   onSelectOther?: () => void;
   onViewOtherProducts?: () => void;
@@ -25,6 +27,7 @@ export default function E1StaffCallTray({
   requestOptions = DEFAULT_REQUEST_OPTIONS,
   otherLabel = '기타',
   viewOtherProductsLabel = '다른 제품 보기 →',
+  showViewOtherProducts = true,
   onChangeSelectedRequests,
   onSelectOther,
   onViewOtherProducts,
@@ -46,7 +49,7 @@ export default function E1StaffCallTray({
     <div className={`stage-external-page${isDragging ? ' stage-external-page--dragging' : ''}`} style={{ translate: `0 ${sheetOffset}px` } as CSSProperties}>
       <img src={backgroundImage} alt="" className="stage-external-page__background" />
       {sheetHandle}
-      <div className="stage-external-page__content">
+      <div className={`stage-external-page__content${showViewOtherProducts ? '' : ' stage-external-page__content--e1-compact'}`}>
         <ScreenHeadline headline={headline} subtext={subtext} variant="md" className="stage-external-page__headline" />
         <div className="stage-external-page__stack">
           <div className="stage-external-page__choice-grid stage-e-staff-call-tray__choice-grid">
@@ -62,7 +65,7 @@ export default function E1StaffCallTray({
           </div>
           <SecondaryButton label={otherLabel} onClick={onSelectOther} textColor="text-[#b8b8b8]" />
         </div>
-        <div className="stage-external-page__actions"><SecondaryButton label={viewOtherProductsLabel} onClick={onViewOtherProducts} pendingOnClick /></div>
+        {showViewOtherProducts && <div className="stage-external-page__actions"><SecondaryButton label={viewOtherProductsLabel} onClick={onViewOtherProducts} pendingOnClick /></div>}
       </div>
     </div>
   );

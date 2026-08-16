@@ -17,6 +17,9 @@ export function stageBRecognizingPath(sku: string): string {
 export const STAGE_D_ROUTES = {
   recommend: '/stage-d/recommend',
   locationGuide: '/stage-d/location-guide',
+  // 두 번째 이탈부터 반복되는 개인화 추천 루프(D3 → D4)
+  personalizedRecommend: '/stage-d/personalized-recommend',
+  personalizedLocationGuide: '/stage-d/personalized-location-guide',
 } as const
 
 export const STAGE_F_ROUTES = {

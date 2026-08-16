@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import backgroundImage from '../../assets/images/stage-a-background.png';
-import { DocentStage } from '../../components/domain/DocentStage';
 import ScreenHeadline from '../../components/common/ScreenHeadline';
 import InfoCard from '../../components/common/InfoCard';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -8,7 +7,14 @@ import SecondaryButton from '../../components/common/SecondaryButton';
 import PrimaryButton from '../../components/common/PrimaryButton';
 import { mockD2Recommendations } from '../../mocks/fixtures/demoContent';
 
-export type ProductCardData = (typeof mockD2Recommendations)[number]
+export type ProductCardData = {
+  id: string
+  /** fixture 추천에만 있다. API 추천은 productId만 내려와서 sku를 알 수 없다. */
+  sku?: string
+  image: string
+  name: string
+  description: string | string[]
+}
 
 // D1에서 아직 디자인이 확정되지 않은 목적값(선물/구경/기타)은
 // 동일 패턴을 따르는 placeholder 문구로만 채워둔 상태입니다.
@@ -25,6 +31,8 @@ function getHeadlineForPurpose(purpose: string): [string, string] {
 
 interface D2ProductRecommendationProps {
   purpose: string;
+  /** D3처럼 목적 문구 대신 개인화 문구를 쓰는 화면에서 헤드라인을 통째로 대체한다. */
+  headline?: [string, string];
   products?: readonly ProductCardData[];
   isLoadingRecommendations?: boolean;
   hasNoRecommendations?: boolean;
@@ -37,6 +45,7 @@ interface D2ProductRecommendationProps {
 
 export default function D2ProductRecommendation({
   purpose,
+  headline,
   products = mockD2Recommendations,
   isLoadingRecommendations = false,
   hasNoRecommendations = false,
@@ -51,11 +60,9 @@ export default function D2ProductRecommendation({
   return (
     <div className="stage-external-page">
       <img src={backgroundImage} alt="" className="stage-external-page__background" />
-      <div className="stage-external-page__content stage-external-page__content--docent stage-external-page__content--d2">
-        <section aria-label="나이비스 AI 도슨트" className="stage-external-page__docent stage-external-page__docent--recommendation">
-          <DocentStage cue="present" />
-        </section>
-        <ScreenHeadline headline={getHeadlineForPurpose(purpose)} onRevealComplete={() => setIsRecommendationVisible(true)} reveal variant="md" className="stage-external-page__headline" />
+      {/* D2·D3은 추천 카드에 집중하도록 3D 도슨트를 두지 않는다. */}
+      <div className="stage-external-page__content stage-external-page__content--d2">
+        <ScreenHeadline headline={headline ?? getHeadlineForPurpose(purpose)} onRevealComplete={() => setIsRecommendationVisible(true)} reveal variant="md" waitForDocent={false} className="stage-external-page__headline" />
         {isRecommendationVisible && (
           isLoadingRecommendations ? (
             <LoadingSpinner label="추천 상품을 준비하고 있어요" />

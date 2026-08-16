@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router'
 import { usePreparedNavigate } from '../../app/usePreparedNavigate'
 import { PreparedLink } from '../../components/common/PreparedLink'
 import { DocentStage } from '../../components/domain/DocentStage'
 import { KineticTextReveal } from '../../components/ui/kinetic-text-reveal'
+import { ProductImageGallery } from '../../components/domain/ProductImageGallery'
 import { StageCDetailShell } from '../../components/domain/StageCDetailShell'
 import { STAGE_A_ROUTES } from '../../constants/appRoutes'
 import { EVENT_NAMES, type SessionEvent } from '../../constants/events'
@@ -25,6 +26,7 @@ export function StageCFitPage({ kind }: { kind: FitPageKind }) {
   const { sku = '' } = useParams()
   const location = useLocation()
   const product = useStageCProduct(sku)
+  const { state } = useSession()
 
   if (product === undefined) {
     return <StageCState title="제품 정보를 불러오는 중이에요" description="잠시만 기다려 주세요." />
@@ -34,7 +36,10 @@ export function StageCFitPage({ kind }: { kind: FitPageKind }) {
     return <FitFallback />
   }
 
-  const selection = getFitSelection(product, new URLSearchParams(location.search))
+  const selection = getFitSelection(product, new URLSearchParams(location.search), {
+    sizeCode: state.selectedSizeCode,
+    colorCode: state.selectedColorCode,
+  })
   if (!selection) {
     return <FitFallback />
   }
@@ -99,13 +104,14 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
   const setSize = (next: SizeOption) => {
     if (next.code === selection.size.code) return
     dispatch({ type: SESSION_ACTIONS.recordSizeCheck, sku, size: next.code })
-    navigateSelection(fitSearchPath(kind === 'size' ? paths.size : paths.tryOn, { ...selection, size: next }))
+    // 선택을 바꿀 때마다 히스토리가 쌓이면 뒤로가기가 색상·사이즈 이력을 되짚게 된다.
+    navigateSelection(fitSearchPath(kind === 'size' ? paths.size : paths.tryOn, { ...selection, size: next }), { replace: true })
   }
 
   const setColor = (next: ColorOption) => {
     if (next.code === selection.color.code) return
     dispatch({ type: SESSION_ACTIONS.recordColorSwitch, sku, from: selection.color.code, to: next.code })
-    navigateSelection(fitSearchPath(kind === 'color' ? paths.color : paths.tryOn, { ...selection, color: next }))
+    navigateSelection(fitSearchPath(kind === 'color' ? paths.color : paths.tryOn, { ...selection, color: next }), { replace: true })
   }
 
   const confirmSize = () => {
@@ -141,7 +147,7 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
   }
 
   if (kind === 'size') {
-    return <FitShell kind={kind} selection={selection} sku={sku}>
+    return <FitShell kind={kind} selection={selection} sizeScale={getSizeScale(product, selection)} sku={sku}>
       <SizeOptions onSelect={setSize} product={product} selection={selection} />
       <dl className="stage-c-fit-reference-facts">
         <div><dt>선택 사이즈</dt><dd>{selection.size.label}</dd></div>
@@ -161,7 +167,7 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
   }
 
   if (kind === 'try-on') {
-    return <FitShell kind={kind} selection={selection} sku={sku}>
+    return <FitShell kind={kind} selection={selection} sizeScale={getSizeScale(product, selection)} sku={sku}>
       <div className="stage-c-fit-try-on-options">
         <SizeOptions label="사이즈" onSelect={setSize} product={product} selection={selection} />
         <ColorOptions label="컬러" onSelect={setColor} product={product} selection={selection} />
@@ -222,16 +228,34 @@ function FitStatusScreen({
   )
 }
 
-function FitShell({ children, kind, selection }: { children: ReactNode; kind: FitPageKind; selection: FitSelection; sku: string }) {
+function FitShell({ children, kind, selection, sizeScale = 1 }: { children: ReactNode; kind: FitPageKind; selection: FitSelection; sizeScale?: number; sku: string }) {
   const labels: Record<'size' | 'color' | 'try-on', string> = { size: '사이즈 · 용량', color: '컬러', 'try-on': '착장 요청' }
+  // 다른 각도 컷도 선택한 색상으로 찍힌 것만 쓴다. 없으면 대표 컷 한 장만 보여준다.
+  const images = [selection.color.imageUrl, ...(selection.color.detailImages ?? [])]
 
   return <StageCDetailShell className={`stage-c-fit-reference-shell stage-c-fit-reference-shell--${kind}`}>
     <div className="stage-c-fit-reference-pill">{labels[kind as 'size' | 'color' | 'try-on']}</div>
-    <section className="stage-c-fit-reference-media">
-      <img alt={`${selection.color.label} 컬러 대표 이미지`} className="stage-c-primary-cutout" src={selection.color.imageUrl} />
+    <section className={`stage-c-fit-reference-media${images.length > 1 ? ' stage-c-fit-reference-media--gallery' : ''}`}>
+      <ProductImageGallery
+        alt={`${selection.color.label} 컬러 대표 이미지`}
+        images={images}
+        imageStyle={{ '--stage-c-primary-cutout-scale': sizeScale } as CSSProperties}
+      />
     </section>
     {children}
   </StageCDetailShell>
+}
+
+// 사이즈별 실사 이미지가 없어 선택한 사이즈를 대표 컷의 배율로 표현한다.
+// 가장 큰 사이즈가 100%이고 한 단계 내려갈 때마다 SIZE_SCALE_STEP만큼 줄어든다.
+const SIZE_SCALE_STEP = 0.12
+
+function getSizeScale(product: Product, selection: FitSelection): number {
+  const options = product.sizeOptions?.slice(0, 3) ?? []
+  if (options.length < 2) return 1
+  const selectedIndex = options.findIndex((option) => option.code === selection.size.code)
+  if (selectedIndex < 0) return 1
+  return 1 - (options.length - 1 - selectedIndex) * SIZE_SCALE_STEP
 }
 
 function SizeOptions({ label, onSelect, product, selection }: { label?: string; onSelect: (option: SizeOption) => void; product: Product; selection: FitSelection }) {
@@ -241,7 +265,13 @@ function SizeOptions({ label, onSelect, product, selection }: { label?: string; 
 
   return <section className="stage-c-fit-reference-options">
     {label && <h2>{label}</h2>}
-    <div aria-label="사이즈 선택" className="stage-c-fit-size-selector" role="group">
+    <div
+      aria-label="사이즈 선택"
+      className="stage-c-fit-size-selector"
+      role="group"
+      style={{ '--stage-c-fit-size-count': options.length } as CSSProperties}
+    >
+      {/* 선택 표시는 옵션 수만큼 균등 분할한다. 사이즈가 2개뿐인 제품에서도 폭과 위치가 맞아야 한다. */}
       <span aria-hidden="true" className={`stage-c-fit-size-selector__indicator stage-c-fit-size-selector__indicator--${selectedIndex}`} />
       {options.map((option) => (
         <button aria-pressed={option.code === selection.size.code} key={option.code} onClick={() => onSelect(option)} type="button">
@@ -252,17 +282,37 @@ function SizeOptions({ label, onSelect, product, selection }: { label?: string; 
   </section>
 }
 
+// 한국어 라벨이 정해진 색만 옮겨 쓰고, 새로 들어오는 색은 데이터의 label을 그대로 보여준다.
+const COLOR_LABELS: Record<string, string> = {
+  cognac: '코냑',
+  black: '블랙',
+  white: '화이트',
+  beige: '베이지',
+  'soft-pink': '소프트 핑크',
+  cinnamon: '시나몬',
+}
+
 function ColorOptions({ label, onSelect, product, selection }: { label?: string; onSelect: (option: ColorOption) => void; product: Product; selection: FitSelection }) {
-  const referenceColors = product.colorOptions?.filter((option) => ['cognac', 'black', 'white'].includes(option.code)) ?? []
-  const referenceLabels: Record<string, string> = { cognac: '코냑', black: '블랙', white: '화이트' }
+  const referenceColors = product.colorOptions ?? []
 
   return <section className="stage-c-fit-reference-options stage-c-fit-reference-options--color">
     {label && <h2>{label}</h2>}
-    <div aria-label="컬러 선택" className="stage-c-fit-color-selector" role="group">
+    <div
+      aria-label="컬러 선택"
+      className="stage-c-fit-color-selector"
+      role="group"
+      style={{ '--stage-c-fit-color-count': referenceColors.length } as CSSProperties}
+    >
       {referenceColors.map((option) => (
-        <button aria-pressed={option.code === selection.color.code} key={option.code} onClick={() => onSelect(option)} type="button">
+        <button
+          aria-pressed={option.code === selection.color.code}
+          key={option.code}
+          onClick={() => onSelect(option)}
+          style={{ '--stage-c-selected-swatch': option.swatch } as CSSProperties}
+          type="button"
+        >
           <i aria-hidden="true" style={{ backgroundColor: option.swatch }} />
-          <span>{referenceLabels[option.code] ?? option.label}</span>
+          <span>{COLOR_LABELS[option.code] ?? option.label}</span>
         </button>
       ))}
     </div>

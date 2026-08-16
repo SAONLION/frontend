@@ -38,6 +38,9 @@ export type SessionState = {
   productId: number | null
   currentSkuId: number | null
   currentSku: string | null
+  /** 현재 제품에서 고객이 고른 사이즈·컬러. 화면을 옮겨도 유지되고 다음 제품 태그 시 초기화된다. */
+  selectedSizeCode: string | null
+  selectedColorCode: string | null
   nickname: string | null
   taggedSkus: readonly string[]
   events: readonly SessionEvent[]

@@ -28,7 +28,6 @@ type StageCHubPageProps = {
 const SUBHUB_SCREEN_HUB_TYPE: Partial<Record<StageCHubScreenId, HubType>> = {
   [STAGE_C_SCREEN_IDS.c2]: 'product',
   [STAGE_C_SCREEN_IDS.c3]: 'fit',
-  [STAGE_C_SCREEN_IDS.c4]: 'purchase',
   [STAGE_C_SCREEN_IDS.c5]: 'other',
 }
 
@@ -69,6 +68,14 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
     if ('hubType' in choice) {
       dispatch({ type: SESSION_ACTIONS.recordHubSelect, hubType: choice.hubType })
       logInteraction(choice.hubType)
+
+      // 구매 조건은 하위 허브 없이 C4-1 가격 안내 요청 완료 화면으로 바로 이어진다.
+      if (choice.hubType === 'purchase') {
+        dispatch({ type: SESSION_ACTIONS.recordPriceInquiryRequest, sku })
+        navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryCompleted, sku))
+        return
+      }
+
       navigate(`/stage-c/${sku}/${choice.destination}`)
       return
     }

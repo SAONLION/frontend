@@ -13,14 +13,16 @@ const SURFACE_STYLES = {
 } as const;
 
 export default function Card({ variant = 'product', onSelect, className = '', children }: CardProps) {
-  return (
-    <div
-      onClick={onSelect}
-      className={`w-full rounded-[15px] ${SURFACE_STYLES[variant]} ${
-        onSelect ? 'cursor-pointer' : ''
-      } ${className}`}
-    >
-      {children}
-    </div>
-  );
+  const surfaceClassName = `w-full rounded-[15px] ${SURFACE_STYLES[variant]} ${className}`;
+
+  // 선택 가능한 카드는 실제 button으로 렌더링해 터치 반응과 공통 누름 모션을 그대로 받는다.
+  if (onSelect) {
+    return (
+      <button type="button" onClick={onSelect} className={`cursor-pointer text-left ${surfaceClassName}`}>
+        {children}
+      </button>
+    );
+  }
+
+  return <div className={surfaceClassName}>{children}</div>;
 }

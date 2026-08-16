@@ -4,12 +4,11 @@ import { STAGE_C_PRODUCT_DETAIL_ROUTES, STAGE_C_ROUTES, STAGE_C_SCREEN_IDS } fro
 import AppLayout from './AppLayout';
 import { StageAIntroPage, StageANicknamePage } from '../pages/StageA/StageAFlowPages';
 import { StageBNfcPromptPage, StageBRecognizingPage } from '../pages/StageB/StageBFlowPages';
-import { StageD1Page, StageD2Page, StageD21Page } from '../pages/StageD/StageDFlowPages';
+import { StageD1Page, StageD2Page, StageD21Page, StageD3Page, StageD4Page } from '../pages/StageD/StageDFlowPages';
 import { StageCHubPage } from '../pages/StageC/StageCHubPage';
 import { StageCProductDetailPage } from '../pages/StageC/StageCProductDetailPage';
 import { StageCFitPage } from '../pages/StageC/StageCFitPages';
-import { StageCPriceInquiryPage } from '../pages/StageC/StageCPriceInquiryPage';
-import { StageCPurchaseStatusPage } from '../pages/StageC/StageCPurchaseStatusPage';
+import { StageCPriceInquiryPage, StageCPurchaseEntryPage } from '../pages/StageC/StageCPriceInquiryPage';
 import { StageCOtherPage } from '../pages/StageC/StageCOtherPage';
 import { StageCAiAnswerPage } from '../pages/StageC/StageCAiAnswerPage';
 import { StaffCallPage } from '../pages/StageC/StaffCallPage';
@@ -38,7 +37,8 @@ export function AppRoutes() {
         <Route element={<StageCHubPage screenId={STAGE_C_SCREEN_IDS.c1} />} path={STAGE_C_ROUTES.c1} />
         <Route element={<StageCHubPage screenId={STAGE_C_SCREEN_IDS.c2} />} path={STAGE_C_ROUTES.c2} />
         <Route element={<StageCHubPage screenId={STAGE_C_SCREEN_IDS.c3} />} path={STAGE_C_ROUTES.c3} />
-        <Route element={<StageCHubPage screenId={STAGE_C_SCREEN_IDS.c4} />} path={STAGE_C_ROUTES.c4} />
+        {/* C4 구매 조건 허브는 폐지하고 C4-1 가격 안내 요청 완료 화면이 그 자리를 대신한다. */}
+        <Route element={<StageCPurchaseEntryPage />} path={STAGE_C_ROUTES.c4} />
         <Route element={<StageCOtherPage />} path={STAGE_C_ROUTES.c5} />
 
         <Route element={<StageCAiAnswerPage />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.otherAnswer} />
@@ -61,13 +61,14 @@ export function AppRoutes() {
         <Route element={<StageCPriceInquiryPage state="request" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiry} />
         <Route element={<StageCPriceInquiryPage state="pending" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryPending} />
         <Route element={<StageCPriceInquiryPage state="completed" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryCompleted} />
-        <Route element={<StageCPurchaseStatusPage kind="stock" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.stockInquiry} />
 
         {/* StageC의 제품 이탈 핸드오프 지점: 이 두 경로에 우리 화면을 매핑한다 */}
         <Route element={<StageD1Page />} path={STAGE_D1_HANDOFF_PATH} />
         <Route element={<StageCStaffCallTriggerPage />} path={STAGE_E1_HANDOFF_PATH} />
         <Route element={<StageD2Page />} path={STAGE_D_ROUTES.recommend} />
         <Route element={<StageD21Page />} path={STAGE_D_ROUTES.locationGuide} />
+        <Route element={<StageD3Page />} path={STAGE_D_ROUTES.personalizedRecommend} />
+        <Route element={<StageD4Page />} path={STAGE_D_ROUTES.personalizedLocationGuide} />
 
         <Route element={<StageFCb6OfferPage />} path={STAGE_F_ROUTES.cb6Offer} />
         <Route element={<StageFEmailInputPage />} path={STAGE_F_ROUTES.emailInput} />

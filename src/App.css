@@ -471,10 +471,15 @@
   --stage-c-page-space: clamp(1rem, 7.7vw, 1.9375rem);
   --stage-c-control-radius: 1.875rem;
   --stage-c-featured-product-width: min(100%, 20rem);
-  --stage-c-featured-product-height: min(20rem, 42dvh);
-  --stage-c-featured-product-media-height: clamp(15rem, 39dvh, 20rem);
-  --stage-c-product-media-top-space: clamp(0.75rem, 2.25dvh, 1.25rem);
+  /* 제품 컷 크기는 절대값 대신 화면 비율로 잡는다. 세로가 짧으면 dvh가, 가로가 좁으면 vw가
+     먼저 걸려서 어떤 기기에서도 이미지·문구·버튼 비율이 같이 움직인다. */
+  --stage-c-featured-product-height: min(38dvh, 70vw);
+  --stage-c-featured-product-media-height: var(--stage-c-featured-product-height);
+  --stage-c-product-media-top-space: 2.4dvh;
   --stage-c-primary-cutout-scale: 1;
+  /* 좌우 중심은 tools/recenter-cutouts.py가 자산 단계에서 알파 질량 중심 기준으로 맞춰둔다.
+     이 변수는 특정 컷을 수동으로 더 밀어야 할 때만 쓰는 예비 노브다. */
+  --stage-c-primary-cutout-shift: 0rem;
   --stage-c-close-inline-inset: 0.375rem;
   --stage-c-close-shift-inline: 0.125rem;
   --stage-c-close-shift-block: 0;
@@ -548,7 +553,8 @@
 
 .stage-c-product-media {
   display: flex;
-  flex: 1 1 auto;
+  /* 남는 높이는 아래 hub-content가 가져가 문구를 가운데 놓는다. 여기서는 줄어들기만 한다. */
+  flex: 0 1 auto;
   align-items: flex-start;
   justify-content: center;
   min-height: var(--stage-c-featured-product-media-height);
@@ -564,6 +570,59 @@
   filter: drop-shadow(0 1.25rem 1.25rem rgb(0 0 0 / 28%));
 }
 
+/* 대표 컷과 제품 상세 컷을 한 장씩 스냅 스크롤로 넘겨보는 공통 갤러리.
+   C1~C3 허브, C2-1·C2-2, C3-1~C3-3이 같은 마크업을 공유한다. */
+.stage-c-media-gallery {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 0;
+}
+
+.stage-c-media-gallery__track {
+  display: flex;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.stage-c-media-gallery__track::-webkit-scrollbar {
+  display: none;
+}
+
+.stage-c-media-gallery__track > img {
+  flex: 0 0 100%;
+  width: 100%;
+  height: var(--stage-c-featured-product-height);
+  max-height: var(--stage-c-featured-product-height);
+  object-fit: contain;
+  scroll-snap-align: center;
+}
+
+/* 인디케이터는 C2-3 갤러리에서 쓰던 글래스 pill을 그대로 쓴다. */
+.stage-c-media-dots {
+  position: static;
+  display: flex;
+  align-items: center;
+  width: max-content;
+  min-height: 1.25rem;
+  margin: 0.5rem auto 0;
+  padding: 0.25rem 0.4375rem;
+  gap: 0.25rem;
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 999rem;
+  background: rgb(217 217 217 / 16%);
+  box-shadow: inset 0 0.0625rem 0 rgb(255 255 255 / 18%), 0 0.1875rem 0.5rem rgb(0 0 0 / 14%);
+  backdrop-filter: blur(0.625rem) saturate(1.1);
+  translate: none;
+}
+
 /* Product cutouts arrive pre-normalized: alpha-bbox cropped and centered so the
    longest side fills ~90% of the canvas. No per-asset scaling is needed, so this
    stays at 1 and exists only as a tuning knob. Values above ~1.1 overflow the
@@ -571,12 +630,22 @@
 .stage-c-primary-cutout {
   transform: scale(var(--stage-c-primary-cutout-scale));
   transform-origin: center;
+  translate: var(--stage-c-primary-cutout-shift, 0) 0;
 }
 
 .stage-c-hub-content {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
-  gap: 1rem;
+  /* 문구 위아래 간격은 아래 auto 여백이 만든다. 여기에 gap을 더하면 아래쪽만 넓어진다. */
+  gap: 0;
+}
+
+/* 메인 문구는 이미지 인디케이터와 첫 선택지 사이 중앙에 놓는다. auto 여백이 남는 높이를
+   위아래로 똑같이 나눠 가지므로 고정값이 필요 없고, padding이 최소 간격을 대칭으로 보장한다. */
+.stage-c-page .stage-c-hub-content > h1 {
+  margin-block: auto;
+  padding-block: 1.5dvh;
 }
 
 .stage-c-hub-content h1,
@@ -614,7 +683,7 @@
   white-space: nowrap;
 }
 
-.stage-c-hub-content > h1 + .stage-c-choice-list {
+.stage-c-choice-list + .stage-c-other-link {
   margin-top: 1rem;
 }
 
@@ -860,6 +929,14 @@
 
   .stage-c-action-button {
     font-size: 0.8125rem;
+  }
+}
+
+/* 세로가 짧은 기기에서는 vw 상한이 먼저 걸려 이미지가 화면에 비해 커진다.
+   이 구간에서만 dvh 비율을 낮춰 문구·선택지·하단 바가 잘리지 않게 한다. */
+@media (max-height: 56rem) {
+  .stage-c-shell {
+    --stage-c-featured-product-height: min(29dvh, 70vw);
   }
 }
 
@@ -1783,6 +1860,12 @@
   overflow-y: hidden;
 }
 
+/* C2-3은 모델 착장샷 한 장뿐이라 좌우 컨트롤 자리를 회수하고 이미지를 키운다. */
+.stage-c-product-detail-media--styling .stage-c-gallery--single {
+  --stage-c-styling-gallery-height: min(27rem, 50dvh);
+  width: 100%;
+}
+
 /* No `mix-blend-mode: multiply` here: it existed to knock out the white background of
    the former opaque JPEGs. The styling shots are transparent cutouts now, so multiply
    would only darken the product against the dark shell. */
@@ -1944,6 +2027,15 @@
   padding: var(--stage-c-fit-image-top-space) 0 0.25rem;
 }
 
+/* 이미지 갤러리가 붙는 화면은 인디케이터(1.25rem + 위 여백 0.5rem)만큼 미디어 박스를 키운다. */
+.stage-c-fit-reference-media--gallery,
+.stage-c-fit-reference-shell--size .stage-c-fit-reference-media--gallery,
+.stage-c-fit-reference-shell--color .stage-c-fit-reference-media--gallery,
+.stage-c-fit-reference-shell--try-on .stage-c-fit-reference-media--gallery {
+  flex-basis: calc(var(--stage-c-featured-product-height) + var(--stage-c-fit-image-top-space) + 2rem);
+  min-height: calc(var(--stage-c-featured-product-height) + var(--stage-c-fit-image-top-space) + 2rem);
+}
+
 .stage-c-fit-reference-shell--size .stage-c-fit-reference-actions,
 .stage-c-fit-reference-shell--color .stage-c-fit-reference-actions {
   margin-top: auto;
@@ -1951,12 +2043,17 @@
 
 .stage-c-fit-reference-shell--color .stage-c-fit-reference-options--color {
   flex: 0 1 auto;
-  margin-top: var(--stage-c-fit-section-gap);
 }
 
 .stage-c-fit-reference-media + .stage-c-fit-reference-options,
 .stage-c-fit-reference-media + .stage-c-fit-try-on-options {
   margin-top: var(--stage-c-fit-section-gap);
+}
+
+/* C3-2는 컬러 스와치가 이미지에 붙어 보여 다른 fit 화면보다 간격을 더 벌린다.
+   바로 위 인접 형제 규칙과 특이도가 같으면 지므로 shell 클래스를 함께 건다. */
+.stage-c-fit-reference-shell--color .stage-c-fit-reference-media + .stage-c-fit-reference-options--color {
+  margin-top: calc(var(--stage-c-fit-section-gap) * 2.5);
 }
 
 .stage-c-fit-reference-options h2 {
@@ -1999,7 +2096,7 @@
   top: 0.25rem;
   bottom: 0.25rem;
   left: 0.25rem;
-  width: calc((100% - 0.5rem) / 3);
+  width: calc((100% - 0.5rem) / var(--stage-c-fit-size-count, 3));
   border-radius: 1.75rem;
   background: var(--stage-c-accent);
   transition: transform 320ms cubic-bezier(0.22, 0.9, 0.32, 1);
@@ -2045,13 +2142,26 @@
 }
 
 .stage-c-fit-color-selector {
+  --stage-c-fit-color-count: 3;
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
-  gap: clamp(2rem, 10vw, 3.5rem);
+  /* 색상 수는 제품마다 다르다. 남는 폭을 나눠 간격으로 쓰되 3개 이하면 기존 여백을 유지하고,
+     색이 늘어날수록 자동으로 좁혀 한 줄에 담는다. 그래도 넘치면 줄바꿈한다. */
+  column-gap: clamp(
+    0.875rem,
+    (100% - var(--stage-c-fit-color-count) * 3.9rem) / max(var(--stage-c-fit-color-count) - 1, 1),
+    3.5rem
+  );
+  row-gap: 1rem;
 }
 
 .stage-c-fit-color-selector button {
   display: flex;
+  /* 라벨 길이와 무관하게 항목 폭을 고정해야 색상이 늘어나도 줄이 고르게 접힌다. */
+  flex: 0 0 auto;
+  width: 3.9rem;
+  min-width: 0;
   flex-direction: column;
   align-items: center;
   gap: 0.375rem;
@@ -2064,6 +2174,16 @@
   transition: color 200ms ease;
 }
 
+.stage-c-fit-color-selector span {
+  width: 100%;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+  text-align: center;
+  word-break: keep-all;
+}
+
 .stage-c-fit-color-selector i {
   width: 2.5rem;
   height: 2.5rem;
@@ -2073,13 +2193,20 @@
 }
 
 .stage-c-fit-color-selector button[aria-pressed='true'] {
-  color: var(--stage-c-accent);
+  color: var(--stage-c-selected-swatch-ink, var(--stage-c-accent));
 }
 
 .stage-c-fit-color-selector button[aria-pressed='true'] i {
-  outline: 0.1875rem solid var(--stage-c-accent);
+  outline: 0.1875rem solid var(--stage-c-selected-swatch-ink, var(--stage-c-accent));
   outline-offset: 0.1875rem;
   transform: scale(1.04);
+}
+
+/* 선택 표시는 고른 색상 자체를 쓰되, 블랙처럼 어두운 색은 배경에 묻히므로 흰색을 섞어 밝힌다. */
+@supports (color: color-mix(in srgb, red, white)) {
+  .stage-c-fit-color-selector button[aria-pressed='true'] {
+    --stage-c-selected-swatch-ink: color-mix(in srgb, var(--stage-c-selected-swatch, currentColor) 62%, #ffffff);
+  }
 }
 
 .stage-c-fit-reference-actions {
