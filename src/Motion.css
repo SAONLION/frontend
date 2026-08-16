@@ -33,16 +33,6 @@
   to { opacity: 0; transform: translateY(100%); }
 }
 
-@keyframes stage-entry-docent-handoff {
-  from { opacity: 1; transform: translateX(-50%) scale(1); }
-  to { opacity: 0; transform: translateX(-50%) translateY(-.75rem) scale(.72); }
-}
-
-@keyframes stage-entry-docent-return {
-  from { opacity: 0; transform: translateX(-50%) translateY(-.75rem) scale(.72); }
-  to { opacity: 1; transform: translateX(-50%) scale(1); }
-}
-
 /* Backgrounds remain stable; visible page components reveal in reading order. */
 .screen-motion-shell {
   animation: none;
