@@ -184,7 +184,26 @@
 }
 
 .stage-entry-content--nfc {
-  padding-top: max(clamp(8rem, 31.7dvh, 17.3125rem), env(safe-area-inset-top));
+  /* Figma 디자인처럼 카드+헤드라인 그룹이 화면 안에서 세로 중앙에 오고, 액션 버튼만
+     margin-top: auto(.stage-entry-actions)로 하단에 고정된다. */
+  padding-top: env(safe-area-inset-top);
+}
+
+/* 직원 호출 오버레이(EOverlay)가 열리고 닫힐 때 여권 카드가 책처럼 반으로 접혔다 펴진다. */
+.stage-b-journey-card-stage {
+  perspective: 62.5rem;
+}
+
+.stage-b-journey-card-fold {
+  transition: transform 480ms var(--motion-ease-enter), opacity 480ms var(--motion-ease-enter);
+  transform: rotateX(0deg);
+  transform-style: preserve-3d;
+  opacity: 1;
+}
+
+.stage-b-journey-card-fold--closed {
+  transform: rotateX(-92deg) scale(0.94);
+  opacity: 0;
 }
 
 .stage-entry-docent {
@@ -211,14 +230,6 @@
 
 .stage-entry-persistent-docent .stage-c-docent-layer {
   inset-inline: -1.5rem;
-}
-
-.stage-entry-persistent-docent--handoff {
-  animation: stage-entry-docent-handoff 820ms var(--motion-ease-enter) both;
-}
-
-.stage-entry-persistent-docent--returning {
-  animation: stage-entry-docent-return 760ms var(--motion-ease-enter) both;
 }
 
 .stage-entry-docent--wide {
