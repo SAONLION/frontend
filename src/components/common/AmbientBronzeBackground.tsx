@@ -16,14 +16,14 @@ const glowCount = 12
 function createBronzeGlow(): BronzeGlowStyle {
   const driftX = (Math.random() - 0.5) * 18
   const driftY = (Math.random() - 0.5) * 15
-  const size = 24 + Math.random() * 42
+  const size = 26 + Math.random() * 44
 
   return {
     '--ambient-bronze-delay': `${-(Math.random() * 24).toFixed(2)}s`,
     '--ambient-bronze-drift-x': `${driftX.toFixed(2)}%`,
     '--ambient-bronze-drift-y': `${driftY.toFixed(2)}%`,
     '--ambient-bronze-duration': `${(4.5 + Math.random() * 6).toFixed(2)}s`,
-    '--ambient-bronze-opacity': `${(0.28 + Math.random() * 0.32).toFixed(2)}`,
+    '--ambient-bronze-opacity': `${(0.32 + Math.random() * 0.36).toFixed(2)}`,
     '--ambient-bronze-size': `${size.toFixed(2)}%`,
     '--ambient-bronze-x': `${(Math.random() * 100).toFixed(2)}%`,
     '--ambient-bronze-y': `${(Math.random() * 100).toFixed(2)}%`,
