@@ -30,7 +30,7 @@ export const SESSION_ACTIONS = {
   setCurrentSkuId: 'set_current_sku_id',
 } as const
 
-export type ActiveOverlay = 'E' | null
+export type ActiveOverlay = 'E' | 'journey' | null
 
 export type SessionState = {
   pseudonymousId: string

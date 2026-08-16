@@ -130,5 +130,5 @@ function PriceInquiryContent({ pageState, productName, sku }: PriceInquiryConten
 }
 
 function PriceInquiryFallback({ path }: { path: string }) {
-  return <StageCDetailShell><GlassInfoCard><h1>가격 안내 요청 정보를 찾을 수 없어요.</h1><p>가격 안내를 원하시면 먼저 요청해 주세요.</p><PreparedLink className="stage-c-glass-link-button" to={path}>가격 안내 요청하기</PreparedLink></GlassInfoCard></StageCDetailShell>
+  return <StageCDetailShell className="stage-c-fallback-screen"><GlassInfoCard><h1>가격 안내 요청 정보를 찾을 수 없어요.</h1><p>가격 안내를 원하시면 먼저 요청해 주세요.</p><PreparedLink className="stage-c-glass-link-button" to={path}>가격 안내 요청하기</PreparedLink></GlassInfoCard></StageCDetailShell>
 }

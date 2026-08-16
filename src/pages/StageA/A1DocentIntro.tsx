@@ -73,6 +73,9 @@ export default function A1DocentIntro({
             )}
           </div>
         )}
+        {/* 화면 어디를 눌러도 넘어간다는 힌트. 문구를 읽는 흐름을 방해하지 않도록
+            본문이 다 나타난 뒤에 옅게 깜빡인다. */}
+        {isSubtextVisible && <p className="stage-entry-tap-hint">화면을 터치하세요</p>}
       </div>
     </main>
   )

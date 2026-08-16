@@ -149,12 +149,7 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
   if (kind === 'size') {
     return <FitShell kind={kind} selection={selection} sizeScale={getSizeScale(product, selection)} sku={sku}>
       <SizeOptions onSelect={setSize} product={product} selection={selection} />
-      <dl className="stage-c-fit-reference-facts">
-        <div><dt>선택 사이즈</dt><dd>{selection.size.label}</dd></div>
-        <div><dt>제품 치수</dt><dd>{selection.size.dimensions}</dd></div>
-        <div><dt>수납 구성</dt><dd>{product.fitDetail?.storage ?? '정확한 수납 안내는 직원에게 문의해 주세요.'}</dd></div>
-        <div><dt>스트랩</dt><dd>{product.fitDetail?.strap ?? '제품 상태에 따라 직원이 안내해 드려요.'}</dd></div>
-      </dl>
+      <FactList rows={getFitFacts(product, selection)} />
       <FitActionRow onExitProduct={exitProduct} onPrimaryAction={confirmSize} />
     </FitShell>
   }
@@ -247,20 +242,46 @@ function FitShell({ children, kind, selection, sizeScale = 1 }: { children: Reac
 }
 
 // 사이즈별 실사 이미지가 없어 선택한 사이즈를 대표 컷의 배율로 표현한다.
-// 가장 큰 사이즈가 100%이고 한 단계 내려갈 때마다 SIZE_SCALE_STEP만큼 줄어든다.
-const SIZE_SCALE_STEP = 0.12
+// 가장 큰 사이즈가 100%, 가장 작은 사이즈가 SIZE_SCALE_MIN이고 그 사이를 균등 분배하므로
+// 사이즈가 2개든 5개든 배율 폭은 같다.
+const SIZE_SCALE_MIN = 0.72
 
 function getSizeScale(product: Product, selection: FitSelection): number {
-  const options = product.sizeOptions?.slice(0, 3) ?? []
+  const options = product.sizeOptions ?? []
   if (options.length < 2) return 1
   const selectedIndex = options.findIndex((option) => option.code === selection.size.code)
   if (selectedIndex < 0) return 1
-  return 1 - (options.length - 1 - selectedIndex) * SIZE_SCALE_STEP
+  return SIZE_SCALE_MIN + (1 - SIZE_SCALE_MIN) * (selectedIndex / (options.length - 1))
+}
+
+type Fact = { label: string; value: string }
+
+/**
+ * 카탈로그에 실제로 있는 값만 줄로 만든다(가방·트래블 기준 치수·제조국 100%, 수납 80%, 스트랩 85%).
+ * 없는 항목은 문구로 때우지 않고 줄 자체를 감춘다.
+ */
+function getFitFacts(product: Product, selection: FitSelection): readonly Fact[] {
+  return [
+    // 사이즈 이름은 바로 위 선택 버튼에 이미 있으므로 여기서는 치수만 보여준다.
+    { label: '제품 치수', value: selection.size.dimensions },
+    { label: '수납 구성', value: product.fitDetail?.storage },
+    { label: '스트랩 · 핸들', value: product.fitDetail?.strap },
+    { label: '제조국', value: product.origin },
+  ].filter((row): row is Fact => Boolean(row.value))
+}
+
+function FactList({ rows }: { rows: readonly Fact[] }) {
+  if (rows.length === 0) return null
+
+  return <dl className="stage-c-fit-reference-facts">
+    {rows.map((row) => <div key={row.label}><dt>{row.label}</dt><dd>{row.value}</dd></div>)}
+  </dl>
 }
 
 function SizeOptions({ label, onSelect, product, selection }: { label?: string; onSelect: (option: SizeOption) => void; product: Product; selection: FitSelection }) {
-  const referenceLabels: Record<string, string> = { MNI: '스몰', SML: '미디엄', SMD: '라지' }
-  const options = product.sizeOptions?.slice(0, 3) ?? []
+  // 라벨은 제품 데이터를 그대로 쓴다. MCM의 사이즈 이름은 제품마다 달라서(미니·S·S–M, 41cm·45cm,
+  // 스몰·캐빈…) 스몰/미디엄/라지로 고정하면 실제 제품과 어긋난다. 개수도 제품마다 다르므로 제한하지 않는다.
+  const options = product.sizeOptions ?? []
   const selectedIndex = Math.max(0, options.findIndex((option) => option.code === selection.size.code))
 
   return <section className="stage-c-fit-reference-options">
@@ -269,13 +290,16 @@ function SizeOptions({ label, onSelect, product, selection }: { label?: string; 
       aria-label="사이즈 선택"
       className="stage-c-fit-size-selector"
       role="group"
-      style={{ '--stage-c-fit-size-count': options.length } as CSSProperties}
+      style={{
+        '--stage-c-fit-size-count': options.length,
+        '--stage-c-fit-size-index': selectedIndex,
+      } as CSSProperties}
     >
-      {/* 선택 표시는 옵션 수만큼 균등 분할한다. 사이즈가 2개뿐인 제품에서도 폭과 위치가 맞아야 한다. */}
-      <span aria-hidden="true" className={`stage-c-fit-size-selector__indicator stage-c-fit-size-selector__indicator--${selectedIndex}`} />
+      {/* 선택 표시는 옵션 수만큼 균등 분할하고 선택 인덱스만큼 옆으로 민다. 개수 제한이 없다. */}
+      <span aria-hidden="true" className="stage-c-fit-size-selector__indicator" />
       {options.map((option) => (
         <button aria-pressed={option.code === selection.size.code} key={option.code} onClick={() => onSelect(option)} type="button">
-          {referenceLabels[option.code] ?? option.label}
+          {option.label}
         </button>
       ))}
     </div>
@@ -346,7 +370,7 @@ function FitFallback() {
   const [isActionVisible, setIsActionVisible] = useState(false)
 
   return (
-    <StageCDetailShell className="stage-c-fit-status-shell stage-c-fit-error-shell">
+    <StageCDetailShell className="stage-c-fit-status-shell stage-c-fit-error-shell stage-c-fallback-screen">
       <div className="stage-c-fit-status-content">
         <section aria-label="나이비스 AI 도슨트" className="stage-c-fit-status-docent"><DocentStage cue="apologize" /></section>
         <h1><KineticTextReveal autoPlay blur className="justify-center" distance={16} onRevealComplete={() => setIsDescriptionVisible(true)} splitBy="characters" stagger={0.035} text="오류가 발생했어요" waitForDocent /></h1>

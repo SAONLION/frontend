@@ -11,12 +11,33 @@ import {
   stageCPath,
 } from '../../constants/stageC'
 import { useProductExit } from '../../features/product-explore/useProductExit'
+import type { Product } from '../../types/product'
 import { useSelectedProductImages } from '../../features/product-explore/useSelectedProductImages'
 import { useStageCProduct } from '../../features/product-explore/useStageCProduct'
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes'
 import { useSession } from '../../features/session/useSession'
 import { StageCState } from './StageCHubPage'
 import { StageFDevFlowOverlay, type StageFDevScenario } from '../StageF/StageFDevFlowOverlay'
+
+// `LOOK 1 — …` 형태의 줄은 앞머리를 굵게 보여준다. 시안과 같은 강조 방식이다.
+function renderSummaryLine(line: string) {
+  const look = /^(LOOK\s*\d+)(\s*[—-].*)$/.exec(line)
+  if (!look) return line
+
+  return <><strong className="stage-c-product-detail-summary__look">{look[1]}</strong>{look[2]}</>
+}
+
+type MaterialFact = { label: string; value: string }
+
+function getMaterialFacts(product: Product): readonly MaterialFact[] {
+  return [
+    { label: '소재', value: product.materialDetail?.material },
+    { label: '하드웨어', value: product.materialDetail?.hardware },
+    { label: '안감', value: product.materialDetail?.lining },
+    { label: '제조국', value: product.origin },
+    { label: '지속가능성', value: product.materialDetail?.sustainability },
+  ].filter((fact): fact is MaterialFact => Boolean(fact.value))
+}
 
 // 훅 순서를 지키기 위한 자리표시자. 로딩·실패 시에도 useSelectedProductImages를 호출한다.
 const EMPTY_PRODUCT = { sku: '', name: '', imageUrl: '', dimensions: '' }
@@ -63,7 +84,7 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
 
   if (!product) {
     return (
-      <StageCDetailShell>
+      <StageCDetailShell className="stage-c-fallback-screen">
         <GlassInfoCard>
           <h1>상품을 찾을 수 없어요</h1>
           <p>태그한 상품의 주소를 다시 확인해 주세요.</p>
@@ -77,7 +98,15 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
   const images = topic === 'styling'
     ? product.stylingImages ?? [stylingLifestyleImage]
     : [selectedImages.imageUrl, ...selectedImages.detailImages]
-  const lines = product.productDetail?.[topic] ?? ['정확한 제품 안내는 직원에게 문의해 주세요.']
+  // C2-1은 카탈로그에 실제로 있는 항목만 `라벨 : 값`으로 보여준다(가방 기준 하드웨어 97% · 안감 94% ·
+  // 소재 90% · 제조국 100%). 없는 항목은 문구로 때우지 않고 줄을 감춘다.
+  const materialFacts = topic === 'craft' ? getMaterialFacts(product) : []
+  const topicLines = product.productDetail?.[topic] ?? []
+  // 룩 설명은 카탈로그에 없다. 문구가 채워지기 전까지 착장컷 수만큼 자리만 만들어 둔다 —
+  // 개수가 이미지와 어긋나면 어떤 컷을 가리키는지 알 수 없기 때문이다.
+  const lines = topic === 'styling' && topicLines.length === 0
+    ? images.map((_, index) => `LOOK ${index + 1} — AI 생성 필요`)
+    : topicLines.length > 0 ? topicLines : ['정확한 제품 안내는 직원에게 문의해 주세요.']
   const imageCount = images.length
 
   const scrollToImage = (nextIndex: number) => {
@@ -175,9 +204,11 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
       </section>
 
       <section className="stage-c-product-detail-summary">
-        {lines.map((line) => (
-          <p key={line}>· {line}</p>
-        ))}
+        {materialFacts.length > 0
+          ? materialFacts.map((fact) => (
+            <p key={fact.label}>· <span className="stage-c-product-detail-summary__label">{fact.label}</span> : {fact.value}</p>
+          ))
+          : lines.map((line) => <p key={line}>· {renderSummaryLine(line)}</p>)}
       </section>
 
       {topic !== 'styling' && (
