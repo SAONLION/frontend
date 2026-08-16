@@ -1,5 +1,7 @@
 import { useLocation } from 'react-router';
 import { usePreparedNavigate } from '../../app/usePreparedNavigate';
+import { postVisitPurpose } from '../../api/visitPurpose';
+import { toVisitPurposeType } from '../../api/visitPurposeType';
 import { STAGE_D_ROUTES } from '../../constants/appRoutes';
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes';
 import { useSession } from '../../features/session/useSession';
@@ -23,13 +25,19 @@ const FALLBACK_SELECTED_PRODUCT: SelectedProduct = {
 // StageC의 useProductExit가 첫 이탈 시 이동시키는 comingSoon 스텁 경로에 매핑된다.
 export function StageD1Page() {
   const navigate = usePreparedNavigate();
-  const { dispatch } = useSession();
+  const { state, dispatch } = useSession();
 
   return (
     <D1VisitPurpose
       onSelectPurpose={(purpose) => {
         dispatch({ type: SESSION_ACTIONS.setVisitPurpose, visitPurpose: purpose });
         navigate(STAGE_D_ROUTES.recommend);
+
+        if (state.sessionId) {
+          void postVisitPurpose(state.sessionId, toVisitPurposeType(purpose)).catch((error: unknown) => {
+            console.error('방문 목적 저장에 실패했습니다.', error);
+          });
+        }
       }}
       onCallStaff={() => dispatch({ type: SESSION_ACTIONS.setActiveOverlay, overlay: 'E' })}
     />

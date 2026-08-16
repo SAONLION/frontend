@@ -4,6 +4,9 @@ import { SESSION_ACTIONS, type SessionAction, type SessionState } from './sessio
 
 export const initialSessionState: SessionState = {
   pseudonymousId: `session-${crypto.randomUUID()}`,
+  sessionId: null,
+  productId: null,
+  currentSkuId: null,
   currentSku: null,
   nickname: null,
   taggedSkus: [],
@@ -161,5 +164,11 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
       return { ...state, visitPurpose: action.visitPurpose }
     case SESSION_ACTIONS.setActiveOverlay:
       return { ...state, activeOverlay: action.overlay }
+    case SESSION_ACTIONS.setSessionId:
+      return { ...state, sessionId: action.sessionId }
+    case SESSION_ACTIONS.setProductId:
+      return { ...state, productId: action.productId }
+    case SESSION_ACTIONS.setCurrentSkuId:
+      return { ...state, currentSkuId: action.skuId }
   }
 }

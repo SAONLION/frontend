@@ -1,8 +1,11 @@
 import { useParams } from 'react-router'
 import { usePreparedNavigate } from '../../app/usePreparedNavigate'
+import { recordInteraction } from '../../api/interactions'
+import { hubTypeToInterestType } from '../../api/interestType'
 import { ChoiceList } from '../../components/common/ChoiceList'
 import { MobileShell } from '../../components/common/MobileShell'
 import { ProductMedia } from '../../components/domain/ProductMedia'
+import type { HubType } from '../../constants/events'
 import {
   STAGE_C_PRODUCT_DETAIL_ROUTE_KEYS,
   STAGE_C_PRODUCT_DETAIL_ROUTES,
@@ -21,11 +24,30 @@ type StageCHubPageProps = {
   screenId: StageCHubScreenId
 }
 
+// 2차 허브 화면(C2~C5)은 각각 1차 관심사 하나에 대응한다.
+const SUBHUB_SCREEN_HUB_TYPE: Partial<Record<StageCHubScreenId, HubType>> = {
+  [STAGE_C_SCREEN_IDS.c2]: 'product',
+  [STAGE_C_SCREEN_IDS.c3]: 'fit',
+  [STAGE_C_SCREEN_IDS.c4]: 'purchase',
+  [STAGE_C_SCREEN_IDS.c5]: 'other',
+}
+
 export function StageCHubPage({ screenId }: StageCHubPageProps) {
   const { sku = '' } = useParams()
   const navigate = usePreparedNavigate()
-  const { dispatch } = useSession()
+  const { state, dispatch } = useSession()
   const exitProduct = useProductExit(sku)
+
+  const logInteraction = (hubType: HubType, subOption?: string) => {
+    if (!state.sessionId || state.currentSkuId === null) return
+    void recordInteraction(state.sessionId, {
+      sku: state.currentSkuId,
+      interestType: hubTypeToInterestType(hubType),
+      subOption,
+    }).catch((error: unknown) => {
+      console.error('인터랙션 기록에 실패했습니다.', error)
+    })
+  }
   const product = useStageCProduct(sku)
   const screen = stageCHubDefinitions[screenId]
   const isProductIntro = screenId === STAGE_C_SCREEN_IDS.c1
@@ -46,17 +68,22 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
   const selectChoice = (choice: (typeof screen.choices)[number]) => {
     if ('hubType' in choice) {
       dispatch({ type: SESSION_ACTIONS.recordHubSelect, hubType: choice.hubType })
+      logInteraction(choice.hubType)
       navigate(`/stage-c/${sku}/${choice.destination}`)
       return
     }
 
+    const subhubType = SUBHUB_SCREEN_HUB_TYPE[screenId] ?? 'other'
+
     if (choice.id === STAGE_C_SCREEN_IDS.c41) {
       dispatch({ type: SESSION_ACTIONS.recordPriceInquiryRequest, sku })
+      logInteraction(subhubType, choice.id)
       navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryCompleted, sku))
       return
     }
 
     dispatch({ type: SESSION_ACTIONS.recordSubhubSelect, sub: choice.id })
+    logInteraction(subhubType, choice.id)
     const detailRouteKey = STAGE_C_PRODUCT_DETAIL_ROUTE_KEYS[
       choice.id as keyof typeof STAGE_C_PRODUCT_DETAIL_ROUTE_KEYS
     ]

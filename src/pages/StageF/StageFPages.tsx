@@ -157,7 +157,7 @@ export function StageFEmailInputPage() {
     event.preventDefault()
     const normalized = email.trim()
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) return setError('이메일 주소를 확인해주세요.')
-    captureEmail(normalized)
+    captureEmail(normalized, { sessionId: state.sessionId, productId: state.productId ?? undefined })
     dispatch({ type: SESSION_ACTIONS.recordContactCaptured, channel: 'email', blockerCode: 'CB6' })
     dispatch({ type: SESSION_ACTIONS.recordContentSent, sku: state.currentSku ?? DEFAULT_PRODUCT_SKU })
     navigate(STAGE_F_ROUTES.sendComplete, { state: scenario })
