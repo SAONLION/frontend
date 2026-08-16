@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useLayoutEffect, useState } from 'react'
 import { BrowserRouter, useLocation } from 'react-router'
 import { AppRoutes } from './app/routes'
 import { realStaffCallService } from './api/staffCallService'
@@ -20,7 +20,6 @@ import { LiquidGlassFilterDefinitions } from './components/common/LiquidGlassFil
 import { DocentStage } from './components/domain/DocentStage'
 import type { DocentCue } from './components/domain/DocentStage'
 import { markDocentReady } from './features/docent/docentReadiness'
-import { useSession } from './features/session/useSession'
 import './App.css'
 import './StageExternal.css'
 import './StageF.css'
@@ -72,54 +71,23 @@ function StageAGoldDust() {
   )
 }
 
+// B1(/stage-b/nfc)은 여권 카드 디자인으로 교체되면서 도슨트를 이 화면에서는 보여주지 않는다.
 function PersistentEntryDocent() {
   const { pathname } = useLocation()
-  const { state } = useSession()
-  const [isReturningFromHandoff, setIsReturningFromHandoff] = useState(false)
-  const [docentInstance, setDocentInstance] = useState(0)
-  const previousOverlay = useRef(state.activeOverlay)
 
-  const isB1Handoff = pathname === '/stage-b/nfc' && state.activeOverlay === 'E'
-
-  useEffect(() => {
-    const didCloseB1Overlay = previousOverlay.current === 'E'
-      && state.activeOverlay !== 'E'
-      && pathname === '/stage-b/nfc'
-    previousOverlay.current = state.activeOverlay
-
-    if (isB1Handoff) {
-      setIsReturningFromHandoff(false)
-      return
-    }
-    if (!didCloseB1Overlay) return
-    setIsReturningFromHandoff(true)
-    setDocentInstance((current) => current + 1)
-    const timer = window.setTimeout(() => setIsReturningFromHandoff(false), 950)
-    return () => window.clearTimeout(timer)
-  }, [isB1Handoff, pathname, state.activeOverlay])
-
-  if (!pathname.startsWith('/stage-a/') && !pathname.startsWith('/stage-b/')) {
+  if (pathname === '/stage-b/nfc' || (!pathname.startsWith('/stage-a/') && !pathname.startsWith('/stage-b/'))) {
     return null
   }
-  const cue: DocentCue = isB1Handoff
-    ? 'handoff'
-    : isReturningFromHandoff && pathname === '/stage-b/nfc'
-      ? 'return-nfc'
-    : pathname === '/stage-a/intro'
+
+  const cue: DocentCue = pathname === '/stage-a/intro'
     ? 'greet'
     : pathname === '/stage-a/nickname'
       ? 'listen'
-      : pathname === '/stage-b/nfc'
-        ? 'nfc-guide'
-        : 'scan'
+      : 'scan'
 
   return (
-    <section
-      aria-label="나이비스 AI 도슨트"
-      className={`stage-entry-persistent-docent${isB1Handoff ? ' stage-entry-persistent-docent--handoff' : ''}${isReturningFromHandoff ? ' stage-entry-persistent-docent--returning' : ''}`}
-      style={isB1Handoff ? undefined : { opacity: 1, visibility: 'visible' }}
-    >
-      <DocentStage immediate={isReturningFromHandoff} key={docentInstance} cue={cue} onReady={markDocentReady} />
+    <section aria-label="나이비스 AI 도슨트" className="stage-entry-persistent-docent">
+      <DocentStage cue={cue} onReady={markDocentReady} />
     </section>
   )
 }
