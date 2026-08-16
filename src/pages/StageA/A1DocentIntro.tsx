@@ -11,7 +11,7 @@ type A1DocentIntroProps = {
 export default function A1DocentIntro({
   headline = '안녕하세요',
   onContinue,
-  subtext = 'MCM의 나이비스 AI 도슨트입니다',
+  subtext = 'MCM의 AI 도슨트입니다',
 }: A1DocentIntroProps) {
   const [isDocentReady, setIsDocentReady] = useState(getDocentReadyState)
   const [isSubtextVisible, setIsSubtextVisible] = useState(false)

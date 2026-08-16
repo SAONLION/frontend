@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react';
+import { useLocation } from 'react-router';
 import { usePreparedNavigate } from './usePreparedNavigate';
 import { STAGE_B_ROUTES } from '../constants/appRoutes';
 import { useSession } from '../features/session/useSession';
@@ -11,6 +12,9 @@ import E2RequestReceived from '../pages/StageE/E2RequestReceived';
 export default function EOverlay() {
   const { dispatch } = useSession();
   const navigate = usePreparedNavigate();
+  const location = useLocation();
+  // B1은 이미 재태그 지점이라 시트 안에서 `다른 제품 보기`를 다시 제안하지 않는다.
+  const isOverStageB1 = location.pathname === STAGE_B_ROUTES.nfcPrompt;
   const [selectedRequests, setSelectedRequests] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -94,6 +98,7 @@ export default function EOverlay() {
           onViewOtherProducts={viewOtherProducts}
           sheetHandle={sheetHandle}
           sheetOffset={dragOffset}
+          showViewOtherProducts={!isOverStageB1}
         />
       )}
     </div>

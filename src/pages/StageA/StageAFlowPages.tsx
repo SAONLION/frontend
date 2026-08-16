@@ -1,4 +1,5 @@
 import { usePreparedNavigate } from '../../app/usePreparedNavigate'
+import { updateNickname } from '../../api/session'
 import { STAGE_A_ROUTES, STAGE_B_ROUTES } from '../../constants/appRoutes'
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes'
 import { useSession } from '../../features/session/useSession'
@@ -13,11 +14,17 @@ export function StageAIntroPage() {
 
 export function StageANicknamePage() {
   const navigate = usePreparedNavigate()
-  const { dispatch } = useSession()
+  const { state, dispatch } = useSession()
 
   const saveNickname = (nickname: string) => {
     dispatch({ type: SESSION_ACTIONS.setNickname, nickname })
     navigate(STAGE_B_ROUTES.nfcPrompt)
+
+    if (state.sessionId) {
+      void updateNickname(state.sessionId, nickname).catch((error: unknown) => {
+        console.error('닉네임 저장에 실패했습니다.', error)
+      })
+    }
   }
 
   return <A2NicknameSetup onSubmit={saveNickname} />

@@ -25,13 +25,22 @@ export const SESSION_ACTIONS = {
   recordTabView: 'record_tab_view', recordSaCall: 'record_sa_call',
   setVisitPurpose: 'set_visit_purpose',
   setActiveOverlay: 'set_active_overlay',
+  setSessionId: 'set_session_id',
+  setProductId: 'set_product_id',
+  setCurrentSkuId: 'set_current_sku_id',
 } as const
 
 export type ActiveOverlay = 'E' | null
 
 export type SessionState = {
   pseudonymousId: string
+  sessionId: string | null
+  productId: number | null
+  currentSkuId: number | null
   currentSku: string | null
+  /** 현재 제품에서 고객이 고른 사이즈·컬러. 화면을 옮겨도 유지되고 다음 제품 태그 시 초기화된다. */
+  selectedSizeCode: string | null
+  selectedColorCode: string | null
   nickname: string | null
   taggedSkus: readonly string[]
   events: readonly SessionEvent[]
@@ -71,3 +80,6 @@ export type SessionAction =
   | { type: typeof SESSION_ACTIONS.recordSaCall; sku: string; callType: StaffCallType; queryId?: string }
   | { type: typeof SESSION_ACTIONS.setVisitPurpose; visitPurpose: string }
   | { type: typeof SESSION_ACTIONS.setActiveOverlay; overlay: ActiveOverlay }
+  | { type: typeof SESSION_ACTIONS.setSessionId; sessionId: string }
+  | { type: typeof SESSION_ACTIONS.setProductId; productId: number }
+  | { type: typeof SESSION_ACTIONS.setCurrentSkuId; skuId: number }

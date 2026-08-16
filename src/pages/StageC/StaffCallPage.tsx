@@ -65,7 +65,7 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
         : {
             sku,
             type: callType,
-            completion: staffCallService.request({ sku, type: callType }),
+            completion: staffCallService.request({ sku, type: callType, sessionId: state.sessionId, productId: state.productId }),
           }
 
     pendingRequestRef.current = request
@@ -78,12 +78,18 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
       if (active) {
         navigate(completedPath, { replace: true })
       }
+    }).catch((error: unknown) => {
+      console.error('직원 호출에 실패했습니다.', error)
+      pendingRequestRef.current = null
+      if (active) {
+        navigate(returnPath, { replace: true })
+      }
     })
 
     return () => {
       active = false
     }
-  }, [callType, completed, completedPath, hasRequestContext, navigate, sku, staffCallService])
+  }, [callType, completed, completedPath, hasRequestContext, navigate, returnPath, sku, staffCallService, state.productId, state.sessionId])
 
   if (!hasRequestContext) {
     return (

@@ -8,6 +8,8 @@ interface ScreenHeadlineProps {
   variant?: 'lg' | 'md';
   className?: string;
   reveal?: boolean;
+  /** 화면에 도슨트가 없으면 false로 준다. 도슨트 준비 신호를 기다리지 않고 바로 등장한다. */
+  waitForDocent?: boolean;
   onRevealComplete?: () => void;
 }
 
@@ -28,6 +30,7 @@ export default function ScreenHeadline({
   variant = 'lg',
   className = '',
   reveal = false,
+  waitForDocent = true,
   onRevealComplete,
 }: ScreenHeadlineProps) {
   const lines = Array.isArray(headline) ? headline : [headline];
@@ -56,7 +59,7 @@ export default function ScreenHeadline({
                 splitBy="characters"
                 stagger={0.035}
                 text={line}
-                waitForDocent
+                waitForDocent={waitForDocent}
                 className={align === 'center' ? 'justify-center' : undefined}
               />
             ) : line}
@@ -65,7 +68,7 @@ export default function ScreenHeadline({
       </h1>
       {subtext && isSubtextVisible && (
         <p className={`font-medium text-[#d1d1d1] ${SUBTEXT_STYLES[variant]}`}>
-          {reveal ? <KineticTextReveal autoPlay blur={false} distance={8} splitBy="words" stagger={0.1} text={subtext} waitForDocent /> : subtext}
+          {reveal ? <KineticTextReveal autoPlay blur={false} distance={8} splitBy="words" stagger={0.1} text={subtext} waitForDocent={waitForDocent} /> : subtext}
         </p>
       )}
     </div>

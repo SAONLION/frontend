@@ -1,17 +1,19 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { BrowserRouter, useLocation } from 'react-router'
 import { AppRoutes } from './app/routes'
+import { realStaffCallService } from './api/staffCallService'
+import { SessionBootstrap } from './features/session/SessionBootstrap'
 import { SessionProvider } from './features/session/SessionProvider'
 import { ProductContentProvider } from './services/product-content/ProductContentProvider'
 import { mockProductContentProvider } from './mocks/providers/mockProductContentProvider'
 import { StaffCallProvider } from './features/sa-call/StaffCallContext'
-import { mockStaffCallService } from './mocks/providers/mockStaffCallService'
 import { PriceInquiryRequestProvider } from './features/price-inquiry/PriceInquiryRequestContext'
 import { mockPriceInquiryRequestService } from './mocks/providers/mockPriceInquiryRequestService'
 import { TryOnRequestProvider } from './features/try-on/TryOnRequestContext'
 import { mockTryOnRequestService } from './mocks/providers/mockTryOnRequestService'
 import { AiAnswerProvider } from './features/ai-answer/AiAnswerContext'
 import { ContactProvider } from './features/contact/ContactProvider'
+import { PendingActionWatcher } from './features/blocker/PendingActionWatcher'
 import { mockAiAnswerService } from './mocks/providers/mockAiAnswerService'
 import { AmbientBronzeBackground } from './components/common/AmbientBronzeBackground'
 import { LiquidGlassFilterDefinitions } from './components/common/LiquidGlassFilterDefinitions'
@@ -23,6 +25,7 @@ import './App.css'
 import './StageExternal.css'
 import './StageF.css'
 import './Motion.css'
+import './PendingAction.css'
 
 const CosmicGoldDust = lazy(async () => {
   const module = await import('./components/common/CosmicGoldDust')
@@ -130,13 +133,16 @@ function AppContent() {
       <div className="app-shell__content">
       <ProductContentProvider value={mockProductContentProvider}>
         <AiAnswerProvider value={mockAiAnswerService}>
-          <StaffCallProvider value={mockStaffCallService}>
+          <StaffCallProvider value={realStaffCallService}>
             <PriceInquiryRequestProvider value={mockPriceInquiryRequestService}>
               <TryOnRequestProvider value={mockTryOnRequestService}>
                 <ContactProvider>
                   <SessionProvider>
-                    <PersistentEntryDocent />
-                    <AppRoutes />
+                    <SessionBootstrap>
+                      <PersistentEntryDocent />
+                      <AppRoutes />
+                      <PendingActionWatcher />
+                    </SessionBootstrap>
                   </SessionProvider>
                 </ContactProvider>
               </TryOnRequestProvider>

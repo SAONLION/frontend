@@ -142,6 +142,30 @@
   padding-bottom: 0;
 }
 
+/* AI 추천에 sku가 없어 데모 제품으로 대체 안내 중임을 알리는 상단 배지. */
+.stage-external-page__fallback-notice {
+  position: absolute;
+  z-index: 4;
+  top: max(1rem, env(safe-area-inset-top));
+  right: 1rem;
+  left: 1rem;
+  margin: 0;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid rgb(255 255 255 / 22%);
+  border-radius: 0.75rem;
+  background: rgb(20 15 9 / 78%);
+  color: rgb(255 255 255 / 82%);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  text-align: center;
+  backdrop-filter: blur(0.5rem);
+}
+
+.stage-external-page__fallback-notice b {
+  color: #ffffff;
+  font-weight: 600;
+}
+
 .stage-external-page__close {
   position: absolute;
   z-index: 3;
@@ -181,6 +205,18 @@
   min-height: min(38rem, 78dvh);
   padding-top: 3.5rem;
   border: 0;
+}
+
+/* `다른 제품 보기`가 빠진 B1 시트에는 하단 액션이 없어 남는 높이를 배분할 곳이 없다.
+   고정 높이 대신 내용 높이를 그대로 쓰고, 첫 요소를 밀어 내리던 auto 여백도 걷어낸다.
+   상단 여백은 모든 화면이 공유하는 하단 여백(--app-content-edge-inset)과 같은 값으로 맞춘다. */
+.stage-overlay .stage-external-page__content--e1-compact {
+  min-height: 0;
+  padding-top: var(--app-content-edge-inset);
+}
+
+.stage-overlay .stage-external-page__content--e1-compact > :first-child {
+  margin-top: 0;
 }
 
 
