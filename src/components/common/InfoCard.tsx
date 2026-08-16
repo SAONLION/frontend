@@ -15,7 +15,9 @@ interface InfoCardProps {
 export default function InfoCard({
   image,
   imageVariant = 'cover',
-  imageScale = 1.45,
+  // Cutouts are pre-normalized to ~90% fill; the thumbnail clips overflow, so
+  // anything above 1.1 crops the product edges.
+  imageScale = 1,
   imageSurface = 'white',
   name,
   description,
