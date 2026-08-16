@@ -37,7 +37,7 @@ ALPHA_THRESHOLD = 8
 WEBP_QUALITY = 82
 
 
-def recenter(path: str, apply: bool) -> float:
+def recenter(path: str, apply: bool, quality: int = WEBP_QUALITY) -> float:
     image = Image.open(path).convert('RGBA')
     canvas_w, canvas_h = image.size
     alpha = np.asarray(image.getchannel('A'), dtype=np.float32) / 255.0
@@ -74,7 +74,7 @@ def recenter(path: str, apply: bool) -> float:
     sheet.paste(content, (x, y), content)
 
     if apply:
-        sheet.save(path, 'WEBP', quality=WEBP_QUALITY, method=6)
+        sheet.save(path, 'WEBP', quality=quality, method=6)
 
     return shift / canvas_w * 100
 

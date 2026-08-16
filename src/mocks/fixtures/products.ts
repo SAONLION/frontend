@@ -27,6 +27,10 @@ import detail03 from '../../assets/mock/stark-visetos-detail-03-new.webp'
 import detail04 from '../../assets/mock/stark-visetos-detail-04-new.webp'
 import type { Product } from '../../types/product'
 
+// C2-3 스타일링의 LOOK 문구는 카탈로그에 근거가 없다. "데일리 · 데님 + 니트" 같은 코디 제안은
+// 632개 상품 어디에도 없고(스타일링·코디 언급 4%는 대부분 의류 상품 자체 설명), 룩을 이미지로
+// 보여줄 모델 착장컷도 3장 이상 가진 가방이 4%뿐이다. styling을 비워 두면 화면이 착장컷 수만큼
+// `LOOK n — AI 생성 필요` 자리를 만든다.
 export const mockProducts: readonly Product[] = [
   {
     sku: 'MMKEAVE15CO001',
@@ -34,10 +38,16 @@ export const mockProducts: readonly Product[] = [
     imageUrl: cognacImage,
     dimensions: '약 13 × 26 × 33cm',
     detailImages: [detail02, detail03, detail04],
-    productDetail: { craft: ['비세토스 모노그램 캔버스', '천연 나파 가죽 트림', '24K 도금 금속 장식 · 인조 나파 안감', '대한민국 제조'], heritage: ['비세토스 패턴과 제품 이야기는 직원에게 더 자세히 안내받을 수 있어요.'], styling: ['모델 착장 컷으로 실제 착용 크기와 스타일을 확인해 보세요.'] },
+    productDetail: { craft: ['비세토스 모노그램 캔버스', '천연 나파 가죽 트림', '24K 도금 금속 장식 · 인조 나파 안감', '대한민국 제조'], heritage: ['비세토스 패턴과 제품 이야기는 직원에게 더 자세히 안내받을 수 있어요.'], styling: [] },
+    origin: '대한민국',
     fitDetail: {
       strap: '조절 가능한 어깨 스트랩',
       storage: '전면 지퍼 수납공간과 내부 포켓',
+    },
+    materialDetail: {
+      material: '비세토스 모노그램 캔버스 · 천연 나파 가죽 트림',
+      hardware: '24K 도금 금속 장식',
+      lining: '인조 나파 안감',
     },
     fitDefaults: { sizeCode: 'SML', colorCode: 'cognac' },
     sizeOptions: [
@@ -67,9 +77,15 @@ export const mockProducts: readonly Product[] = [
     productDetail: {
       craft: ['비세토스 모노그램 캔버스', '천연 나파 가죽 트림', '24K 도금 브라스 금속 장식 · 패브릭 안감', '대한민국 제조'],
       heritage: ['여권과 필수 서류를 담는 Ottomar 트래블 라인의 이야기는 직원에게 더 자세히 안내받을 수 있어요.'],
-      styling: ['큰 가방 안에 넣거나 가죽 스트랩으로 핸즈프리로 착용할 수 있어요.'],
+      styling: [],
     },
+    origin: '대한민국',
     fitDetail: { strap: '탈부착 가능한 가죽 스트랩 · 드롭 55cm', storage: '내부 포켓, 카드 슬롯 및 지퍼 수납공간' },
+    materialDetail: {
+      material: '비세토스 모노그램 캔버스 · 천연 나파 가죽 트림',
+      hardware: '24K 도금 브라스 금속 장식',
+      lining: '패브릭 안감',
+    },
     fitDefaults: { sizeCode: 'SML', colorCode: 'cognac' },
     sizeOptions: [
       { code: 'MNI', label: '미니', sku: 'MXZFSTT04CO001', productName: '미니 Ottomar 비세토스 트래블 파우치', dimensions: '약 2 × 18 × 12cm' },
@@ -89,9 +105,15 @@ export const mockProducts: readonly Product[] = [
     productDetail: {
       craft: ['비세토스 모노그램 캔버스', '나파 가죽 트림', '24K 골드 도금 브라스 하드웨어 · 스웨이드 마감 극세사 안감', '대한민국 제조'],
       heritage: ['MCM 캐리어 수공예 전통을 기내용 크기로 재해석한 위켄더 이야기는 직원에게 안내받을 수 있어요.'],
-      styling: ['양방향 확장형 지퍼로 짐의 양에 맞춰 크기를 조절할 수 있어요.'],
+      styling: [],
     },
+    origin: '대한민국',
     fitDetail: { strap: '탈부착·길이 조절 가능한 위빙 스트랩 · 72~127cm', storage: '내부 포켓과 지퍼 포켓, 뒷면 트롤리 슬리브' },
+    materialDetail: {
+      material: '비세토스 모노그램 캔버스 · 나파 가죽 트림',
+      hardware: '24K 골드 도금 브라스 하드웨어',
+      lining: '스웨이드 마감의 극세사 안감',
+    },
     fitDefaults: { sizeCode: 'MNI', colorCode: 'cognac' },
     sizeOptions: [
       { code: 'MNI', label: '41cm', sku: 'MMVGATT01CO001', productName: '41cm / 16.14인치 Ottomar 비세토스 위켄더', dimensions: '약 17 × 41 × 26cm' },
@@ -112,9 +134,15 @@ export const mockProducts: readonly Product[] = [
     productDetail: {
       craft: ['비세토스 모노그램 캔버스', '블랙 나파 가죽 트림', '매트 블랙 메탈 하드웨어 · 옥스포드 나일론 안감', '대한민국 제조'],
       heritage: ['뮌헨 황금기 아카이브 트렁크에서 이어진 트롤리 실루엣은 직원에게 더 자세히 안내받을 수 있어요.'],
-      styling: ['기내용 스몰 사이즈라 여행 목적에 맞는지 직원과 함께 확인해 보세요.'],
+      styling: [],
     },
+    origin: '대한민국',
     fitDetail: { strap: '집어넣을 수 있는 트롤리 핸들 · 드롭 45cm', storage: '전면 지퍼 수납공간과 내부 지퍼 수납공간' },
+    materialDetail: {
+      material: '비세토스 모노그램 캔버스 · 블랙 나파 가죽 트림',
+      hardware: '매트 블랙 메탈 하드웨어',
+      lining: '옥스포드 나일론 안감',
+    },
     fitDefaults: { sizeCode: 'MNI', colorCode: 'cognac' },
     sizeOptions: [
       { code: 'MNI', label: '스몰', sku: 'MMVDSTT02CO001', productName: 'Ottomar 비세토스 트롤리', dimensions: '약 23 × 38 × 55cm' },

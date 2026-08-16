@@ -25,9 +25,20 @@ export type Product = {
   /** C2-3 스타일링 화면에 쓰는 모델 착장 컷. */
   stylingImages?: readonly string[]
   productDetail?: { craft: readonly string[]; heritage: readonly string[]; styling: readonly string[] }
+  /** 두 화면이 공유하는 제조국. 카탈로그 전 상품이 갖고 있는 값이다. */
+  origin?: string
+  /** C3-1 사이즈 화면의 부가 정보. 없는 항목은 그 줄을 감춘다. */
   fitDetail?: {
-    strap: string
-    storage: string
+    strap?: string
+    storage?: string
+  }
+  /** C2-1 소재 화면의 항목. 없는 항목은 그 줄을 감춘다. */
+  materialDetail?: {
+    material?: string
+    hardware?: string
+    lining?: string
+    /** 인증이 있는 상품에만 있다(가방 기준 19%). */
+    sustainability?: string
   }
   fitDefaults?: {
     sizeCode: string
