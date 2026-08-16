@@ -183,6 +183,7 @@
 
 .stage-overlay .stage-external-page {
   position: absolute;
+  z-index: 1;
   right: 0;
   bottom: 0;
   left: 0;
@@ -302,5 +303,192 @@
   .stage-external-page .liquid-glass-button,
   .stage-external-page .liquid-glass-card {
     backdrop-filter: url("#liquid-glass-distortion") var(--liquid-glass-backdrop);
+  }
+}
+
+
+/* ===== 여권 카드 탑시트 =====
+   하단 직원 호출 시트(.stage-overlay)와 같은 규칙을 위쪽 방향으로 뒤집은 것이다.
+   배경 화면을 언마운트하지 않고, 시트 밖에는 백드롭을 깔지 않아 뒤쪽이 계속 보인다. */
+.stage-top-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  background: transparent;
+}
+
+/* 시트가 열리면 뒤 화면을 살짝 덮어 어둡게 하고, 그 영역의 조작을 막는다. */
+.stage-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border: 0;
+  background: rgb(0 0 0 / 55%);
+  pointer-events: auto;
+  cursor: default;
+  animation: sheet-backdrop-enter 260ms var(--motion-ease-enter) both;
+}
+
+.stage-overlay--closing .stage-sheet-backdrop,
+.stage-top-sheet--closing .stage-sheet-backdrop {
+  animation: sheet-backdrop-exit 320ms ease-out both;
+}
+
+@keyframes sheet-backdrop-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes sheet-backdrop-exit {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.stage-top-sheet__panel {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  left: 0;
+  pointer-events: auto;
+  border: 1px solid var(--liquid-glass-border, rgb(255 255 255 / 28%));
+  border-top: 0;
+  border-radius: 0 0 1.75rem 1.75rem;
+  background: #1e1710;
+  box-shadow: var(--liquid-glass-shadow, 0 1rem 2.5rem rgb(0 0 0 / 32%));
+  transition: translate 220ms var(--motion-ease-enter);
+  animation: journey-sheet-enter 420ms var(--motion-ease-enter) both;
+}
+
+.stage-top-sheet__panel--dragging { transition: none; }
+
+.stage-top-sheet--closing .stage-top-sheet__panel {
+  animation: journey-sheet-exit 420ms cubic-bezier(.4, 0, 1, 1) both;
+}
+
+.stage-top-sheet__content {
+  /* 여권과 버튼 사이 간격을 변수로 두고, 버튼 아래 여백도 같은 값을 쓴다.
+     (+1rem은 아래 가장자리의 드래그 손잡이 자리) */
+  --stage-top-sheet-gap: 1.25rem;
+  /* .stage-c-action-button이 쓰는 변수들. 셸 밖이라 값이 없으면 모서리·색이 날아간다. */
+  --stage-c-surface: rgb(217 217 217 / 16%);
+  --stage-c-text: #ffffff;
+  --stage-c-border: rgb(255 255 255 / 24%);
+  --stage-c-accent: #8a5111;
+  --stage-c-accent-dark: #6f400c;
+  --stage-c-control-radius: 1.875rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--stage-top-sheet-gap);
+  width: min(100%, 25.125rem);
+  margin: 0 auto;
+  padding: max(3rem, env(safe-area-inset-top)) clamp(1rem, 7.7vw, 1.9375rem)
+    calc(var(--stage-top-sheet-gap) + 1rem);
+}
+
+.stage-top-sheet__headline {
+  width: 100%;
+}
+
+.stage-top-sheet__headline h1 {
+  font-size: clamp(1.25rem, 5.1vw, 1.5rem);
+}
+
+/* StageC 하단 액션 바처럼 버튼 하나가 한 칸(가로 절반)을 차지한다. */
+.stage-top-sheet__actions {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.stage-top-sheet__actions > .stage-c-action-button {
+  flex: 0 0 auto;
+  width: calc(50% - 0.3125rem);
+}
+
+/* 손잡이는 시트 아래쪽 가장자리에 붙는다. 위로 끌어 닫는다. */
+.stage-top-sheet__drag-handle {
+  position: absolute;
+  z-index: 4;
+  bottom: 0.75rem;
+  left: 50%;
+  width: 3.1rem;
+  height: 0.22rem;
+  border-radius: 99rem;
+  background: rgb(255 255 255 / 22%);
+  translate: -50% 0;
+  cursor: grab;
+  touch-action: none;
+}
+
+.stage-top-sheet__drag-handle:active { cursor: grabbing; }
+
+@keyframes journey-sheet-enter {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes journey-sheet-exit {
+  from { transform: translateY(0); }
+  to { transform: translateY(-100%); }
+}
+
+/* C·D 화면 우측 상단 여권 버튼.
+   C5-1의 X 버튼과 같은 좌표 규칙을 쓴다 — 화면 폭이 넓어도 모바일 셸(25.125rem) 안쪽
+   같은 자리에 붙도록 슬롯을 셸과 같은 폭으로 잡고 오른쪽 정렬한다. */
+.stage-journey-trigger-slot {
+  /* fixed가 아니라 absolute다. 화면에 고정되지 않고 내용과 함께 스크롤된다. */
+  position: absolute;
+  z-index: 40;
+  /* C1 제품명 필의 세로 중앙과 버튼 중앙을 맞춘다. 값은 App.css에서 계산한다. */
+  top: var(--stage-c-top-control-y, 4.875rem);
+  left: 50%;
+  display: flex;
+  justify-content: flex-end;
+  width: min(100%, 25.125rem);
+  padding-inline: 2rem;
+  translate: -50% 0;
+  pointer-events: none;
+  /* 다른 화면 요소와 같은 진입 모션을 쓴다. 제품명 필과 같은 줄에 있으므로 지연도 같게 둔다. */
+  animation: service-content-rise var(--motion-content-enter) var(--motion-ease-enter) both;
+}
+
+/* 로딩·오류·준비 중 같은 폴백 화면에는 여권 버튼을 두지 않는다. */
+.screen-motion-shell:has(.stage-c-fallback-screen) + .stage-journey-trigger-slot {
+  display: none;
+}
+
+/* X 버튼이 이미 있는 화면(C5-1·C5-2)에서는 그 왼쪽에 놓는다. X 위치는 그대로 둔다. */
+.stage-journey-trigger-slot--beside-close {
+  padding-right: calc(2rem + 2.5rem);
+}
+
+.stage-journey-trigger {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid var(--stage-c-glass-border, rgb(255 255 255 / 34%));
+  border-radius: 50%;
+  background: rgb(255 255 255 / 12%);
+  box-shadow: inset 0 1px 0 var(--stage-c-glass-highlight, rgb(255 255 255 / 50%)),
+    var(--stage-c-glass-shadow, 0 0.875rem 2.25rem rgb(0 0 0 / 32%));
+  color: var(--stage-c-glass-text, #f8fafc);
+  cursor: pointer;
+  pointer-events: auto;
+  backdrop-filter: var(--stage-c-glass-blur, blur(1.125rem) saturate(1.3) contrast(1.04))
+    var(--stage-c-glass-saturate, saturate(1));
+}
+
+.stage-journey-trigger:active {
+  background: rgb(255 255 255 / 22%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-top-sheet__panel,
+  .stage-top-sheet--closing .stage-top-sheet__panel {
+    animation: none;
   }
 }

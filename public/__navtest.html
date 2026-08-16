@@ -1,0 +1,24 @@
+<html><body style="margin:0">
+<iframe id="f" src="/stage-c/MMKEAVE15CO001" style="width:402px;height:874px;border:0"></iframe>
+<pre id="out"></pre>
+<script>
+const log = [];
+function report(msg){ log.push(msg); document.getElementById('out').textContent = 'NAV ' + log.join(' | '); document.title = 'NAV ' + log.join(' | '); }
+const f = document.getElementById('f');
+setTimeout(() => {
+  const w = f.contentWindow, d = f.contentDocument;
+  w.addEventListener('error', (e) => report('ERROR:' + (e.message || '').slice(0,120)));
+  w.addEventListener('unhandledrejection', (e) => report('REJECT:' + String(e.reason).slice(0,120)));
+  const btn = d.querySelector('.stage-c-choice-button');
+  report('before=' + w.location.pathname + ' btn=' + (btn ? btn.textContent.trim() : 'none'));
+  if (!btn) return;
+  btn.dispatchEvent(new w.PointerEvent('pointerdown', {bubbles:true}));
+  btn.click();
+  setTimeout(() => {
+    const d2 = f.contentDocument;
+    report('after=' + f.contentWindow.location.pathname
+      + ' heading=' + (d2.querySelector('.stage-c-hub-content h1')?.textContent || '(none)').slice(0,24)
+      + ' rootChildren=' + (d2.getElementById('root')?.childElementCount ?? -1));
+  }, 3000);
+}, 4000);
+</script></body></html>

@@ -370,7 +370,7 @@ function FitFallback() {
   const [isActionVisible, setIsActionVisible] = useState(false)
 
   return (
-    <StageCDetailShell className="stage-c-fit-status-shell stage-c-fit-error-shell">
+    <StageCDetailShell className="stage-c-fit-status-shell stage-c-fit-error-shell stage-c-fallback-screen">
       <div className="stage-c-fit-status-content">
         <section aria-label="나이비스 AI 도슨트" className="stage-c-fit-status-docent"><DocentStage cue="apologize" /></section>
         <h1><KineticTextReveal autoPlay blur className="justify-center" distance={16} onRevealComplete={() => setIsDescriptionVisible(true)} splitBy="characters" stagger={0.035} text="오류가 발생했어요" waitForDocent /></h1>

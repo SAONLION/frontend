@@ -10,7 +10,11 @@ interface ScreenHeadlineProps {
   reveal?: boolean;
   /** 화면에 도슨트가 없으면 false로 준다. 도슨트 준비 신호를 기다리지 않고 바로 등장한다. */
   waitForDocent?: boolean;
+  /** 서브텍스트가 나타날 때 아래 요소가 밀리지 않도록 자리를 미리 잡아둔다. */
+  reserveSubtextSpace?: boolean;
   onRevealComplete?: () => void;
+  /** 보조 문구까지 다 나타난 뒤 실행된다. 아래 요소를 그다음에 띄울 때 쓴다. */
+  onSubtextRevealComplete?: () => void;
 }
 
 const HEADLINE_STYLES = {
@@ -31,7 +35,9 @@ export default function ScreenHeadline({
   className = '',
   reveal = false,
   waitForDocent = true,
+  reserveSubtextSpace = false,
   onRevealComplete,
+  onSubtextRevealComplete,
 }: ScreenHeadlineProps) {
   const lines = Array.isArray(headline) ? headline : [headline];
   const alignClasses = align === 'left' ? 'items-start text-left' : 'items-center text-center';
@@ -55,6 +61,7 @@ export default function ScreenHeadline({
                 onRevealComplete={index === lines.length - 1 ? () => {
                   setIsSubtextVisible(true);
                   onRevealComplete?.();
+                  if (!subtext) onSubtextRevealComplete?.();
                 } : undefined}
                 splitBy="characters"
                 stagger={0.035}
@@ -66,9 +73,25 @@ export default function ScreenHeadline({
           </span>
         ))}
       </h1>
-      {subtext && isSubtextVisible && (
-        <p className={`font-medium text-[#d1d1d1] ${SUBTEXT_STYLES[variant]}`}>
-          {reveal ? <KineticTextReveal autoPlay blur={false} distance={8} splitBy="words" stagger={0.1} text={subtext} waitForDocent={waitForDocent} /> : subtext}
+      {subtext && (isSubtextVisible || reserveSubtextSpace) && (
+        <p
+          className={`font-medium text-[#d1d1d1] ${SUBTEXT_STYLES[variant]}`}
+          style={reserveSubtextSpace && !isSubtextVisible ? { visibility: 'hidden' } : undefined}
+        >
+          {/* 자리만 잡아둔 상태에서는 평문을 깔아둔다. 리빌 컴포넌트를 미리 마운트하면
+              보이지 않는 채로 애니메이션이 끝나 완료 콜백이 일찍 발생한다. */}
+          {reveal && isSubtextVisible ? (
+            <KineticTextReveal
+              autoPlay
+              blur={false}
+              distance={8}
+              onRevealComplete={onSubtextRevealComplete}
+              splitBy="words"
+              stagger={0.1}
+              text={subtext}
+              waitForDocent={waitForDocent}
+            />
+          ) : subtext}
         </p>
       )}
     </div>

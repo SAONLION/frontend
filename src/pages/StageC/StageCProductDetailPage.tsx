@@ -84,7 +84,7 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
 
   if (!product) {
     return (
-      <StageCDetailShell>
+      <StageCDetailShell className="stage-c-fallback-screen">
         <GlassInfoCard>
           <h1>상품을 찾을 수 없어요</h1>
           <p>태그한 상품의 주소를 다시 확인해 주세요.</p>

@@ -30,7 +30,7 @@ export function ComingSoonPage({ screenId: explicitScreenId }: { screenId?: stri
 
   return (
     <MobileShell>
-      <section className="stage-c-state-page stage-c-coming-soon-page">
+      <section className="stage-c-state-page stage-c-coming-soon-page stage-c-fallback-screen">
         <p className="stage-c-target-id">{resolvedScreenId || '다음 화면'}</p>
         <h1>이 안내는 준비 중이에요</h1>
         <p>선택하신 내용을 더 잘 안내할 수 있도록 곧 연결할게요.</p>

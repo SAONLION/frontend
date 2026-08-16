@@ -53,14 +53,13 @@ function toSelectedProduct(product: ProductCardData): SelectedProduct {
 
 /**
  * D2·D3이 공유하는 AI 추천 조회.
- * null이면 추천 섹션을 건너뛰고 fixture 추천으로 대체하고, 빈 배열이면 "추천 없음" 안내를 띄운다.
+ * 추천이 없거나(태그 이력 없음) 조회에 실패하면 fixture 추천으로 대체하고 그 사실을 화면에 알린다.
  */
 function useRecommendedProducts() {
   const { state } = useSession();
   const sessionId = state.sessionId;
   const [isLoading, setIsLoading] = useState(true);
   const [products, setProducts] = useState<readonly ProductCardData[] | null>(null);
-  const [hasNone, setHasNone] = useState(false);
 
   useEffect(() => {
     if (!sessionId) {
@@ -72,12 +71,9 @@ function useRecommendedProducts() {
 
     fetchRecommendations(sessionId).then((recommendations) => {
       if (cancelled) return;
-      if (recommendations === null) {
+      // 빈 배열(태그 이력 없음)도 null(오류·타임아웃)과 같게 다룬다 — 데모 추천으로 대체한다.
+      if (recommendations === null || recommendations.length === 0) {
         setProducts(null);
-        setHasNone(false);
-      } else if (recommendations.length === 0) {
-        setProducts([]);
-        setHasNone(true);
       } else {
         setProducts(recommendations.map((item) => ({
           id: String(item.productId),
@@ -85,21 +81,20 @@ function useRecommendedProducts() {
           name: item.productName,
           description: item.reason ?? '',
         })));
-        setHasNone(false);
       }
       setIsLoading(false);
     }).catch((error: unknown) => {
       console.error('추천 조회에 실패했습니다.', error);
       if (cancelled) return;
       setProducts(null);
-      setHasNone(false);
       setIsLoading(false);
     });
 
     return () => { cancelled = true; };
   }, [sessionId]);
 
-  return { products: products ?? mockD2Recommendations, isLoading, hasNone };
+  // products가 null이면 fixture로 대체된 상태다.
+  return { products: products ?? mockD2Recommendations, isLoading, isFallback: products === null };
 }
 
 function getPersonalizedHeadline(nickname: string | null, purpose: string | null): [string, string] {
@@ -133,14 +128,14 @@ export function StageD2Page() {
   const navigate = usePreparedNavigate();
   const { state, dispatch } = useSession();
   const returnToB1 = useReturnToB1();
-  const { products, isLoading, hasNone } = useRecommendedProducts();
+  const { products, isLoading, isFallback } = useRecommendedProducts();
 
   return (
     <D2ProductRecommendation
       purpose={state.visitPurpose ?? '방문'}
       products={products}
       isLoadingRecommendations={isLoading}
-      hasNoRecommendations={hasNone}
+      isFallbackData={isFallback}
       onSelectProduct={(product) => {
         navigate(STAGE_D_ROUTES.locationGuide, { state: toSelectedProduct(product) });
       }}
@@ -183,7 +178,7 @@ export function StageD3Page() {
   const navigate = usePreparedNavigate();
   const { state, dispatch } = useSession();
   const returnToB1 = useReturnToB1();
-  const { products, isLoading, hasNone } = useRecommendedProducts();
+  const { products, isLoading, isFallback } = useRecommendedProducts();
 
   return (
     <D2ProductRecommendation
@@ -191,7 +186,7 @@ export function StageD3Page() {
       headline={getPersonalizedHeadline(state.nickname, state.visitPurpose)}
       products={products}
       isLoadingRecommendations={isLoading}
-      hasNoRecommendations={hasNone}
+      isFallbackData={isFallback}
       onSelectProduct={(product) => {
         navigate(STAGE_D_ROUTES.personalizedLocationGuide, { state: toSelectedProduct(product) });
       }}
