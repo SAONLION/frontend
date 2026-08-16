@@ -42,7 +42,7 @@ export default function InfoCard({
       )}
       <div className="flex min-w-0 flex-1 flex-col items-start overflow-hidden">
         <p className="w-full truncate text-[15px] font-semibold leading-snug text-[#f2f2f2]">{name}</p>
-        <p className="w-full truncate text-[12.5px] leading-normal text-[#a6a6a6]">{descriptionText}</p>
+        {descriptionText && <p className="w-full truncate text-[12.5px] leading-normal text-[#a6a6a6]">{descriptionText}</p>}
       </div>
     </Card>
   );
