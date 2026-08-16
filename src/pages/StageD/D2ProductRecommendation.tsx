@@ -56,7 +56,6 @@ export default function D2ProductRecommendation({
             <InfoCard
               key={product.id}
               image={product.image}
-              imageScale={1.25}
               imageSurface="transparent"
               imageVariant="primary-cutout"
               name={product.name}

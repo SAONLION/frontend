@@ -193,8 +193,12 @@
   margin-inline: auto;
 }
 
+/* Absolute, not fixed: the docent stays mounted across A1→A2→B1→B2 so the WebGL
+   context and GLB survive route changes, but it belongs to the page rather than the
+   viewport. Fixed made it hover over the content whenever a screen overflowed.
+   `.app-shell__content` is the positioned ancestor. */
 .stage-entry-persistent-docent {
-  position: fixed;
+  position: absolute;
   z-index: 2;
   width: min(85.8%, 21.5625rem);
   aspect-ratio: 345 / 216;
@@ -470,7 +474,7 @@
   --stage-c-featured-product-height: min(20rem, 42dvh);
   --stage-c-featured-product-media-height: clamp(15rem, 39dvh, 20rem);
   --stage-c-product-media-top-space: clamp(0.75rem, 2.25dvh, 1.25rem);
-  --stage-c-primary-cutout-scale: 1.38;
+  --stage-c-primary-cutout-scale: 1;
   --stage-c-close-inline-inset: 0.375rem;
   --stage-c-close-shift-inline: 0.125rem;
   --stage-c-close-shift-block: 0;
@@ -560,8 +564,10 @@
   filter: drop-shadow(0 1.25rem 1.25rem rgb(0 0 0 / 28%));
 }
 
-/* The new primary PNGs retain transparent safety space around the product.
-   Scale only those cutouts so their visible silhouette matches the former product framing. */
+/* Product cutouts arrive pre-normalized: alpha-bbox cropped and centered so the
+   longest side fills ~90% of the canvas. No per-asset scaling is needed, so this
+   stays at 1 and exists only as a tuning knob. Values above ~1.1 overflow the
+   media box and collide with the surrounding UI. */
 .stage-c-primary-cutout {
   transform: scale(var(--stage-c-primary-cutout-scale));
   transform-origin: center;
@@ -1224,11 +1230,14 @@
   display: none;
 }
 
+/* `contain`, not `cover`: the gallery box is taller than it is wide relative to the
+   square cutouts, so `cover` would crop ~13% of the height. The cutouts only carry
+   ~5% transparent margin, so that crop would cut into the product itself. */
 .stage-c-gallery-track img {
   flex: 0 0 100%;
   width: 100%;
   min-width: 0;
-  object-fit: cover;
+  object-fit: contain;
   scroll-snap-align: center;
 }
 
@@ -1774,9 +1783,11 @@
   overflow-y: hidden;
 }
 
+/* No `mix-blend-mode: multiply` here: it existed to knock out the white background of
+   the former opaque JPEGs. The styling shots are transparent cutouts now, so multiply
+   would only darken the product against the dark shell. */
 .stage-c-product-detail-media--styling .stage-c-gallery-track img {
   object-fit: contain;
-  mix-blend-mode: multiply;
 }
 
 .stage-c-product-detail-media--styling .stage-c-gallery-controls {
