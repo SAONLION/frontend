@@ -4,9 +4,14 @@ import type { InteractionLogRequest, InteractionLogResponse, InterestType } from
 // POST /api/v1/sessions/{sessionId}/interactions
 export async function recordInteraction(
   sessionId: string,
-  input: { sku: number; interestType: InterestType; subOption?: string },
+  input: { sku: number; interestType: InterestType; subOption?: string; durationSeconds?: number },
 ): Promise<InteractionLogResponse> {
-  const body: InteractionLogRequest = { sku: input.sku, interestType: input.interestType, subOption: input.subOption }
+  const body: InteractionLogRequest = {
+    sku: input.sku,
+    interestType: input.interestType,
+    subOption: input.subOption,
+    durationSeconds: input.durationSeconds,
+  }
   const { data } = await apiClient.post<InteractionLogResponse>(`/api/v1/sessions/${sessionId}/interactions`, body)
   return data
 }

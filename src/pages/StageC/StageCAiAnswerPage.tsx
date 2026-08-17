@@ -60,7 +60,17 @@ export function StageCAiAnswerPage() {
     const previous = requestRef.current
     const request = previous?.queryId === query.id && previous.sku === sku
       ? previous
-      : { queryId: query.id, sku, completion: service.answer({ sku, topic: query.topic, text: query.text }) }
+      : {
+        queryId: query.id,
+        sku,
+        completion: service.answer({
+          sku,
+          topic: query.topic,
+          text: query.text,
+          sessionId: state.sessionId,
+          productId: state.productId,
+        }),
+      }
 
     if (request !== previous) {
       requestRef.current = request
@@ -87,7 +97,7 @@ export function StageCAiAnswerPage() {
     })
 
     return () => { active = false }
-  }, [contextKey, dispatch, hasOtherStaffCall, navigate, product, query, requestStaff, service, sku, staffPendingPath])
+  }, [contextKey, dispatch, hasOtherStaffCall, navigate, product, query, requestStaff, service, sku, staffPendingPath, state.productId, state.sessionId])
 
   if (product === undefined) return <StageCState title="제품 정보를 불러오는 중이에요" description="잠시만 기다려 주세요." />
   if (product === null) return <StageCState title="상품을 찾을 수 없어요" description="태그한 상품의 주소를 다시 확인해 주세요." />

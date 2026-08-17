@@ -40,7 +40,19 @@ export const HUB_TYPES = ['product', 'fit', 'purchase', 'other'] as const
 
 export type HubType = (typeof HUB_TYPES)[number]
 export type BlockerCode = 'CB3' | 'CB5' | 'CB6'
-export type BlockerTriggerId = 'T-CB3-2' | 'T-CB5-1' | 'T-CB5-2' | 'T-CB6-a' | 'T-CB6-b' | 'T-CB6-c'
+export type BlockerTriggerId =
+  | 'T-CB3-2'
+  | 'T-CB5-1'
+  | 'T-CB5-2'
+  | 'T-CB6-a'
+  | 'T-CB6-b'
+  | 'T-CB6-c'
+  /**
+   * 서버가 감지했으나 어느 트리거였는지 알려주지 않은 경우.
+   * 서버 `pending-action` 응답에 `triggerId`가 없어서 생긴 값이며,
+   * 트리거 단위 적중률을 내려면 서버가 실제 트리거 ID를 함께 보내야 한다.
+   */
+  | 'T-SERVER'
 
 type EventBase<Name extends (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES]> = {
   id: string

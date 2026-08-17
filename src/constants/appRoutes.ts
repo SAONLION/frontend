@@ -25,14 +25,4 @@ export const STAGE_D_ROUTES = {
   personalizedLocationGuide: '/stage-d/personalized-location-guide',
 } as const
 
-export const STAGE_F_ROUTES = {
-  cb6Offer: '/stage-f/cb6/offer',
-  emailInput: '/stage-f/cb6/email',
-  sendComplete: '/stage-f/cb6/complete',
-  cb3Prompt: '/stage-f/cb3/prompt',
-  cb5Prompt: '/stage-f/cb5/prompt',
-  valueContent: '/stage-f/cb5/content',
-  staffHandoff: '/stage-f/staff-handoff',
-} as const
-
 export const SESSION_END_ROUTE = '/session-end'

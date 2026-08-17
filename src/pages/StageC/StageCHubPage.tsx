@@ -16,6 +16,7 @@ import {
   type StageCHubScreenId,
 } from '../../constants/stageC'
 import { useStageCProduct } from '../../features/product-explore/useStageCProduct'
+import { useDwellSeconds } from '../../features/product-explore/useDwellSeconds'
 import { useProductExit } from '../../features/product-explore/useProductExit'
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes'
 import { useSession } from '../../features/session/useSession'
@@ -37,6 +38,8 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
   const navigate = usePreparedNavigate()
   const { state, dispatch } = useSession()
   const exitProduct = useProductExit(sku)
+  // 이 허브 화면에 머문 시간. 선택하는 순간 인터랙션 로그에 함께 실어 보낸다.
+  const dwellSeconds = useDwellSeconds(`${screenId}:${sku}`)
 
   const logInteraction = (hubType: HubType, subOption?: string) => {
     if (!state.sessionId || state.currentSkuId === null) return
@@ -44,6 +47,7 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
       sku: state.currentSkuId,
       interestType: hubTypeToInterestType(hubType),
       subOption,
+      durationSeconds: dwellSeconds(),
     }).catch((error: unknown) => {
       console.error('인터랙션 기록에 실패했습니다.', error)
     })
