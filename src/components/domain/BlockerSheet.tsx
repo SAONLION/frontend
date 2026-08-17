@@ -1,7 +1,9 @@
-import { useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react'
 
 const CLOSE_DRAG_RATIO = 0.24
 const CLOSE_DRAG_MINIMUM_PX = 96
+// Motion.css의 `service-sheet-exit` 길이와 맞춘다.
+const CLOSE_ANIMATION_MS = 420
 
 export type BlockerSheetAction = { key: string; label: string }
 
@@ -27,6 +29,23 @@ export function BlockerSheet({ title, body, actions, onDismiss, onSelect, labell
   const dragOffsetRef = useRef(0)
   const [dragOffset, setDragOffset] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
+  const [isClosing, setIsClosing] = useState(false)
+  const closeTimerRef = useRef<number | null>(null)
+
+  useEffect(() => () => {
+    if (closeTimerRef.current !== null) window.clearTimeout(closeTimerRef.current)
+  }, [])
+
+  /** 퇴장 모션을 보여준 뒤 응답한다. 형제 시트(여권 카드·E 오버레이)와 같은 규칙이다. */
+  const closeThen = (run: () => void) => {
+    if (isClosing) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      run()
+      return
+    }
+    setIsClosing(true)
+    closeTimerRef.current = window.setTimeout(run, CLOSE_ANIMATION_MS)
+  }
 
   const startDrag = (event: PointerEvent<HTMLSpanElement>) => {
     dragStartYRef.current = event.clientY
@@ -54,7 +73,7 @@ export function BlockerSheet({ title, body, actions, onDismiss, onSelect, labell
 
     const sheetHeight = sheetRef.current?.offsetHeight ?? 0
     if (dragOffsetRef.current >= Math.max(CLOSE_DRAG_MINIMUM_PX, sheetHeight * CLOSE_DRAG_RATIO)) {
-      onDismiss()
+      closeThen(onDismiss)
       return
     }
     dragOffsetRef.current = 0
@@ -62,7 +81,7 @@ export function BlockerSheet({ title, body, actions, onDismiss, onSelect, labell
   }
 
   return (
-    <div className="blocker-sheet-overlay">
+    <div className={`blocker-sheet-overlay${isClosing ? ' blocker-sheet-overlay--closing' : ''}`}>
       <section
         aria-labelledby={labelledById}
         aria-modal="true"
@@ -87,7 +106,7 @@ export function BlockerSheet({ title, body, actions, onDismiss, onSelect, labell
               key={action.key}
               className={`blocker-sheet__button${index === 0 ? ' blocker-sheet__button--primary' : ''}`}
               type="button"
-              onClick={() => onSelect(action.key)}
+              onClick={() => closeThen(() => onSelect(action.key))}
             >
               {action.label}
             </button>

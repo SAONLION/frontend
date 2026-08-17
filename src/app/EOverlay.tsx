@@ -36,6 +36,8 @@ export default function EOverlay() {
   const isOverStageB1 = location.pathname === STAGE_B_ROUTES.nfcPrompt;
   const [selectedRequests, setSelectedRequests] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
+  // 요청이 서버에 닿았는지. E2 문구가 이 값을 따라간다.
+  const [delivery, setDelivery] = useState<'sending' | 'failed'>('sending');
   const [isClosing, setIsClosing] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -63,7 +65,10 @@ export default function EOverlay() {
   /**
    * 선택한 요청을 서버 직원 호출로 보내고 세션 타임라인에도 남긴다.
    * 접수 화면(E2)은 서버 응답을 기다리지 않고 바로 보여준다 — 응대는 사람이 하는 일이라
-   * 네트워크 왕복 동안 고객을 붙잡아 둘 이유가 없다. 실패하면 배너로 알린다.
+   * 네트워크 왕복 동안 고객을 붙잡아 둘 이유가 없다.
+   *
+   * 다만 **실패하면 E2 문구를 바꾼다.** 배너만 띄우고 "직원이 곧 안내드릴 예정"을 그대로 두면
+   * 서버에 아무것도 닿지 않았는데 화면이 온 것처럼 말하게 된다.
    */
   const submitStaffCall = (label: string) => {
     // 가격·착장·재고·구매는 정보성 요청, 기타는 자유 문의로 구분한다.
@@ -71,12 +76,14 @@ export default function EOverlay() {
     dispatch({ type: SESSION_ACTIONS.recordSaCall, sku: state.currentSku ?? DEFAULT_PRODUCT_SKU, callType });
 
     // 서버는 productId 없는 호출을 400(MISSING_PRODUCT_ID)으로 거절한다.
-    // B1에서 아직 아무것도 태그하지 않았다면 이 값이 없다.
+    // B1에서 아직 아무것도 태그하지 않았다면 이 값이 없다 — 보내볼 것도 없이 실패다.
     if (!state.sessionId || state.productId === null) {
       markDegraded(DEGRADATION_KEYS.staffCall);
+      setDelivery('failed');
       return;
     }
 
+    setDelivery('sending');
     void createStaffCall(state.sessionId, {
       productId: state.productId,
       reason: STAFF_CALL_REASON_BY_LABEL[label] ?? STAFF_CALL_REASONS.other,
@@ -85,6 +92,7 @@ export default function EOverlay() {
       .catch((error: unknown) => {
         console.error('직원 호출 요청에 실패했습니다.', error);
         markDegraded(DEGRADATION_KEYS.staffCall);
+        setDelivery('failed');
       });
   };
 
@@ -129,7 +137,7 @@ export default function EOverlay() {
       {/* 뒤 화면을 덮어 어둡게 하고 그 영역의 조작을 막는다. 눌러서 닫을 수도 있다. */}
       <button aria-label="직원 호출 닫기" className="stage-sheet-backdrop" onClick={close} type="button" />
       {submitted ? (
-        <E2RequestReceived isDragging={isDragging} selectedRequests={selectedRequests} sheetHandle={sheetHandle} sheetOffset={dragOffset} />
+        <E2RequestReceived delivery={delivery} isDragging={isDragging} selectedRequests={selectedRequests} sheetHandle={sheetHandle} sheetOffset={dragOffset} />
       ) : (
         <E1StaffCallTray
           isDragging={isDragging}

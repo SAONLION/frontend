@@ -52,6 +52,12 @@ function toSelectedProduct(product: ProductCardData): SelectedProduct {
 }
 
 /**
+ * 기획서 v2.2 Step 6이 정의한 추천 개수. 화면 레이아웃과 진입 모션 스태거도 이 값 기준이다.
+ * 서버는 0~5개로 불안정하게 돌려주므로(BACKEND_REQUEST P1-7) 여기서 잘라 스펙에 맞춘다.
+ */
+const RECOMMENDATION_LIMIT = 3;
+
+/**
  * D2·D3이 공유하는 AI 추천 조회.
  * 추천이 없거나(태그 이력 없음) 조회에 실패하면 fixture 추천으로 대체하고 그 사실을 화면에 알린다.
  */
@@ -75,7 +81,7 @@ function useRecommendedProducts() {
       if (recommendations === null || recommendations.length === 0) {
         setProducts(null);
       } else {
-        setProducts(recommendations.map((item) => ({
+        setProducts(recommendations.slice(0, RECOMMENDATION_LIMIT).map((item) => ({
           id: String(item.productId),
           image: emblemImage,
           name: item.productName,
