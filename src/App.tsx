@@ -17,6 +17,7 @@ import { AiAnswerProvider } from './features/ai-answer/AiAnswerContext'
 import { ContactProvider } from './features/contact/ContactProvider'
 import { PendingActionWatcher } from './features/blocker/PendingActionWatcher'
 import { mockAiAnswerService } from './mocks/providers/mockAiAnswerService'
+import { realAiAnswerService } from './api/aiAnswerService'
 import { isLiveSource, type DataSourceRow } from './features/dev-diagnostics/dataSources'
 import { AmbientBronzeBackground } from './components/common/AmbientBronzeBackground'
 import { LiquidGlassFilterDefinitions } from './components/common/LiquidGlassFilterDefinitions'
@@ -36,7 +37,7 @@ const CosmicGoldDust = lazy(async () => {
 
 // 화면·Provider에 실제로 주입하는 구현. 여기 한 곳만 바꾸면 Mock ↔ Live가 전환된다.
 const productContentProvider = liveProductContentProvider
-const aiAnswerService = mockAiAnswerService
+const aiAnswerService = realAiAnswerService
 const staffCallService = realStaffCallService
 const priceInquiryRequestService = mockPriceInquiryRequestService
 const tryOnRequestService = realTryOnRequestService

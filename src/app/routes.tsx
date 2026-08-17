@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router';
-import { SESSION_END_ROUTE, STAGE_A_ROUTES, STAGE_B_ROUTES, STAGE_D_ROUTES, STAGE_F_ROUTES } from '../constants/appRoutes';
+import { SESSION_END_ROUTE, STAGE_A_ROUTES, STAGE_B_ROUTES, STAGE_D_ROUTES } from '../constants/appRoutes';
 import { STAGE_C_PRODUCT_DETAIL_ROUTES, STAGE_C_ROUTES, STAGE_C_SCREEN_IDS } from '../constants/stageC';
 import AppLayout from './AppLayout';
 import { StageAIntroPage, StageANicknamePage } from '../pages/StageA/StageAFlowPages';
@@ -16,7 +16,6 @@ import { ComingSoonPage } from '../pages/StageC/ComingSoonPage';
 import { StageCStaffCallTriggerPage } from '../pages/StageC/StageCOverlayTriggers';
 import SessionEndPage from '../pages/SessionEndPage';
 import NotFoundPage from '../pages/NotFoundPage';
-import { StageFCb6OfferPage, StageFEmailInputPage, StageFPromptPage, StageFSendCompletePage, StageFStaffHandoffPage, StageFValueContentPage } from '../pages/StageF/StageFPages';
 import { StageFDevPreviewPage } from '../pages/StageF/StageFDevPreviewPage';
 
 const STAGE_D1_HANDOFF_PATH = STAGE_C_ROUTES.comingSoon.replace(':screenId', STAGE_C_SCREEN_IDS.stageD1);
@@ -70,13 +69,6 @@ export function AppRoutes() {
         <Route element={<StageD3Page />} path={STAGE_D_ROUTES.personalizedRecommend} />
         <Route element={<StageD4Page />} path={STAGE_D_ROUTES.personalizedLocationGuide} />
 
-        <Route element={<StageFCb6OfferPage />} path={STAGE_F_ROUTES.cb6Offer} />
-        <Route element={<StageFEmailInputPage />} path={STAGE_F_ROUTES.emailInput} />
-        <Route element={<StageFSendCompletePage />} path={STAGE_F_ROUTES.sendComplete} />
-        <Route element={<StageFPromptPage variant="cb3-staff" />} path={STAGE_F_ROUTES.cb3Prompt} />
-        <Route element={<StageFPromptPage variant="cb5-value" />} path={STAGE_F_ROUTES.cb5Prompt} />
-        <Route element={<StageFValueContentPage />} path={STAGE_F_ROUTES.valueContent} />
-        <Route element={<StageFStaffHandoffPage />} path={STAGE_F_ROUTES.staffHandoff} />
         {import.meta.env.DEV && <Route element={<StageFDevPreviewPage />} path="/__dev/stage-f" />}
 
         <Route element={<SessionEndPage />} path={SESSION_END_ROUTE} />

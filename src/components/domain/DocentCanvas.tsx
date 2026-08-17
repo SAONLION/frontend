@@ -279,9 +279,7 @@ function Model({ cue, continuityKey, reducedMotion, onReady }: { cue: DocentCue;
 
     const elapsed = (performance.now() - cueStartedAt.current) / 1000
     const duration = getDocentCueDuration(cue)
-    const activeCue = duration !== null && elapsed >= duration
-      ? cue === 'return-nfc' ? 'nfc-guide' : 'idle'
-      : cue
+    const activeCue = duration !== null && elapsed >= duration ? 'idle' : cue
     writeDocentMotion(activeCue, elapsed, clock.elapsedTime, targetMotion.current)
     const transitionProgress = Math.min((performance.now() - cueTransitionStartedAt.current) / 1000 / CUE_TRANSITION_DURATION, 1)
     blendMotion(appliedMotion.current, transitionFromMotion.current, targetMotion.current, smoothstep(transitionProgress))
