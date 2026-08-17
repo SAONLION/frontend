@@ -102,3 +102,17 @@ export type RespondResponse = {
   actionNextStep: string
   result?: StockCheckResultDTO
 }
+
+// --- QnA (POST /api/v1/products/{productId}/qna) ---
+export const QNA_QUESTION_TYPES = [
+  'AS_REPAIR',
+  'CARE',
+  'GIFT_WRAP',
+  'TAX_REFUND',
+  'SHIPPING_RETURN',
+  'FREE_TEXT',
+] as const
+export type QnaQuestionType = (typeof QNA_QUESTION_TYPES)[number]
+/** `question`은 FREE_TEXT일 때만 의미가 있다. 나머지 타입은 서버가 정형 답변을 돌려준다. */
+export type QnaRequest = { questionType: QnaQuestionType; question?: string }
+export type QnaResponse = { answer: string }
