@@ -2322,12 +2322,26 @@
   word-break: keep-all;
 }
 
+/* 칩 안에는 그 색상으로 찍힌 제품 사진이 들어간다(단색 hex 원본이 없다).
+   `background-color`는 사진이 아직 안 떴을 때만 보이는 바탕이다. */
 .stage-c-fit-color-selector i {
+  display: block;
+  overflow: hidden;
   width: 2.5rem;
   height: 2.5rem;
   border: 1px solid rgb(255 255 255 / 70%);
   border-radius: 50%;
   transition: outline-color 200ms ease, outline-offset 200ms ease, transform 200ms ease;
+}
+
+/* 제품 컷은 여백이 넓어 그대로 넣으면 원 안이 거의 비어 보인다.
+   가운데를 채우도록 키우고 잘라낸다. */
+.stage-c-fit-color-selector i img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  scale: 1.35;
 }
 
 .stage-c-fit-color-selector button[aria-pressed='true'] {
@@ -2340,11 +2354,10 @@
   transform: scale(1.04);
 }
 
-/* 선택 표시는 고른 색상 자체를 쓰되, 블랙처럼 어두운 색은 배경에 묻히므로 흰색을 섞어 밝힌다. */
-@supports (color: color-mix(in srgb, red, white)) {
-  .stage-c-fit-color-selector button[aria-pressed='true'] {
-    --stage-c-selected-swatch-ink: color-mix(in srgb, var(--stage-c-selected-swatch, currentColor) 62%, #ffffff);
-  }
+/* 칩이 사진이 되면서 테두리 색을 색상값에 맞출 수 없게 됐다(사진은 여러 색을 담는다).
+   선택 표시는 사진 위에서 항상 보이도록 밝은 중립색으로 고정한다. */
+.stage-c-fit-color-selector button[aria-pressed='true'] {
+  --stage-c-selected-swatch-ink: rgb(255 255 255 / 92%);
 }
 
 .stage-c-fit-reference-actions {
@@ -2839,4 +2852,21 @@
   background: rgb(54 49 42 / 74%);
   box-shadow: none;
   backdrop-filter: none;
+}
+
+/* 직원 호출 대기 중 서버가 알려주는 응대 단계 문구.
+   제목 아래에서 이 줄만 바뀌므로, 바뀔 때마다 짧게 다시 올라오게 해 변화를 알린다. */
+.stage-c-staff-call-progress {
+  margin: 0.75rem 0 0;
+  color: rgb(255 255 255 / 72%);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  text-align: center;
+  animation: service-content-rise var(--motion-content-enter) var(--motion-ease-enter) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-c-staff-call-progress {
+    animation: none;
+  }
 }

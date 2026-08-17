@@ -17,6 +17,7 @@ import {
 } from '../../constants/stageC'
 import { useStageCProduct } from '../../features/product-explore/useStageCProduct'
 import { useDwellSeconds } from '../../features/product-explore/useDwellSeconds'
+import { resolveProductDisplayName } from '../../features/product-explore/productDisplayName'
 import { useProductExit } from '../../features/product-explore/useProductExit'
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes'
 import { useSession } from '../../features/session/useSession'
@@ -54,6 +55,8 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
   }
   const product = useStageCProduct(sku)
   const screen = stageCHubDefinitions[screenId]
+  // 사이즈마다 제품 이름이 다르므로 고른 사이즈의 이름을 보여준다.
+  const displayName = product ? resolveProductDisplayName(product, state.selectedSizeCode) : ''
   const isProductIntro = screenId === STAGE_C_SCREEN_IDS.c1
   const headingClassName = isProductIntro
     ? 'stage-c-heading--intro'
@@ -121,14 +124,14 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
   return (
     <MobileShell>
       <section className="stage-c-page" aria-labelledby="stage-c-heading">
-        <div className="stage-c-product-context-pill">{product.name}</div>
+        <div className="stage-c-product-context-pill">{displayName}</div>
         <ProductMedia product={product} />
         <div className="stage-c-hub-content">
           {screen.intro && <p className="stage-c-intro">{screen.intro}</p>}
           <h1 className={headingClassName} id="stage-c-heading">
             {isProductIntro ? (
               <>
-                <span title={`MCM의 대표 제품 ${product.name}이네요`}>MCM의 대표 제품 {product.name}이네요</span>
+                <span title={`MCM의 대표 제품 ${displayName}이네요`}>MCM의 대표 제품 {displayName}이네요</span>
                 <span>어떤 점이 궁금하신가요?</span>
               </>
             ) : screen.heading}
