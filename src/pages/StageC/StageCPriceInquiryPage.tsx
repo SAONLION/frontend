@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { requestPriceInquiry } from '../../api/priceInquiry'
 import { Navigate, useParams } from 'react-router'
 import { usePreparedNavigate } from '../../app/usePreparedNavigate'
 import { PreparedLink } from '../../components/common/PreparedLink'
@@ -28,7 +29,7 @@ const PRICE_INQUIRY_COPY: Record<PriceInquiryPageState, { cue: 'present' | 'send
  */
 export function StageCPurchaseEntryPage() {
   const { sku = '' } = useParams()
-  const { dispatch } = useSession()
+  const { dispatch, state } = useSession()
   const recorded = useRef(false)
 
   // 렌더 중에 dispatch하면 다른 컴포넌트를 갱신한다는 경고가 나므로 커밋 뒤에 기록한다.
@@ -36,7 +37,8 @@ export function StageCPurchaseEntryPage() {
     if (recorded.current) return
     recorded.current = true
     dispatch({ type: SESSION_ACTIONS.recordPriceInquiryRequest, sku })
-  }, [dispatch, sku])
+    requestPriceInquiry(state.sessionId, state.productId)
+  }, [dispatch, sku, state.productId, state.sessionId])
 
   return <Navigate replace to={stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryCompleted, sku)} />
 }

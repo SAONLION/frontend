@@ -16,6 +16,7 @@ export const DEGRADATION_KEYS = {
   staffCall: 'staff-call',
   tryOn: 'try-on',
   purchaseInquiry: 'purchase-inquiry',
+  priceInquiry: 'price-inquiry',
 } as const
 
 export type DegradationKey = (typeof DEGRADATION_KEYS)[keyof typeof DEGRADATION_KEYS]
@@ -27,6 +28,7 @@ const MESSAGES: Record<DegradationKey, string> = {
   [DEGRADATION_KEYS.staffCall]: '직원 호출을 전달하지 못했어요. 잠시 후 다시 시도해 주세요.',
   [DEGRADATION_KEYS.tryOn]: '착장 요청을 전달하지 못했어요. 직원에게 직접 말씀해 주세요.',
   [DEGRADATION_KEYS.purchaseInquiry]: '구매 문의를 전달하지 못했어요. 직원에게 직접 말씀해 주세요.',
+  [DEGRADATION_KEYS.priceInquiry]: '가격 안내 요청을 전달하지 못했어요. 직원에게 직접 말씀해 주세요.',
 }
 
 /** 가장 최근에 표시된 것이 배열의 끝에 온다. 화면에는 한 번에 하나만 보여준다. */

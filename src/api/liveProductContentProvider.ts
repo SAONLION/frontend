@@ -23,6 +23,36 @@ function isBlank(value: string | null | undefined): value is null | undefined {
 }
 
 /**
+ * 서버 이미지를 실제로 띄울 수 있는지 한 번 확인한다.
+ *
+ * URL이 응답에 들어 있다고 이미지가 열리는 건 아니다. 2026-08-17 확인 시점에 S3 버킷이
+ * 비공개라 모든 이미지가 403이었다. URL만 믿고 쓰면 화면의 제품 사진이 전부 깨진다.
+ *
+ * 세션당 한 번만 재고, 결과를 재사용한다. 버킷이 공개되면 다음 방문부터 자동으로 서버
+ * 이미지를 쓰므로 배포 없이 전환된다. `<img>` 로드로 검사하므로 CORS 설정과 무관하다.
+ */
+let serverImageProbe: Promise<boolean> | null = null
+
+function canLoadImage(url: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const image = new Image()
+    image.onload = () => resolve(true)
+    image.onerror = () => resolve(false)
+    image.src = url
+  })
+}
+
+function probeServerImages(sampleUrl: string): Promise<boolean> {
+  serverImageProbe ??= canLoadImage(sampleUrl).then((usable) => {
+    if (!usable) {
+      console.warn('서버 제품 이미지를 불러올 수 없어 로컬 이미지로 표시합니다.', sampleUrl)
+    }
+    return usable
+  })
+  return serverImageProbe
+}
+
+/**
  * 서버 SKU 목록을 fixture 컬러에 얹는다.
  *
  * 서버 컬러명과 같은 fixture 항목을 찾아 스와치·상세컷을 가져오고, 이미지는 서버에 있으면 서버
@@ -32,11 +62,13 @@ function isBlank(value: string | null | undefined): value is null | undefined {
 function mergeColorOptions(
   serverSkus: readonly SkuListItemResponse[],
   fixtureColors: readonly ColorOption[] | undefined,
+  useServerImages: boolean,
 ): readonly ColorOption[] | undefined {
   if (serverSkus.length === 0 || !fixtureColors || fixtureColors.length === 0) return fixtureColors
 
   const merged = serverSkus
     .map((sku) => {
+      const serverImage = useServerImages && !isBlank(sku.imageUrl) ? sku.imageUrl : null
       const matched = fixtureColors.find(
         (option) => option.label.toLowerCase() === sku.color.toLowerCase()
           || option.code.toLowerCase() === sku.color.toLowerCase(),
@@ -46,18 +78,18 @@ function mergeColorOptions(
         return {
           ...matched,
           label: sku.color,
-          imageUrl: isBlank(sku.imageUrl) ? matched.imageUrl : sku.imageUrl,
+          imageUrl: serverImage ?? matched.imageUrl,
         } satisfies ColorOption
       }
 
-      // fixture에 없는 색이라도 서버가 이미지를 주면 그대로 보여줄 수 있다.
-      if (isBlank(sku.imageUrl)) return null
+      // fixture에 없는 색은 보여줄 이미지가 서버에 있을 때만 추가한다.
+      if (!serverImage) return null
 
       return {
         code: sku.color.toLowerCase().replace(/\s+/g, '-'),
         label: sku.color,
         sku: String(sku.skuId),
-        imageUrl: sku.imageUrl,
+        imageUrl: serverImage,
         swatch: fixtureColors[0]?.swatch ?? '#9a5828',
       } satisfies ColorOption
     })
@@ -77,20 +109,26 @@ export const liveProductContentProvider: ProductContentProviderValue = {
     if (!server || !fixture || server.sku !== sku) return fixture
 
     const name = isBlank(server.name) ? fixture.name : server.name
-    const imageUrl = isBlank(server.imageUrl) ? fixture.imageUrl : server.imageUrl
 
     try {
       const serverSkus = await getSkus(server.id)
+
+      // 서버 이미지가 실제로 열리는지 한 번 확인한다. URL이 있어도 버킷이 비공개면 못 쓴다.
+      const sampleImage = serverSkus.map((sku) => sku.imageUrl).find((url) => !isBlank(url))
+      const useServerImages = sampleImage !== undefined && await probeServerImages(sampleImage)
+
+      const imageUrl = useServerImages && !isBlank(server.imageUrl) ? server.imageUrl : fixture.imageUrl
+
       return {
         ...fixture,
         name,
         imageUrl,
-        colorOptions: mergeColorOptions(serverSkus, fixture.colorOptions),
+        colorOptions: mergeColorOptions(serverSkus, fixture.colorOptions, useServerImages),
       }
     } catch (error) {
-      // SKU 조회만 실패한 것이므로 이름·대표 이미지는 서버 값을 살린다.
+      // SKU 조회만 실패한 것이므로 이름은 서버 값을 살린다.
       console.error('서버 SKU 목록을 불러오지 못해 컬러는 로컬 데이터로 표시합니다.', error)
-      return { ...fixture, name, imageUrl }
+      return { ...fixture, name }
     }
   },
 }

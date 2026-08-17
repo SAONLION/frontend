@@ -3,7 +3,8 @@ import { useLocation } from 'react-router';
 import { usePreparedNavigate } from './usePreparedNavigate';
 import { createStaffCall } from '../api/staffCalls';
 import { DEFAULT_PRODUCT_SKU, STAGE_B_ROUTES } from '../constants/appRoutes';
-import type { StaffCallType } from '../constants/events';
+import type { StaffCallType } from '../constants/events'
+import { STAFF_CALL_REASONS } from '../constants/staffCallReasons';
 import { clearDegraded, DEGRADATION_KEYS, markDegraded } from '../features/degradation/degradationStore';
 import { useSession } from '../features/session/useSession';
 import { SESSION_ACTIONS } from '../features/session/sessionTypes';
@@ -18,11 +19,11 @@ import E2RequestReceived from '../pages/StageE/E2RequestReceived';
  * E1이 그쪽이 요구하는 사이즈·컬러를 묻지 않으므로 기본값을 지어내지 않고 직원 호출로 넘긴다.
  */
 const STAFF_CALL_REASON_BY_LABEL: Record<string, string> = {
-  '가격 확인': '가격 문의',
-  '착장 요청': '착장 요청',
-  '재고 문의': '재고 문의',
-  '구매 요청': '구매 문의',
-  기타: '기타 문의',
+  '가격 확인': STAFF_CALL_REASONS.price,
+  '착장 요청': STAFF_CALL_REASONS.tryOn,
+  '재고 문의': STAFF_CALL_REASONS.stock,
+  '구매 요청': STAFF_CALL_REASONS.purchase,
+  기타: STAFF_CALL_REASONS.other,
 };
 
 // 배경 화면을 완전히 가리지 않는 논블로킹 바텀시트: 뒤쪽 라우트는 언마운트되지 않고
@@ -78,7 +79,7 @@ export default function EOverlay() {
 
     void createStaffCall(state.sessionId, {
       productId: state.productId,
-      reason: STAFF_CALL_REASON_BY_LABEL[label] ?? '기타 문의',
+      reason: STAFF_CALL_REASON_BY_LABEL[label] ?? STAFF_CALL_REASONS.other,
     })
       .then(() => clearDegraded(DEGRADATION_KEYS.staffCall))
       .catch((error: unknown) => {

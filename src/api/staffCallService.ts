@@ -1,4 +1,5 @@
 import { createStaffCall, getStaffCall } from './staffCalls'
+import { STAFF_CALL_REASONS } from '../constants/staffCallReasons'
 import { setActiveStaffCallId } from '../features/sa-call/activeStaffCall'
 import type { StaffCallService } from '../features/sa-call/StaffCallService'
 
@@ -21,7 +22,7 @@ async function pollUntilCompleted(sessionId: string, callId: number): Promise<'c
 export const realStaffCallService: StaffCallService = {
   async request({ sessionId, productId, type }) {
     if (!sessionId) throw new Error('세션이 아직 생성되지 않았습니다.')
-    const reason = type === 'info' ? '제품 정보 문의' : '기타 문의'
+    const reason = type === 'info' ? STAFF_CALL_REASONS.productInfo : STAFF_CALL_REASONS.other
     const created = await createStaffCall(sessionId, { productId: productId ?? undefined, reason })
     setActiveStaffCallId(created.callId)
 
