@@ -13,6 +13,8 @@ import { useProductExit } from '../../features/product-explore/useProductExit'
 import { useStageCProduct } from '../../features/product-explore/useStageCProduct'
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes'
 import { useSession } from '../../features/session/useSession'
+import { createPurchaseInquiry } from '../../api/purchaseInquiries'
+import { clearDegraded, DEGRADATION_KEYS, markDegraded } from '../../features/degradation/degradationStore'
 import { useTryOnRequestService } from '../../features/try-on/useTryOnRequestService'
 import type { ColorOption, Product, SizeOption } from '../../types/product'
 import { StageCState } from './StageCHubPage'
@@ -84,6 +86,8 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
             sku,
             size: selection.size.code,
             color: selection.color.code,
+            sessionId: state.sessionId,
+            skuId: state.currentSkuId,
           }),
         }
 
@@ -93,13 +97,22 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
     })
 
     void Promise.all([request.completion, minimumDisplayTime]).then(() => {
+      clearDegraded(DEGRADATION_KEYS.tryOn)
+      if (active) {
+        navigate(fitSearchPath(paths.completed, selection), { replace: true })
+      }
+    }).catch((error: unknown) => {
+      console.error('착장 요청에 실패했습니다.', error)
+      // 요청이 서버에 남지 않았으므로 완료 화면으로 넘기되 전달 실패를 알린다.
+      markDegraded(DEGRADATION_KEYS.tryOn)
+      requestRef.current = null
       if (active) {
         navigate(fitSearchPath(paths.completed, selection), { replace: true })
       }
     })
 
     return () => { active = false }
-  }, [hasTryOnRequest, kind, navigate, paths.completed, selection, sku, tryOnRequestService])
+  }, [hasTryOnRequest, kind, navigate, paths.completed, selection, sku, state.currentSkuId, state.sessionId, tryOnRequestService])
 
   const setSize = (next: SizeOption) => {
     if (next.code === selection.size.code) return
@@ -134,6 +147,18 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
   const requestPurchase = () => {
     if (!hasPurchaseInquiry) {
       dispatch({ type: SESSION_ACTIONS.recordPurchaseInquiry, sku })
+
+      // 구매 의사를 명시적으로 표현하는 이벤트라 서버 기록이 누락되면 안 된다.
+      if (state.sessionId && state.currentSkuId !== null) {
+        void createPurchaseInquiry(state.sessionId, state.currentSkuId)
+          .then(() => clearDegraded(DEGRADATION_KEYS.purchaseInquiry))
+          .catch((error: unknown) => {
+            console.error('구매 문의 기록에 실패했습니다.', error)
+            markDegraded(DEGRADATION_KEYS.purchaseInquiry)
+          })
+      } else {
+        markDegraded(DEGRADATION_KEYS.purchaseInquiry)
+      }
     }
     navigate(fitSearchPath(paths.purchaseCompleted, selection))
   }

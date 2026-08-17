@@ -28,6 +28,7 @@ export const SESSION_ACTIONS = {
   setSessionId: 'set_session_id',
   setProductId: 'set_product_id',
   setCurrentSkuId: 'set_current_sku_id',
+  restoreProductContext: 'restore_product_context',
 } as const
 
 export type ActiveOverlay = 'E' | 'journey' | null
@@ -83,3 +84,4 @@ export type SessionAction =
   | { type: typeof SESSION_ACTIONS.setSessionId; sessionId: string }
   | { type: typeof SESSION_ACTIONS.setProductId; productId: number }
   | { type: typeof SESSION_ACTIONS.setCurrentSkuId; skuId: number }
+  | { type: typeof SESSION_ACTIONS.restoreProductContext; productId: number | null; currentSkuId: number | null; currentSku: string | null }

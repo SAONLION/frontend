@@ -10,8 +10,11 @@ export const STAGE_B_ROUTES = {
   recognizing: '/stage-b/recognizing',
 } as const
 
-export function stageBRecognizingPath(sku: string): string {
-  return `${STAGE_B_ROUTES.recognizing}?sku=${encodeURIComponent(sku)}`
+export function stageBRecognizingPath(sku: string, tagId?: number): string {
+  const params = new URLSearchParams({ sku })
+  // tagId를 넘기지 않으면 B2가 기본 태그를 쓴다. 시연 흐름은 항상 짝이 맞는 태그를 함께 넘긴다.
+  if (tagId !== undefined) params.set('tagId', String(tagId))
+  return `${STAGE_B_ROUTES.recognizing}?${params.toString()}`
 }
 
 export const STAGE_D_ROUTES = {

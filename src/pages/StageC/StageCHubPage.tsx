@@ -1,6 +1,7 @@
 import { useParams } from 'react-router'
 import { usePreparedNavigate } from '../../app/usePreparedNavigate'
 import { recordInteraction } from '../../api/interactions'
+import { requestPriceInquiry } from '../../api/priceInquiry'
 import { hubTypeToInterestType } from '../../api/interestType'
 import { ChoiceList } from '../../components/common/ChoiceList'
 import { MobileShell } from '../../components/common/MobileShell'
@@ -72,6 +73,8 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
       // 구매 조건은 하위 허브 없이 C4-1 가격 안내 요청 완료 화면으로 바로 이어진다.
       if (choice.hubType === 'purchase') {
         dispatch({ type: SESSION_ACTIONS.recordPriceInquiryRequest, sku })
+        // 화면이 "요청을 보냈어요"라고 알리므로 실제 직원 호출을 서버에 남긴다.
+        requestPriceInquiry(state.sessionId, state.productId)
         navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryCompleted, sku))
         return
       }
@@ -84,6 +87,7 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
 
     if (choice.id === STAGE_C_SCREEN_IDS.c41) {
       dispatch({ type: SESSION_ACTIONS.recordPriceInquiryRequest, sku })
+      requestPriceInquiry(state.sessionId, state.productId)
       logInteraction(subhubType, choice.id)
       navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryCompleted, sku))
       return

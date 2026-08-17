@@ -5,7 +5,10 @@ import { ApiError } from '../../api/client'
 import { fetchJourneyCard, type JourneyCardResponse } from '../../api/journeyCard'
 import { getSkus, scanTag } from '../../api/products'
 import { DEFAULT_PRODUCT_SKU, stageBRecognizingPath } from '../../constants/appRoutes'
+import { pickDemoTag } from '../../constants/demoTags'
 import { STAGE_C_ROUTES, stageCPath } from '../../constants/stageC'
+import { clearDegraded, DEGRADATION_KEYS, markDegraded } from '../../features/degradation/degradationStore'
+import { setServerProduct } from '../../features/product-explore/serverProduct'
 import { reissueSession } from '../../features/session/reissueSession'
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes'
 import { useSession } from '../../features/session/useSession'
@@ -29,6 +32,7 @@ export function StageBNfcPromptPage() {
       try {
         const data = await fetchJourneyCard(sessionId)
         if (!cancelled) setJourneyCard(data)
+        clearDegraded(DEGRADATION_KEYS.journeyCard)
       } catch (error) {
         if (error instanceof ApiError && error.status === 404) {
           // 저장된 세션이 서버에 더 이상 없음 → 새 세션을 발급하면 sessionId 변경으로
@@ -38,10 +42,12 @@ export function StageBNfcPromptPage() {
             if (!cancelled) dispatch({ type: SESSION_ACTIONS.setSessionId, sessionId: newSessionId })
           } catch (reissueError) {
             console.error('세션 재발급에 실패했습니다.', reissueError)
+            markDegraded(DEGRADATION_KEYS.session)
           }
           return
         }
         console.error('여정 카드 조회에 실패했습니다.', error)
+        markDegraded(DEGRADATION_KEYS.journeyCard)
       }
     }
 
@@ -57,7 +63,11 @@ export function StageBNfcPromptPage() {
       isOverlayOpen={state.activeOverlay === 'E'}
       journeyCard={journeyCard}
       onCallStaff={() => dispatch({ type: SESSION_ACTIONS.setActiveOverlay, overlay: 'E' })}
-      onNfcDetected={() => navigate(stageBRecognizingPath(DEFAULT_PRODUCT_SKU))}
+      onNfcDetected={() => {
+        // 실물 태그가 없으므로 시연용 태그 풀에서 고른다. 직전 제품은 피해 매번 다른 제품이 나온다.
+        const tag = pickDemoTag(state.currentSku)
+        navigate(stageBRecognizingPath(tag.sku, tag.tagId))
+      }}
     />
   )
 }
@@ -67,7 +77,8 @@ export function StageBRecognizingPage() {
   const [searchParams] = useSearchParams()
   const { state, dispatch } = useSession()
   const recognized = useRef(false)
-  // 화면에 실제로 렌더링되는 제품 콘텐츠는 지금도 로컬 mock 픽스처(sku 문자열) 기준이라 그대로 둔다.
+  // 화면은 하이브리드 Provider를 쓴다 — 이름·컬러·이미지는 서버 값이 있으면 서버,
+  // 없으면 이 sku 문자열로 찾은 fixture다. 그래서 sku는 여전히 fixture 조회 키로 필요하다.
   const sku = searchParams.get('sku')?.trim() || DEFAULT_PRODUCT_SKU
   const tagIdParam = Number(searchParams.get('tagId'))
   const tagId = Number.isInteger(tagIdParam) && tagIdParam > 0 ? tagIdParam : DEFAULT_TAG_ID
@@ -79,6 +90,15 @@ export function StageBRecognizingPage() {
     const resolveTag = state.sessionId
       ? scanTag(tagId, state.sessionId)
         .then((result) => {
+          clearDegraded(DEGRADATION_KEYS.tagScan)
+          // 제품 콘텐츠 Provider가 세션 바깥에 있어 store로 건넨다.
+          setServerProduct({
+            id: result.product.id,
+            name: result.product.name,
+            category: result.product.category,
+            imageUrl: result.product.imageUrl,
+            sku,
+          })
           dispatch({ type: SESSION_ACTIONS.setProductId, productId: result.product.id })
           return getSkus(result.product.id).catch((error: unknown) => {
             console.error('SKU 목록 조회에 실패했습니다.', error)
@@ -91,6 +111,8 @@ export function StageBRecognizingPage() {
         })
         .catch((error: unknown) => {
           console.error('제품 태그 조회에 실패했습니다.', error)
+          // 화면은 로컬 fixture로 계속 진행되지만 productId가 없어 직원 호출이 실패한다.
+          markDegraded(DEGRADATION_KEYS.tagScan)
         })
       : Promise.resolve()
 

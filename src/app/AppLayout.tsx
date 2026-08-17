@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router';
 import { useSession } from '../features/session/useSession';
 import { rememberNavigationTrigger } from './navigationTrigger';
 import EOverlay from './EOverlay';
+import { DegradationNotice } from '../components/common/DegradationNotice';
 import { JourneyCardTopSheet } from '../components/domain/JourneyCardTopSheet';
 import { JourneyCardTrigger } from '../components/domain/JourneyCardTrigger';
 
@@ -24,6 +25,7 @@ export default function AppLayout() {
       {showsJourneyTrigger && <JourneyCardTrigger key={`journey-${motionKey}`} />}
       {state.activeOverlay === 'E' && <EOverlay />}
       {state.activeOverlay === 'journey' && <JourneyCardTopSheet />}
+      <DegradationNotice />
     </div>
   );
 }
