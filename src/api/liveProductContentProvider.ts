@@ -55,9 +55,12 @@ function probeServerImages(sampleUrl: string): Promise<boolean> {
 /**
  * 서버 SKU 목록을 fixture 컬러에 얹는다.
  *
- * 서버 컬러명과 같은 fixture 항목을 찾아 스와치·상세컷을 가져오고, 이미지는 서버에 있으면 서버
+ * 서버 컬러명과 같은 fixture 항목을 찾아 상세컷을 가져오고, 이미지는 서버에 있으면 서버
  * 것을 쓴다. **이름이 매칭되지 않고 서버 이미지도 없는 색은 아예 버린다** — 순서로 이으면
  * 예컨대 서버의 `Soft Pink`에 fixture의 코냑 사진이 붙어 색상과 사진이 어긋난다.
+ *
+ * 반대로 **서버 이미지가 있으면 fixture에 없는 색도 그대로 추가한다.** 색상 칩을 사진으로
+ * 그리기 때문에 매핑표 없이도 정확하게 보인다 — 카탈로그 색상 40가지를 모두 감당한다.
  */
 function mergeColorOptions(
   serverSkus: readonly SkuListItemResponse[],
@@ -90,6 +93,8 @@ function mergeColorOptions(
         label: sku.color,
         sku: String(sku.skuId),
         imageUrl: serverImage,
+        // 색상 칩은 이 이미지로 그린다. `swatch`는 이미지가 뜨기 전 바탕색일 뿐이라
+        // 정확할 필요가 없다 — 카탈로그에 색상 hex 원본이 아예 없다(BACKEND_REQUEST P2-9).
         swatch: fixtureColors[0]?.swatch ?? '#9a5828',
       } satisfies ColorOption
     })

@@ -332,6 +332,11 @@ function SizeOptions({ label, onSelect, product, selection }: { label?: string; 
 }
 
 // 한국어 라벨이 정해진 색만 옮겨 쓰고, 새로 들어오는 색은 데이터의 label을 그대로 보여준다.
+/**
+ * 자주 쓰는 색의 한글 이름만 갖는다. 카탈로그의 색상은 40가지이고 서버는 영문 이름만 주므로
+ * 여기 없는 색은 서버 라벨을 그대로 보여준다 — 영문이어도 의미가 통한다.
+ * 서버가 다국어 색상명을 주기로 하면 이 표는 사라진다(BACKEND_REQUEST P2-9).
+ */
 const COLOR_LABELS: Record<string, string> = {
   cognac: '코냑',
   black: '블랙',
@@ -357,10 +362,14 @@ function ColorOptions({ label, onSelect, product, selection }: { label?: string;
           aria-pressed={option.code === selection.color.code}
           key={option.code}
           onClick={() => onSelect(option)}
-          style={{ '--stage-c-selected-swatch': option.swatch } as CSSProperties}
           type="button"
         >
-          <i aria-hidden="true" style={{ backgroundColor: option.swatch }} />
+          {/* 칩은 단색이 아니라 그 색상으로 찍힌 실제 제품 사진이다.
+              색상은 40가지인데 hex 원본이 없어 단색으로는 34가지가 틀린 색으로 칠해진다.
+              사진을 쓰면 매핑이 필요 없고 `Beige + Black`·`Multi` 같은 복합 색도 그대로 맞는다. */}
+          <i aria-hidden="true" style={{ backgroundColor: option.swatch }}>
+            <img alt="" decoding="async" loading="lazy" src={option.imageUrl} />
+          </i>
           <span>{COLOR_LABELS[option.code] ?? option.label}</span>
         </button>
       ))}

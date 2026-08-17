@@ -50,6 +50,9 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
     ? Boolean(latestQuery && hasOtherStaffCallForQuery(state, sku, latestQuery.index))
     : state.events.some((event) => event.name === EVENT_NAMES.saCall && event.sku === sku && event.type === callType)
 
+  // 서버가 알려주는 응대 진행 문구. 없으면 기존 안내만 보여준다.
+  const [progressMessage, setProgressMessage] = useState<string | null>(null)
+
   useEffect(() => {
     let active = true
 
@@ -66,7 +69,14 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
         : {
             sku,
             type: callType,
-            completion: staffCallService.request({ sku, type: callType, sessionId: state.sessionId, productId: state.productId }),
+            completion: staffCallService.request({
+              sku,
+              type: callType,
+              sessionId: state.sessionId,
+              productId: state.productId,
+              // 45초를 한 문구로 버티지 않도록 서버 단계 문구를 그대로 흘려보낸다.
+              onProgress: ({ displayMessage }) => setProgressMessage(displayMessage || null),
+            }),
           }
 
     pendingRequestRef.current = request
@@ -116,6 +126,10 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
           <h1><KineticTextReveal autoPlay blur className="justify-center" distance={16} onRevealComplete={() => setRevealedCompletedState(completed)} splitBy="characters" stagger={0.035} text={completed
               ? '제가 직원분께 궁금해 하시는\n부분을 잘 전달했어요!'
               : '더 자세히 설명드리기 위해\n직원에게 알림을 보내는 중이에요!'} waitForDocent /></h1>
+          {/* 서버가 알려주는 응대 단계. 제목은 그대로 두고 이 줄만 바뀌어 대기가 진행 중임을 보인다. */}
+          {!completed && progressMessage && (
+            <p aria-live="polite" className="stage-c-staff-call-progress" key={progressMessage}>{progressMessage}</p>
+          )}
         </div>
 
         {completed && revealedCompletedState === completed && (

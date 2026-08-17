@@ -10,7 +10,7 @@ import type { JourneyCardResponse } from '../../api/journeyCard'
 import { formatJourneyCardDate } from '../../api/journeyCard'
 
 // 여권 카드 안 콜라주 사진 4칸의 위치·크기 (Figma 디자인 기준 고정값).
-// collageImages는 최대 5장까지 올 수 있지만 디자인상 슬롯은 4칸뿐이라 5번째는 표시되지 않는다.
+// 서버도 최대 4장까지만 만든다(모델샷 1장 + 제품샷으로 채움). 슬롯 수와 일치하므로 잘리는 사진은 없다.
 type CollageSlotProps = { image?: { imageUrl: string; shotType: string }; index?: number }
 
 /**

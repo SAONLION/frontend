@@ -10,6 +10,7 @@ import { EVENT_NAMES } from '../../constants/events'
 import { STAGE_C_PRODUCT_DETAIL_ROUTES, STAGE_C_ROUTES, stageCPath } from '../../constants/stageC'
 import { usePriceInquiryRequestService } from '../../features/price-inquiry/usePriceInquiryRequestService'
 import { useProductExit } from '../../features/product-explore/useProductExit'
+import { resolveProductDisplayName } from '../../features/product-explore/productDisplayName'
 import { useStageCProduct } from '../../features/product-explore/useStageCProduct'
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes'
 import { useSession } from '../../features/session/useSession'
@@ -46,6 +47,7 @@ export function StageCPurchaseEntryPage() {
 export function StageCPriceInquiryPage({ state: pageState }: { state: PriceInquiryPageState }) {
   const { sku = '' } = useParams()
   const product = useStageCProduct(sku)
+  const { state } = useSession()
 
   if (product === undefined) {
     return <StageCState title="제품 정보를 불러오는 중이에요" description="잠시만 기다려 주세요." />
@@ -55,7 +57,7 @@ export function StageCPriceInquiryPage({ state: pageState }: { state: PriceInqui
     return <StageCState title="상품을 찾을 수 없어요" description="태그한 상품의 주소를 다시 확인해 주세요." />
   }
 
-  return <PriceInquiryContent pageState={pageState} productName={product.name} sku={sku} />
+  return <PriceInquiryContent pageState={pageState} productName={resolveProductDisplayName(product, state.selectedSizeCode)} sku={sku} />
 }
 
 type PriceInquiryContentProps = {
