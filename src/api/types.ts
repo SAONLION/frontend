@@ -23,8 +23,25 @@ export type VisitPurposeStatusResponse = {
   confirmedAt?: string
 }
 
+// --- TryonRequest ---
+export type TryonRequestRequest = { sku: number; size: string; color: string }
+export type TryonRequestResponse = {
+  tryonRequestId: number
+  sku: number
+  size: string
+  color: string
+  requestedAt: string
+}
+
+// --- PurchaseInquiry ---
+export type PurchaseInquiryRequest = { sku: number }
+export type PurchaseInquiryResponse = { purchaseInquiryId: number; sku: number; inquiredAt: string }
+
+// --- InternalTest (시연 전용) ---
+export type StaffCallTestStatusRequest = { status: string }
+
 // --- InteractionLog ---
-export type InteractionLogRequest = { sku: number; interestType: InterestType; subOption?: string }
+export type InteractionLogRequest = { sku: number; interestType: InterestType; subOption?: string; durationSeconds?: number }
 export type InteractionLogResponse = {
   interactionId: number
   sessionId: string

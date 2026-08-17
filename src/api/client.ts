@@ -1,4 +1,12 @@
 import axios, { type AxiosError } from 'axios'
+import { recordApiCallEnd, recordApiCallStart } from '../features/dev-diagnostics/apiCallLog'
+
+declare module 'axios' {
+  interface InternalAxiosRequestConfig {
+    /** 개발 진단 패널의 호출 기록 ID. production 빌드에서는 설정되지 않는다. */
+    devCallId?: number
+  }
+}
 
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -36,7 +44,26 @@ function toApiError(error: unknown): ApiError {
   return new ApiError(0, null, '알 수 없는 오류가 발생했습니다.')
 }
 
+// 개발 빌드에서만 호출을 기록한다. production에서는 이 분기가 통째로 제거된다.
+if (import.meta.env.DEV) {
+  apiClient.interceptors.request.use((config) => {
+    config.devCallId = recordApiCallStart(config.method, config.url)
+    return config
+  })
+}
+
 apiClient.interceptors.response.use(
-  (response) => response,
-  (error: unknown) => Promise.reject(toApiError(error)),
+  (response) => {
+    if (import.meta.env.DEV) {
+      recordApiCallEnd(response.config.devCallId, response.status, null)
+    }
+    return response
+  },
+  (error: unknown) => {
+    const apiError = toApiError(error)
+    if (import.meta.env.DEV && axios.isAxiosError(error)) {
+      recordApiCallEnd(error.config?.devCallId, apiError.status, apiError.code)
+    }
+    return Promise.reject(apiError)
+  },
 )

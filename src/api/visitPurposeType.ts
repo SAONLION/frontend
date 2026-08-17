@@ -9,3 +9,12 @@ const VISIT_PURPOSE_TYPE_BY_LABEL: Record<string, string> = {
 export function toVisitPurposeType(label: string): string {
   return VISIT_PURPOSE_TYPE_BY_LABEL[label] ?? 'OTHER'
 }
+
+const VISIT_PURPOSE_LABEL_BY_TYPE: Record<string, string> = Object.fromEntries(
+  Object.entries(VISIT_PURPOSE_TYPE_BY_LABEL).map(([label, type]) => [type, label]),
+)
+
+/** 서버에 저장된 목적을 화면 라벨로 되돌린다. 새로고침 후 D1을 건너뛸 때 사용한다. */
+export function toVisitPurposeLabel(purposeType: string): string {
+  return VISIT_PURPOSE_LABEL_BY_TYPE[purposeType] ?? '기타'
+}
