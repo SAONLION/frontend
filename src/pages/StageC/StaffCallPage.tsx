@@ -15,6 +15,7 @@ import {
   STAGE_C_ROUTES,
   stageCPath,
 } from '../../constants/stageC'
+import { clearDegraded, DEGRADATION_KEYS, markDegraded } from '../../features/degradation/degradationStore'
 import { useProductExit } from '../../features/product-explore/useProductExit'
 import { findLatestFreeQueryForSku, hasOtherStaffCallForQuery } from '../../features/session/freeQueryContext'
 import { useStaffCallService } from '../../features/sa-call/useStaffCallService'
@@ -75,11 +76,14 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
     })
 
     void Promise.all([request.completion, minimumDisplayTime]).then(() => {
+      clearDegraded(DEGRADATION_KEYS.staffCall)
       if (active) {
         navigate(completedPath, { replace: true })
       }
     }).catch((error: unknown) => {
       console.error('직원 호출에 실패했습니다.', error)
+      // 실패해도 조용히 이전 화면으로 되돌아가므로, 알리지 않으면 무반응처럼 보인다.
+      markDegraded(DEGRADATION_KEYS.staffCall)
       pendingRequestRef.current = null
       if (active) {
         navigate(returnPath, { replace: true })

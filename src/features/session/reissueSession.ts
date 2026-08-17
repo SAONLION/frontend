@@ -1,5 +1,5 @@
 import { createSession } from '../../api/session'
-import { setStoredSessionId } from './sessionStorage'
+import { clearStoredProductContext, setStoredSessionId } from './sessionStorage'
 
 const DEFAULT_SESSION_LANGUAGE = 'ko'
 
@@ -8,5 +8,7 @@ const DEFAULT_SESSION_LANGUAGE = 'ko'
 export async function reissueSession(): Promise<string> {
   const result = await createSession(DEFAULT_SESSION_LANGUAGE)
   setStoredSessionId(result.sessionId)
+  // 이전 세션의 productId·skuId를 새 세션에 물려주면 남의 세션 제품을 기록하게 된다.
+  clearStoredProductContext()
   return result.sessionId
 }

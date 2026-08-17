@@ -1,4 +1,5 @@
 import { createStaffCall, getStaffCall } from './staffCalls'
+import { setActiveStaffCallId } from '../features/sa-call/activeStaffCall'
 import type { StaffCallService } from '../features/sa-call/StaffCallService'
 
 const POLL_INTERVAL_MS = 4_000
@@ -22,6 +23,12 @@ export const realStaffCallService: StaffCallService = {
     if (!sessionId) throw new Error('세션이 아직 생성되지 않았습니다.')
     const reason = type === 'info' ? '제품 정보 문의' : '기타 문의'
     const created = await createStaffCall(sessionId, { productId: productId ?? undefined, reason })
-    return pollUntilCompleted(sessionId, created.callId)
+    setActiveStaffCallId(created.callId)
+
+    try {
+      return await pollUntilCompleted(sessionId, created.callId)
+    } finally {
+      setActiveStaffCallId(null)
+    }
   },
 }

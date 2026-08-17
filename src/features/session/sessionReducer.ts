@@ -178,5 +178,14 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
       return { ...state, productId: action.productId }
     case SESSION_ACTIONS.setCurrentSkuId:
       return { ...state, currentSkuId: action.skuId }
+    case SESSION_ACTIONS.restoreProductContext:
+      // 새로고침 복구 경로다. 이벤트를 만들지 않고 식별자만 되돌린다 —
+      // 여기서 nfc_tag를 다시 기록하면 태그 이력과 Intent Score가 부풀려진다.
+      return {
+        ...state,
+        productId: action.productId,
+        currentSkuId: action.currentSkuId,
+        currentSku: action.currentSku ?? state.currentSku,
+      }
   }
 }

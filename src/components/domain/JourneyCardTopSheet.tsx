@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react'
 import { ApiError } from '../../api/client'
 import { fetchJourneyCard, type JourneyCardResponse } from '../../api/journeyCard'
+import { clearDegraded, DEGRADATION_KEYS, markDegraded } from '../../features/degradation/degradationStore'
 import ScreenHeadline from '../common/ScreenHeadline'
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes'
 import { useSession } from '../../features/session/useSession'
@@ -32,10 +33,15 @@ export function JourneyCardTopSheet() {
     let cancelled = false
 
     fetchJourneyCard(state.sessionId)
-      .then((data) => { if (!cancelled) setJourneyCard(data) })
+      .then((data) => {
+        if (!cancelled) setJourneyCard(data)
+        clearDegraded(DEGRADATION_KEYS.journeyCard)
+      })
       .catch((error: unknown) => {
+        // 404는 B1의 세션 재발급 경로가 처리한다. 여기서 중복으로 알리지 않는다.
         if (error instanceof ApiError && error.status === 404) return
         console.error('여정 카드 조회에 실패했습니다.', error)
+        markDegraded(DEGRADATION_KEYS.journeyCard)
       })
 
     return () => { cancelled = true }

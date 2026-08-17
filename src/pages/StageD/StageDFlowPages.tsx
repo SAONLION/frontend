@@ -3,8 +3,8 @@ import { useLocation } from 'react-router';
 import { usePreparedNavigate } from '../../app/usePreparedNavigate';
 import emblemImage from '../../assets/images/mcm-emblem.png';
 import { fetchRecommendations } from '../../api/recommendations';
-import { postVisitPurpose } from '../../api/visitPurpose';
-import { toVisitPurposeType } from '../../api/visitPurposeType';
+import { getVisitPurpose, postVisitPurpose } from '../../api/visitPurpose';
+import { toVisitPurposeLabel, toVisitPurposeType } from '../../api/visitPurposeType';
 import { DEFAULT_PRODUCT_SKU, STAGE_D_ROUTES } from '../../constants/appRoutes';
 import { STAGE_C_ROUTES, stageCPath } from '../../constants/stageC';
 import { mockD2Recommendations } from '../../mocks/fixtures/demoContent';
@@ -106,6 +106,25 @@ function getPersonalizedHeadline(nickname: string | null, purpose: string | null
 export function StageD1Page() {
   const navigate = usePreparedNavigate();
   const { state, dispatch } = useSession();
+  const sessionId = state.sessionId;
+
+  // 방문 목적은 세션당 1회다. 새로고침으로 프론트 상태가 날아가도 서버에 답이 남아 있으면
+  // 다시 묻지 않고 추천으로 넘어간다.
+  useEffect(() => {
+    if (!sessionId || state.visitPurpose) return;
+    let cancelled = false;
+
+    getVisitPurpose(sessionId).then((result) => {
+      if (cancelled || !result.answered || !result.purposeType) return;
+      dispatch({ type: SESSION_ACTIONS.setVisitPurpose, visitPurpose: toVisitPurposeLabel(result.purposeType) });
+      navigate(STAGE_D_ROUTES.recommend, { replace: true });
+    }).catch((error: unknown) => {
+      // 조회에 실패하면 그냥 다시 묻는다. 서버가 멱등 처리하므로 중복 저장은 문제되지 않는다.
+      console.error('방문 목적 조회에 실패했습니다.', error);
+    });
+
+    return () => { cancelled = true; };
+  }, [dispatch, navigate, sessionId, state.visitPurpose]);
 
   return (
     <D1VisitPurpose
