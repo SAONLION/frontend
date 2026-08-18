@@ -65,3 +65,41 @@ body {
 button {
   -webkit-tap-highlight-color: transparent;
 }
+
+/*
+ * 매장에서 고객이 만지는 앱이고, 노트북에서는 폰 목업 안에서 돌아간다.
+ * 두 환경 모두 브라우저 기본 드래그·선택이 방해가 된다 —
+ * 제품 사진을 끌면 고스트 이미지가 딸려 나오고, 문구를 끌면 파란 선택 영역이 생긴다.
+ */
+img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+body {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 입력은 예외다. 선택을 막으면 커서 이동·수정·복사가 전부 불가능해진다. */
+input,
+textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/*
+ * 스크롤바를 감춘다(스크롤은 그대로 동작한다).
+ *
+ * 실기기에서는 오버레이 스크롤바라 평소 보이지 않지만, 데스크톱 브라우저는 자리를 차지하는
+ * 스크롤바를 그려 목업 안 화면 폭이 실기기와 달라지고 오른쪽에 회색 띠가 남는다.
+ */
+/* Firefox는 `scrollbar-width`가 상속되지 않아 스크롤 컨테이너마다 필요하다. */
+* {
+  scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
