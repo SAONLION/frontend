@@ -1,4 +1,5 @@
 import { createSession } from '../../api/session'
+import { resetJourneyCompletion } from '../journey-card/journeyCompletionStore'
 import { resetJourneyPulse } from '../journey-card/journeyPulse'
 import { clearStoredProductContext, setStoredSessionId } from './sessionStorage'
 
@@ -11,7 +12,8 @@ export async function reissueSession(): Promise<string> {
   setStoredSessionId(result.sessionId)
   // 이전 세션의 productId·skuId를 새 세션에 물려주면 남의 세션 제품을 기록하게 된다.
   clearStoredProductContext()
-  // 태그 이력이 0으로 돌아가므로 여권 알림 표식도 함께 되돌린다.
+  // 태그 이력이 0으로 돌아가므로 여권 알림 표식과 완성 팝업 표식도 함께 되돌린다.
   resetJourneyPulse()
+  resetJourneyCompletion()
   return result.sessionId
 }

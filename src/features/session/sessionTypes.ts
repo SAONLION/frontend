@@ -31,7 +31,7 @@ export const SESSION_ACTIONS = {
   restoreProductContext: 'restore_product_context',
 } as const
 
-export type ActiveOverlay = 'E' | 'journey' | null
+export type ActiveOverlay = 'E' | 'journey' | 'journeyComplete' | null
 
 export type SessionState = {
   pseudonymousId: string
