@@ -1,7 +1,11 @@
 import { usePreparedNavigate } from './usePreparedNavigate';
 import { STAGE_B_ROUTES } from '../constants/appRoutes';
 import { fetchJourneyCard, JOURNEY_CARD_COLLAGE_SLOTS } from '../api/journeyCard';
-import { setPendingJourneyCompletionCard } from '../features/journey-card/journeyCompletionStore';
+import {
+  hasShownJourneyCompletion,
+  markJourneyCompletionShown,
+  setPendingJourneyCompletionCard,
+} from '../features/journey-card/journeyCompletionStore';
 import { SESSION_ACTIONS } from '../features/session/sessionTypes';
 import { useSession } from '../features/session/useSession';
 
@@ -14,7 +18,9 @@ export function useReturnToB1() {
 
   return () => {
     const sessionId = state.sessionId;
-    if (!sessionId) {
+    // 완성 팝업은 세션당 1회다. 이미 보여줬으면 조회 없이 곧장 B1로 보낸다 —
+    // 콜라주가 더 바뀌지 않으므로 다시 물을 이유가 없고, 왕복도 아낀다.
+    if (!sessionId || hasShownJourneyCompletion()) {
       navigate(STAGE_B_ROUTES.nfcPrompt);
       return;
     }
@@ -23,6 +29,7 @@ export function useReturnToB1() {
       .then((journeyCard) => {
         if (journeyCard.collageImages.length >= JOURNEY_CARD_COLLAGE_SLOTS) {
           setPendingJourneyCompletionCard(journeyCard);
+          markJourneyCompletionShown();
           dispatch({ type: SESSION_ACTIONS.setActiveOverlay, overlay: 'journeyComplete' });
           return;
         }

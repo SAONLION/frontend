@@ -7,6 +7,31 @@ import type { JourneyCardResponse } from '../../api/journeyCard'
  */
 let pendingCompletionCard: JourneyCardResponse | null = null
 
+/**
+ * 완성 팝업을 이미 보여줬는지. **세션당 1회만 띄운다.**
+ *
+ * 콜라주는 4칸이 차면 그 뒤로 내용이 바뀌지 않는다(서버가 먼저 태그한 4개를 고정으로 준다).
+ * 그래서 매번 띄우면 **같은 카드를 다시 보라고 반복해서 권하는 셈**이 된다.
+ *
+ * 서버가 "가장 관심 있는 4개"로 바꿔 콜라주가 계속 갱신되면 이 전제가 깨진다.
+ * 그때는 이 표식을 걷어내고 갱신될 때마다 다시 띄우는 쪽으로 바꾼다.
+ */
+let hasShownCompletion = false
+
+export function markJourneyCompletionShown(): void {
+  hasShownCompletion = true
+}
+
+export function hasShownJourneyCompletion(): boolean {
+  return hasShownCompletion
+}
+
+/** 세션이 새로 발급되면 다시 보여줄 수 있어야 한다. */
+export function resetJourneyCompletion(): void {
+  hasShownCompletion = false
+  pendingCompletionCard = null
+}
+
 export function setPendingJourneyCompletionCard(card: JourneyCardResponse): void {
   pendingCompletionCard = card
 }
