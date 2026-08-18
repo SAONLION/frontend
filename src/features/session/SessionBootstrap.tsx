@@ -1,6 +1,8 @@
 import { useEffect, useRef, type PropsWithChildren } from 'react'
+import { setSessionEndedHandler } from '../../api/client'
 import { createSession } from '../../api/session'
 import { clearDegraded, DEGRADATION_KEYS, markDegraded } from '../degradation/degradationStore'
+import { recoverFromEndedSession, subscribeSessionReissued } from './endedSessionRecovery'
 import {
   clearStoredProductContext,
   getStoredProductContext,
@@ -45,6 +47,24 @@ export function SessionBootstrap({ children }: PropsWithChildren) {
       cancelled = true
     }
   }, [dispatch, state.sessionId])
+
+  /**
+   * 종료된 세션을 새 세션으로 갈아끼운다.
+   *
+   * 404(세션 없음)는 B1에서만 잡는데, **409(세션 종료)는 어느 화면에서든 나온다.**
+   * 종료 세션도 읽기는 200이라 B1의 404 경로로는 빠져나올 수 없어 여기서 전역으로 받는다.
+   */
+  useEffect(() => {
+    setSessionEndedHandler(recoverFromEndedSession)
+    const unsubscribe = subscribeSessionReissued((sessionId) => {
+      dispatch({ type: SESSION_ACTIONS.setSessionId, sessionId })
+    })
+
+    return () => {
+      setSessionEndedHandler(null)
+      unsubscribe()
+    }
+  }, [dispatch])
 
   // 새로고침·앱 전환 뒤 서버 제품 식별자를 되돌린다. 세션이 바뀌었으면 이전 문맥은 버린다.
   const restored = useRef(false)

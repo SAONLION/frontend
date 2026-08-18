@@ -109,12 +109,6 @@ export function JourneyCardTopSheet() {
     setDragOffset(0)
   }
 
-  // 콜라주 초기화 — 서버 태그 이력을 지우는 API가 스펙에 없어 화면 표시용 상태만 비운다.
-  // TODO: 서버 쪽 태그 이력까지 초기화해야 하는지는 백엔드팀 확인 필요.
-  const resetCollage = () => {
-    setJourneyCard((current) => (current ? { ...current, collageImages: [] } : current))
-  }
-
   const saveImage = async () => {
     if (!cardRef.current || isSavingImage) return
     setIsSavingImage(true)
@@ -151,7 +145,7 @@ export function JourneyCardTopSheet() {
             headline={`${nickname}님을 위한 여권을 저장해보세요!`}
             variant="md"
           />
-          <JourneyPassportCard journeyCard={journeyCard} onReset={resetCollage} ref={cardRef} />
+          <JourneyPassportCard journeyCard={journeyCard} ref={cardRef} />
           <div className="stage-top-sheet__actions">
             <button
               className="stage-c-action-button stage-c-action-button--primary"

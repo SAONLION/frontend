@@ -6,7 +6,6 @@ import swatchPin from '../../assets/images/stage-b-journey-card-swatch-pin.svg'
 import dividerFold from '../../assets/images/stage-b-journey-card-divider-fold.svg'
 import dividerBottom1 from '../../assets/images/stage-b-journey-card-divider-bottom-1.svg'
 import dividerBottom2 from '../../assets/images/stage-b-journey-card-divider-bottom-2.svg'
-import resetIcon from '../../assets/images/stage-b-journey-card-reset-icon.png'
 import type { JourneyCardResponse } from '../../api/journeyCard'
 import { formatJourneyCardDate } from '../../api/journeyCard'
 
@@ -80,14 +79,17 @@ function CollageSlot4({ image, index }: CollageSlotProps) {
   )
 }
 
+/**
+ * 초기화 버튼은 2026-08-19에 제거했다. 서버에 태그 이력을 지우는 API가 없어 화면 상태만
+ * 비웠는데, 시트를 닫았다 열면 재조회로 되살아나 고객에게는 "지웠는데 다시 생겼다"로 보였다.
+ * 되돌아오는 버튼을 두는 것보다 없는 편이 낫다고 판단했다(BACKEND_REQUEST P1-10).
+ */
 type JourneyPassportCardProps = {
   journeyCard: JourneyCardResponse | null
-  /** 담긴 상품이 있을 때만 노출되는 우측 하단 초기화 버튼. 생략하면 버튼을 그리지 않는다. */
-  onReset?: () => void
 }
 
 export const JourneyPassportCard = forwardRef<HTMLDivElement, JourneyPassportCardProps>(function JourneyPassportCard(
-  { journeyCard, onReset },
+  { journeyCard },
   ref,
 ) {
   const images = journeyCard?.collageImages ?? []
@@ -134,16 +136,6 @@ export const JourneyPassportCard = forwardRef<HTMLDivElement, JourneyPassportCar
       <img alt="" className="pointer-events-none absolute left-0 top-[382px] w-[300px]" src={dividerBottom1} />
       <img alt="" className="pointer-events-none absolute left-0 top-[394.5px] w-[297px]" src={dividerBottom2} />
 
-      {onReset && images.length > 0 && (
-        <button
-          aria-label="담은 상품 초기화"
-          className="absolute left-[269px] top-[356px] flex size-[28px] items-center justify-center"
-          onClick={onReset}
-          type="button"
-        >
-          <img alt="" className="size-[14.7px]" src={resetIcon} />
-        </button>
-      )}
     </div>
   )
 })

@@ -1,6 +1,8 @@
 import { useCallback, useRef, useState, type CSSProperties } from 'react'
 import { clearStoredProductContext, clearStoredSessionId } from '../../features/session/sessionStorage'
 import PhoneMockup from './PhoneMockup'
+import ShellBlockerTriggers from './ShellBlockerTriggers'
+import ShellDebugPanel from './ShellDebugPanel'
 import { resolveAppEntryPath } from './appEntryPath'
 import { BACKGROUND_IDS, BACKGROUND_PRESETS, resolveBackground, resolveBackgroundImage } from './backgrounds'
 import { chassisSize, IPHONE_16_PRO } from './devicePresets'
@@ -79,6 +81,13 @@ export default function DemoShellPage() {
           showsChrome={options.showsChrome}
         />
       </div>
+      {/*
+        시연·디버그 도구는 **목업 바깥**에 둔다. 관객이 보는 것은 폰 화면이라
+        안에 있으면 시연 화면에 잡힌다. 기존 컨트롤과 자리가 겹치지 않게 나눴다 —
+        Blocker 트리거는 좌측 하단, 화면·API는 우측 상단이다.
+      */}
+      <ShellBlockerTriggers />
+      <ShellDebugPanel iframeRef={iframeRef} />
       <div className="demo-controls">
         <button className="demo-controls__button" onClick={cycleBackground} type="button">
           배경: {BACKGROUND_PRESETS[background]}
