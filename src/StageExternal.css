@@ -189,8 +189,8 @@
   left: 0;
   min-height: 0;
   pointer-events: auto;
-  border: 1px solid var(--liquid-glass-border, rgb(255 255 255 / 28%));
-  border-bottom: 0;
+  /* 외곽선을 두지 않는다. 시트와 뒤 화면의 경계는 그림자만으로 낸다(여권 탑시트와 동일). */
+  border: 0;
   border-radius: 1.75rem 1.75rem 0 0;
   background: #1e1710;
   box-shadow: var(--liquid-glass-shadow, 0 -1rem 2.5rem rgb(0 0 0 / 32%));
@@ -352,8 +352,8 @@
   right: 0;
   left: 0;
   pointer-events: auto;
-  border: 1px solid var(--liquid-glass-border, rgb(255 255 255 / 28%));
-  border-top: 0;
+  /* 외곽선을 두지 않는다. 시트와 뒤 화면의 경계는 그림자만으로 낸다. */
+  border: 0;
   border-radius: 0 0 1.75rem 1.75rem;
   background: #1e1710;
   box-shadow: var(--liquid-glass-shadow, 0 1rem 2.5rem rgb(0 0 0 / 32%));
