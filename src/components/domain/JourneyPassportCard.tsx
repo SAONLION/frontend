@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { forwardRef, useEffect, useState } from 'react'
 import cardTexture from '../../assets/images/stage-b-journey-card-texture.webp'
 import emblemWatermark from '../../assets/images/stage-b-journey-card-emblem-watermark.webp'
 import stampTexture from '../../assets/images/stage-b-journey-card-texture-overlay.webp'
@@ -6,6 +6,7 @@ import swatchPin from '../../assets/images/stage-b-journey-card-swatch-pin.svg'
 import dividerFold from '../../assets/images/stage-b-journey-card-divider-fold.svg'
 import dividerBottom1 from '../../assets/images/stage-b-journey-card-divider-bottom-1.svg'
 import dividerBottom2 from '../../assets/images/stage-b-journey-card-divider-bottom-2.svg'
+import resetIcon from '../../assets/images/stage-b-journey-card-reset-icon.png'
 import type { JourneyCardResponse } from '../../api/journeyCard'
 import { formatJourneyCardDate } from '../../api/journeyCard'
 
@@ -79,7 +80,16 @@ function CollageSlot4({ image, index }: CollageSlotProps) {
   )
 }
 
-export function JourneyPassportCard({ journeyCard }: { journeyCard: JourneyCardResponse | null }) {
+type JourneyPassportCardProps = {
+  journeyCard: JourneyCardResponse | null
+  /** 담긴 상품이 있을 때만 노출되는 우측 하단 초기화 버튼. 생략하면 버튼을 그리지 않는다. */
+  onReset?: () => void
+}
+
+export const JourneyPassportCard = forwardRef<HTMLDivElement, JourneyPassportCardProps>(function JourneyPassportCard(
+  { journeyCard, onReset },
+  ref,
+) {
   const images = journeyCard?.collageImages ?? []
   const brand = journeyCard?.brand ?? '—'
   const date = journeyCard ? formatJourneyCardDate(journeyCard.date) : '—'
@@ -89,7 +99,10 @@ export function JourneyPassportCard({ journeyCard }: { journeyCard: JourneyCardR
   const isLoaded = journeyCard !== null
 
   return (
-    <div className={`stage-b-journey-card${isLoaded ? ' stage-b-journey-card--loaded' : ''} relative mx-auto h-[407.7px] w-[299.7px] shrink-0 drop-shadow-[0px_3.6px_24px_rgba(0,0,0,0.93)]`}>
+    <div
+      className={`stage-b-journey-card${isLoaded ? ' stage-b-journey-card--loaded' : ''} relative mx-auto h-[407.7px] w-[299.7px] shrink-0 drop-shadow-[0px_3.6px_24px_rgba(0,0,0,0.93)]`}
+      ref={ref}
+    >
       <img alt="" className="absolute inset-0 size-full rounded-[18px] object-cover" src={cardTexture} />
 
       <CollageSlot1 image={images[0]} index={0} />
@@ -120,6 +133,17 @@ export function JourneyPassportCard({ journeyCard }: { journeyCard: JourneyCardR
       <img alt="" className="pointer-events-none absolute left-[-9px] top-[184px] w-[318px]" src={dividerFold} />
       <img alt="" className="pointer-events-none absolute left-0 top-[382px] w-[300px]" src={dividerBottom1} />
       <img alt="" className="pointer-events-none absolute left-0 top-[394.5px] w-[297px]" src={dividerBottom2} />
+
+      {onReset && images.length > 0 && (
+        <button
+          aria-label="담은 상품 초기화"
+          className="absolute left-[269px] top-[356px] flex size-[28px] items-center justify-center"
+          onClick={onReset}
+          type="button"
+        >
+          <img alt="" className="size-[14.7px]" src={resetIcon} />
+        </button>
+      )}
     </div>
   )
-}
+})

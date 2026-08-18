@@ -3,6 +3,7 @@ import { useSession } from '../features/session/useSession';
 import { rememberNavigationTrigger } from './navigationTrigger';
 import EOverlay from './EOverlay';
 import { DegradationNotice } from '../components/common/DegradationNotice';
+import { JourneyCardCompletionPopup } from '../components/domain/JourneyCardCompletionPopup';
 import { JourneyCardTopSheet } from '../components/domain/JourneyCardTopSheet';
 import { JourneyCardTrigger } from '../components/domain/JourneyCardTrigger';
 
@@ -25,6 +26,7 @@ export default function AppLayout() {
       {showsJourneyTrigger && <JourneyCardTrigger key={`journey-${motionKey}`} />}
       {state.activeOverlay === 'E' && <EOverlay />}
       {state.activeOverlay === 'journey' && <JourneyCardTopSheet />}
+      {state.activeOverlay === 'journeyComplete' && <JourneyCardCompletionPopup />}
       <DegradationNotice />
     </div>
   );

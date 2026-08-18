@@ -11,6 +11,9 @@ export type JourneyCardResponse = {
   collageImages: readonly JourneyCardCollageImage[]
 }
 
+// 여권 카드 콜라주 슬롯 수. 서버도 이 개수까지만 채운다.
+export const JOURNEY_CARD_COLLAGE_SLOTS = 4
+
 // GET /api/v1/session/journey-card
 export async function fetchJourneyCard(sessionId: string): Promise<JourneyCardResponse> {
   const { data } = await apiClient.get<JourneyCardResponse>('/api/v1/session/journey-card', {
