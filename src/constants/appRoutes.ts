@@ -26,3 +26,6 @@ export const STAGE_D_ROUTES = {
 } as const
 
 export const SESSION_END_ROUTE = '/session-end'
+
+// 시연용 목업 셸. 앱 라우터 바깥에서 처리되므로 AppRoutes에는 등록하지 않는다.
+export const DEMO_SHELL_ROUTE = '/demo'
