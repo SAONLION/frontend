@@ -1,0 +1,339 @@
+.demo-stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* 기본. 목업이 기기처럼 도드라져 보이도록 밝은 무채색을 깐다. */
+.demo-stage[data-background='white'] {
+  background: #fff;
+}
+
+/* 흰 배경에서는 어두운 글로우가 얼룩처럼 보이므로 그림자를 중성 톤으로 바꾼다. */
+.demo-stage[data-background='white'] .demo-phone__bezel {
+  box-shadow:
+    0 0.125rem 0.375rem rgb(0 0 0 / 12%),
+    0 1.5rem 3.5rem rgb(0 0 0 / 22%),
+    0 0.25rem 1rem rgb(0 0 0 / 10%);
+}
+
+/* 앱의 브론즈 앰비언트 톤을 스테이지까지 이어 붙인다. */
+.demo-stage[data-background='ambient'] {
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgb(58 42 18 / 55%) 0%, rgb(0 0 0 / 0%) 60%),
+    radial-gradient(90% 70% at 50% 110%, rgb(38 30 16 / 45%) 0%, rgb(0 0 0 / 0%) 55%),
+    #000;
+}
+
+.demo-stage[data-background='black'] {
+  background: #000;
+}
+
+/* 위에서 떨어지는 조명과 바닥의 반사광. 3D 매장을 얹기 전까지 매장 느낌을 대신한다. */
+.demo-stage[data-background='spotlight'] {
+  background:
+    radial-gradient(60% 55% at 50% 8%, rgb(226 200 148 / 22%) 0%, rgb(0 0 0 / 0%) 100%),
+    radial-gradient(80% 30% at 50% 100%, rgb(196 154 74 / 16%) 0%, rgb(0 0 0 / 0%) 100%),
+    linear-gradient(180deg, #0a0908 0%, #16120b 55%, #050504 100%);
+}
+
+/* 사진·영상 촬영용 중성 배경. 화면 색이 배경 색조에 물들지 않는다. */
+.demo-stage[data-background='studio'] {
+  background: radial-gradient(85% 75% at 50% 32%, #34343a 0%, #1b1b1f 55%, #0d0d0f 100%);
+}
+
+/* ?bgImage=로 넘긴 그림. 프리셋 위에 덮어 깔린다. */
+.demo-stage[data-background-image]::before {
+  position: absolute;
+  content: '';
+  inset: 0;
+  background-image: var(--demo-background-image);
+  background-position: center;
+  background-size: cover;
+  pointer-events: none;
+}
+
+/* 목업이 놓일 자리. 여기서 남은 공간을 재서 배율을 계산한다. */
+.demo-stage__viewport {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.demo-phone {
+  position: relative;
+  /* 섀시 바깥 크기. 화면(--device-width/height)에 베젤을 양쪽으로 더한 값이다.
+     화면 크기는 아래 inset 중첩에서 정확히 기기 논리 해상도로 떨어진다. */
+  width: calc(var(--device-width) + var(--device-bezel-x) * 2);
+  height: calc(var(--device-height) + var(--device-bezel-y) * 2);
+  flex: none;
+  /* 배율만 바꾸고 레이아웃 박스는 그대로 둔다. */
+  transform-origin: center center;
+  will-change: transform;
+}
+
+/* 측면 버튼 공통. top은 버튼의 중심 위치다(도면이 중심으로 표기한다). */
+.demo-phone__side-button {
+  position: absolute;
+  z-index: 0;
+  transform: translateY(-50%);
+}
+
+/* 액션·볼륨·전원. 공식 도면상 0.45mm(약 2.7pt) 돌출한 티타늄 버튼. */
+.demo-phone__side-button--metal {
+  width: 0.1875rem;
+  background: linear-gradient(180deg, #4c4c52 0%, #33333a 22%, #26262b 78%, #3d3d43 100%);
+  box-shadow: 0 0.0625rem 0.125rem rgb(0 0 0 / 45%);
+}
+
+/* 카메라 컨트롤. 돌출된 버튼이 아니라 프레임에 박힌 사파이어 면이라,
+   거의 튀어나오지 않고 위아래 모서리에만 유리 특유의 밝은 베벨이 선다. */
+.demo-phone__side-button--sapphire {
+  width: 0.125rem;
+  background:
+    linear-gradient(
+      180deg,
+      rgb(168 190 220 / 55%) 0%,
+      rgb(38 46 60 / 96%) 14%,
+      rgb(18 23 32 / 98%) 50%,
+      rgb(34 42 55 / 96%) 86%,
+      rgb(150 172 205 / 45%) 100%
+    );
+  box-shadow:
+    0 0 0.0625rem rgb(176 198 228 / 30%),
+    inset 0 0 0 0.03125rem rgb(0 0 0 / 45%);
+}
+
+.demo-phone__side-button--left {
+  left: -0.1875rem;
+  border-radius: 0.125rem 0 0 0.125rem;
+}
+
+.demo-phone__side-button--right {
+  right: -0.1875rem;
+  border-radius: 0 0.125rem 0.125rem 0;
+}
+
+/* 사파이어 면은 금속 버튼보다 얕게 나온다. */
+.demo-phone__side-button--sapphire.demo-phone__side-button--left {
+  left: -0.0625rem;
+}
+
+.demo-phone__side-button--sapphire.demo-phone__side-button--right {
+  right: -0.0625rem;
+}
+
+/* 섀시. 바깥으로 드러나는 티타늄 밴드. */
+.demo-phone__bezel {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  border-radius: calc(var(--device-screen-radius) + var(--device-bezel-x));
+  /* 위아래 모서리에서 빛을 받고 가운데로 갈수록 어두워지는 금속 띠 위에,
+     한 방향으로 흐르는 광택 밴드를 겹쳐 단조로움을 없앤다. */
+  background:
+    linear-gradient(76deg, rgb(255 255 255 / 0%) 0%, rgb(255 255 255 / 10%) 46%, rgb(255 255 255 / 0%) 54%),
+    linear-gradient(160deg, #55555c 0%, #2b2b30 14%, #101013 40%, #0a0a0c 60%, #2e2e34 86%, #5a5a62 100%);
+  box-shadow:
+    0 0.125rem 0.375rem rgb(0 0 0 / 55%),
+    0 2.5rem 5rem rgb(0 0 0 / 70%),
+    0 0 6rem rgb(196 154 74 / 12%);
+}
+
+/* 전면 유리. 금속 밴드 안쪽으로 도는 검은 베젤이 여기서 나온다. */
+.demo-phone__glass {
+  position: absolute;
+  inset: calc(var(--device-bezel-y) - var(--device-glass-y)) calc(var(--device-bezel-x) - var(--device-glass-x));
+  border-radius: calc(var(--device-screen-radius) + var(--device-glass-x));
+  background: #000;
+  box-shadow: inset 0 0 0 0.0625rem rgb(0 0 0 / 90%);
+}
+
+.demo-phone__screen {
+  position: absolute;
+  inset: var(--device-glass-y) var(--device-glass-x);
+  overflow: hidden;
+  border-radius: var(--device-screen-radius);
+  background: #000;
+}
+
+.demo-phone__viewport {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  /* iframe 안쪽이 기기 논리 해상도를 그대로 뷰포트로 쓰게 한다. */
+  background: #000;
+  color-scheme: dark;
+}
+
+/* 유리와 화면이 만나는 자리에 지는 얇은 그림자. */
+.demo-phone__screen-edge {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0.1875rem rgb(0 0 0 / 55%);
+  pointer-events: none;
+}
+
+/* 가짜 상태바. 높이를 아일랜드 위아래 여백과 맞추면 세로 중앙이 아일랜드 중심과 정확히 겹친다. */
+.demo-status-bar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  height: calc(var(--device-notch-top) * 2 + var(--device-notch-height));
+  align-items: center;
+  justify-content: space-between;
+  color: #fff;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  pointer-events: none;
+}
+
+/* 아일랜드 좌우로 남는 폭을 그대로 차지하고, 그 안에서 가운데 정렬한다.
+   그래서 시간은 화면 왼쪽 끝과 아일랜드 왼쪽 끝의 중간에, 아이콘은 그 반대쪽 중간에 온다.
+   아일랜드 크기를 바꾸면 두 자리도 따라 움직인다. */
+.demo-status-bar__time,
+.demo-status-bar__indicators {
+  display: flex;
+  width: calc((100% - var(--device-notch-width)) / 2);
+  align-items: center;
+  justify-content: center;
+}
+
+.demo-status-bar__time {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.demo-status-bar__indicators {
+  gap: 0.5rem;
+}
+
+.demo-phone__notch {
+  position: absolute;
+  top: var(--device-notch-top);
+  left: 50%;
+  width: var(--device-notch-width);
+  height: var(--device-notch-height);
+  border-radius: 62.4375rem;
+  background: #000;
+  box-shadow: inset 0 0 0.25rem rgb(0 0 0 / 100%);
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+/* 아일랜드 오른쪽 전면 카메라. 어두운 유리에 비스듬히 빛이 걸린 모양. */
+.demo-phone__lens {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 28%, #2c3d55 0%, #101a28 52%, #04070c 100%);
+  box-shadow: inset 0 0 0 0.03125rem rgb(104 134 173 / 30%);
+  transform: translateY(-50%);
+}
+
+/* 홈 인디케이터. 앱의 하단 여백(--app-content-edge-inset, 최소 78px) 안쪽이라
+   화면 콘텐츠와 겹치지 않는다. */
+.demo-phone__home-indicator {
+  position: absolute;
+  bottom: var(--device-home-bottom);
+  left: 50%;
+  width: var(--device-home-width);
+  height: var(--device-home-height);
+  border-radius: 62.4375rem;
+  background: rgb(255 255 255 / 55%);
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+/* 유리 표면에 비스듬히 걸린 반사. 앱 화면을 가리지 않을 만큼만 준다. */
+.demo-phone__glare {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    122deg,
+    rgb(255 255 255 / 0%) 36%,
+    rgb(255 255 255 / 5%) 45%,
+    rgb(255 255 255 / 1.5%) 51%,
+    rgb(255 255 255 / 0%) 57%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* 섀시 바깥 테두리에 도는 폴리시드 엣지. */
+.demo-phone__rim {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 0.0625rem rgb(255 255 255 / 16%),
+    inset 0 0.0625rem 0.125rem rgb(255 255 255 / 26%),
+    inset 0 -0.0625rem 0.125rem rgb(255 255 255 / 12%);
+  pointer-events: none;
+}
+
+/* 실기기 모서리는 원호가 아니라 연속 곡률(스퀘어클)이다. 지원하는 브라우저에서만 켠다. */
+@supports (corner-shape: squircle) {
+  .demo-phone__bezel,
+  .demo-phone__glass,
+  .demo-phone__screen,
+  .demo-phone__screen-edge,
+  .demo-phone__rim {
+    corner-shape: squircle;
+  }
+}
+
+/* 시연 중에는 숨어 있다가 마우스를 가져가야 나타나는 조작부. */
+.demo-controls {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 10;
+  display: flex;
+  gap: 0.5rem;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.demo-controls:hover,
+.demo-controls:focus-within {
+  opacity: 1;
+}
+
+.demo-controls__button {
+  padding: 0.5rem 0.875rem;
+  border: 0.0625rem solid rgb(255 255 255 / 18%);
+  border-radius: 62.4375rem;
+  background: rgb(20 20 20 / 82%);
+  backdrop-filter: blur(0.75rem);
+  color: rgb(255 255 255 / 78%);
+  cursor: pointer;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.demo-controls__button:hover {
+  border-color: rgb(196 154 74 / 55%);
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-controls {
+    transition: none;
+  }
+}

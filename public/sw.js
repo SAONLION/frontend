@@ -1,4 +1,11 @@
-const CACHE_NAME = 'saonlion-runtime-v2'
+/**
+ * 캐시 이름에 들어가는 빌드 버전.
+ *
+ * `__BUILD_VERSION__`은 빌드 시 `vite.config.ts`의 플러그인이 번들 콘텐츠 해시로 치환한다.
+ * 손으로 올리던 값(`v2`)을 쓰면 **배포하고 갱신을 잊었을 때 옛 자산이 그대로 남는다.**
+ * 개발 서버에서는 치환되지 않고 placeholder 그대로 쓰이는데, 값이 고정이라 문제되지 않는다.
+ */
+const CACHE_NAME = 'saonlion-__BUILD_VERSION__'
 const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icons/saonlion-app-icon.svg']
 
 function canCache(response) {

@@ -23,7 +23,7 @@
   width: min(100%, 25.125rem);
   min-height: 100dvh;
   margin: 0 auto;
-  padding: max(4.875rem, env(safe-area-inset-top)) clamp(1rem, 7.7vw, 1.9375rem) var(--app-content-edge-inset);
+  padding: max(4.875rem, var(--app-safe-area-top)) clamp(1rem, 7.7vw, 1.9375rem) var(--app-content-edge-inset);
 }
 
 .stage-external-page__content--docent {
@@ -33,11 +33,11 @@
 .stage-external-page__content--d1,
 .stage-external-page__content--d21,
 .stage-external-page__content--e2 {
-  padding-top: max(clamp(6.5rem, 26dvh, 14.25rem), env(safe-area-inset-top));
+  padding-top: max(clamp(6.5rem, 26dvh, 14.25rem), var(--app-safe-area-top));
 }
 
 .stage-external-page__content--d2 {
-  padding-top: max(clamp(8.5rem, 19dvh, 11rem), env(safe-area-inset-top));
+  padding-top: max(clamp(8.5rem, 19dvh, 11rem), var(--app-safe-area-top));
 }
 
 .stage-external-page__content > :first-child {
@@ -146,7 +146,7 @@
 .stage-external-page__fallback-notice {
   position: absolute;
   z-index: 4;
-  top: max(1rem, env(safe-area-inset-top));
+  top: max(1rem, var(--app-safe-area-top));
   right: 1rem;
   left: 1rem;
   margin: 0;
@@ -169,7 +169,7 @@
 .stage-external-page__close {
   position: absolute;
   z-index: 3;
-  top: max(var(--surface-close-inset, 1.25rem), env(safe-area-inset-top));
+  top: max(var(--surface-close-inset, 1.25rem), var(--app-safe-area-top));
   right: var(--surface-close-inset, 1.25rem);
 }
 
@@ -225,7 +225,7 @@
   min-height: min(31rem, 70dvh);
   justify-content: center;
   gap: 1.25rem;
-  padding-block: max(3.5rem, env(safe-area-inset-top)) max(2rem, env(safe-area-inset-bottom));
+  padding-block: max(3.5rem, var(--app-safe-area-top)) max(2rem, var(--app-safe-area-bottom));
 }
 
 .stage-overlay .stage-external-page__content--e2 > :first-child {
@@ -384,7 +384,7 @@
   gap: var(--stage-top-sheet-gap);
   width: min(100%, 25.125rem);
   margin: 0 auto;
-  padding: max(3rem, env(safe-area-inset-top)) clamp(1rem, 7.7vw, 1.9375rem)
+  padding: max(3rem, var(--app-safe-area-top)) clamp(1rem, 7.7vw, 1.9375rem)
     calc(var(--stage-top-sheet-gap) + 1rem);
 }
 

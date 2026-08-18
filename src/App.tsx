@@ -1,6 +1,7 @@
 import { lazy, Suspense, useLayoutEffect, useState } from 'react'
 import { BrowserRouter, useLocation } from 'react-router'
 import { AppRoutes } from './app/routes'
+import { shouldRenderDemoShell } from './pages/Demo/demoShellEntry'
 import { realStaffCallService } from './api/staffCallService'
 import { liveProductContentProvider } from './api/liveProductContentProvider'
 import { realTryOnRequestService } from './api/tryOnRequestService'
@@ -34,6 +35,9 @@ const CosmicGoldDust = lazy(async () => {
   const module = await import('./components/common/CosmicGoldDust')
   return { default: module.CosmicGoldDust }
 })
+
+// 시연용 목업 셸. 앱 본체와 CSS를 공유하지 않도록 별도 청크로 떼어 둔다.
+const DemoShellPage = lazy(() => import('./pages/Demo/DemoShellPage'))
 
 // 화면·Provider에 실제로 주입하는 구현. 여기 한 곳만 바꾸면 Mock ↔ Live가 전환된다.
 const productContentProvider = liveProductContentProvider
@@ -161,6 +165,16 @@ function AppContent() {
 }
 
 function App() {
+  // 목업 셸은 iframe으로 앱 전체를 다시 띄운다. 세션 부트스트랩과 도슨트 캔버스가
+  // 바깥 프레임에서도 돌지 않도록 Provider 트리에 들어가기 전에 갈라놓는다.
+  if (shouldRenderDemoShell(window.location.pathname)) {
+    return (
+      <Suspense fallback={null}>
+        <DemoShellPage />
+      </Suspense>
+    )
+  }
+
   return (
     <BrowserRouter>
       <AppContent />

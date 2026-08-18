@@ -38,7 +38,7 @@ export const mockProducts: readonly Product[] = [
     imageUrl: cognacImage,
     dimensions: '약 13 × 26 × 33cm',
     detailImages: [detail02, detail03, detail04],
-    productDetail: { craft: ['비세토스 모노그램 캔버스', '천연 나파 가죽 트림', '24K 도금 금속 장식 · 인조 나파 안감', '대한민국 제조'], heritage: ['비세토스 패턴과 제품 이야기는 직원에게 더 자세히 안내받을 수 있어요.'], styling: [] },
+    productDetail: { craft: ['비세토스 모노그램 캔버스', '천연 나파 가죽 트림', '24K 도금 금속 장식 · 인조 나파 안감', '대한민국 제조'], heritage: ['글로벌 노마드의 자유로운 정신을 담은 휴대용 아이콘입니다.'], styling: [] },
     origin: '대한민국',
     fitDetail: {
       strap: '조절 가능한 어깨 스트랩',
