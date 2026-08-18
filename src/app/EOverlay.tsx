@@ -32,7 +32,8 @@ export default function EOverlay() {
   const { dispatch, state } = useSession();
   const navigate = usePreparedNavigate();
   const location = useLocation();
-  // B1은 이미 재태그 지점이라 시트 안에서 `다른 제품 보기`를 다시 제안하지 않는다.
+  // B1은 제품을 다시 태그하는 화면이다. 이전 탐색에서 localStorage로 복구된 productId가
+  // 남아 있을 수 있으므로, 여기서 만든 직원 호출은 반드시 제품 무관 요청으로 보낸다.
   const isOverStageB1 = location.pathname === STAGE_B_ROUTES.nfcPrompt;
   const [selectedRequests, setSelectedRequests] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
@@ -75,17 +76,19 @@ export default function EOverlay() {
     const callType: StaffCallType = label === '기타' ? 'other' : 'info';
     dispatch({ type: SESSION_ACTIONS.recordSaCall, sku: state.currentSku ?? DEFAULT_PRODUCT_SKU, callType });
 
-    // 서버는 productId 없는 호출을 400(MISSING_PRODUCT_ID)으로 거절한다.
-    // B1에서 아직 아무것도 태그하지 않았다면 이 값이 없다 — 보내볼 것도 없이 실패다.
-    if (!state.sessionId || state.productId === null) {
+    if (!state.sessionId) {
       markDegraded(DEGRADATION_KEYS.staffCall);
       setDelivery('failed');
       return;
     }
 
+    // staff-calls는 productId를 선택값으로 허용한다. B1은 직전 제품 문맥(예: 이전 태그의
+    // productId)을 붙이면 안 되고, 다른 화면은 현재 제품 문맥이 있을 때만 함께 보낸다.
+    const productId = isOverStageB1 ? undefined : state.productId ?? undefined;
+
     setDelivery('sending');
     void createStaffCall(state.sessionId, {
-      productId: state.productId,
+      productId,
       reason: STAFF_CALL_REASON_BY_LABEL[label] ?? STAFF_CALL_REASONS.other,
     })
       .then(() => clearDegraded(DEGRADATION_KEYS.staffCall))

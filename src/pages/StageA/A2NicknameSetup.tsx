@@ -9,6 +9,15 @@ type A2NicknameSetupProps = {
   placeholder?: string
 }
 
+/**
+ * 서버 `PATCH /sessions/{id}/nickname`의 상한이다. 초과하면 400 `INVALID_NICKNAME`이 온다.
+ *
+ * 이 값을 서버보다 크게 두면 **저장이 조용히 실패한다** — 화면은 다음으로 넘어가고
+ * 닉네임은 로컬 상태에만 남아 서버·SA 대시보드와 값이 갈린다. 넘길 수 없는 값은 애초에
+ * 입력되지 않게 막는다.
+ */
+const NICKNAME_MAX_LENGTH = 21
+
 export default function A2NicknameSetup({
   headline = '고객님을 어떻게 불러드리면 좋을까요?',
   onSubmit,
@@ -31,7 +40,7 @@ export default function A2NicknameSetup({
         {isFormVisible && <TextInput
           ariaLabel="이름 또는 닉네임"
           className="stage-entry-nickname-input"
-          maxLength={24}
+          maxLength={NICKNAME_MAX_LENGTH}
           onChange={setNickname}
           placeholder={placeholder}
           value={nickname}

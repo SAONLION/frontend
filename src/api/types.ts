@@ -39,6 +39,8 @@ export type PurchaseInquiryResponse = { purchaseInquiryId: number; sku: number; 
 
 // --- InternalTest (시연 전용) ---
 export type StaffCallTestStatusRequest = { status: string }
+/** 오프셋 없는 `LocalDateTime` 문자열(`2026-08-18T17:33:43`)을 보낸다. */
+export type StaffCallTestRequestedAtRequest = { requestedAt: string }
 
 // --- InteractionLog ---
 export type InteractionLogRequest = { sku: number; interestType: InterestType; subOption?: string; durationSeconds?: number }

@@ -94,7 +94,7 @@ function mergeColorOptions(
         sku: String(sku.skuId),
         imageUrl: serverImage,
         // 색상 칩은 이 이미지로 그린다. `swatch`는 이미지가 뜨기 전 바탕색일 뿐이라
-        // 정확할 필요가 없다 — 카탈로그에 색상 hex 원본이 아예 없다(BACKEND_REQUEST P2-9).
+        // 정확한 색상값이 아니다 — 카탈로그에 색상 hex 원본이 없다.
         swatch: fixtureColors[0]?.swatch ?? '#9a5828',
       } satisfies ColorOption
     })
