@@ -7,6 +7,7 @@ import { KineticTextReveal } from '../../components/ui/kinetic-text-reveal'
 import { ProductImageGallery } from '../../components/domain/ProductImageGallery'
 import { StageCDetailShell } from '../../components/domain/StageCDetailShell'
 import { STAGE_A_ROUTES } from '../../constants/appRoutes'
+import { getKoreanColorLabel } from '../../constants/colorLabels'
 import { EVENT_NAMES, type SessionEvent } from '../../constants/events'
 import { STAGE_C_PRODUCT_DETAIL_ROUTES, stageCPath } from '../../constants/stageC'
 import { useProductExit } from '../../features/product-explore/useProductExit'
@@ -331,21 +332,6 @@ function SizeOptions({ label, onSelect, product, selection }: { label?: string; 
   </section>
 }
 
-// 한국어 라벨이 정해진 색만 옮겨 쓰고, 새로 들어오는 색은 데이터의 label을 그대로 보여준다.
-/**
- * 자주 쓰는 색의 한글 이름만 갖는다. 카탈로그의 색상은 40가지이고 서버는 영문 이름만 주므로
- * 여기 없는 색은 서버 라벨을 그대로 보여준다 — 영문이어도 의미가 통한다.
- * 서버가 다국어 색상명을 주기로 하면 이 표는 사라진다(BACKEND_REQUEST P2-9).
- */
-const COLOR_LABELS: Record<string, string> = {
-  cognac: '코냑',
-  black: '블랙',
-  white: '화이트',
-  beige: '베이지',
-  'soft-pink': '소프트 핑크',
-  cinnamon: '시나몬',
-}
-
 function ColorOptions({ label, onSelect, product, selection }: { label?: string; onSelect: (option: ColorOption) => void; product: Product; selection: FitSelection }) {
   const referenceColors = product.colorOptions ?? []
 
@@ -370,7 +356,7 @@ function ColorOptions({ label, onSelect, product, selection }: { label?: string;
           <i aria-hidden="true" style={{ backgroundColor: option.swatch }}>
             <img alt="" decoding="async" loading="lazy" src={option.imageUrl} />
           </i>
-          <span>{COLOR_LABELS[option.code] ?? option.label}</span>
+          <span>{getKoreanColorLabel(option.label)}</span>
         </button>
       ))}
     </div>

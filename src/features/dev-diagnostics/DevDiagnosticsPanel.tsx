@@ -1,7 +1,11 @@
 import { useState, useSyncExternalStore } from 'react'
-import { clearApiCallLog, getApiCallRecords, subscribeApiCallLog } from './apiCallLog'
+import { clearApiCallLog, getApiCallRecords, subscribeApiCallLog } from '../demo-tools/apiCallLog'
 import type { DataSourceRow } from './dataSources'
-import { setStaffCallTestStatus, STAFF_CALL_TEST_STATUSES } from '../../api/internalTest'
+import {
+  backdateStaffCallRequestedAt,
+  setStaffCallTestStatus,
+  STAFF_CALL_TEST_STATUSES,
+} from '../../api/internalTest'
 import { getActiveStaffCallId, subscribeActiveStaffCall } from '../sa-call/activeStaffCall'
 import {
   getActiveDegradations,
@@ -67,7 +71,7 @@ export function DevDiagnosticsPanel({ dataSources }: DevDiagnosticsPanelProps) {
             <>
               <header><strong>직원 호출 #{activeStaffCallId} 시연</strong></header>
               <p className="dev-diagnostics__hint">
-                SA 대시보드가 없어 상태가 바뀌지 않으면 약 3분 뒤 시간 초과된다.
+                SA 대시보드가 없어 상태가 바뀌지 않으면 45초 뒤 시간 초과된다.
                 서버의 internal-test 엔드포인트가 꺼져 있으면 404가 난다.
               </p>
               <div className="dev-diagnostics__actions">
@@ -84,6 +88,26 @@ export function DevDiagnosticsPanel({ dataSources }: DevDiagnosticsPanelProps) {
                     {status}
                   </button>
                 ))}
+              </div>
+              {/*
+                상태 버튼과 배타적인 동작이라 줄을 나눈다. 위 버튼들은 CB3를 억제하고,
+                아래 버튼만 CB3를 띄운다 — 같은 줄에 두면 같은 종류로 오해한다.
+              */}
+              <p className="dev-diagnostics__hint">
+                아래 버튼은 호출 시각을 10분 전으로 돌려 <strong>CB3 팝업을 즉시 띄운다.</strong>
+                위 상태 버튼을 먼저 누르면 CB3가 억제되므로 순서를 지켜야 한다.
+              </p>
+              <div className="dev-diagnostics__actions">
+                <button
+                  onClick={() => {
+                    void backdateStaffCallRequestedAt(activeStaffCallId).catch((error: unknown) => {
+                      console.error('시연용 요청 시각 변경에 실패했습니다.', error)
+                    })
+                  }}
+                  type="button"
+                >
+                  CB3 즉시 발동
+                </button>
               </div>
             </>
           )}

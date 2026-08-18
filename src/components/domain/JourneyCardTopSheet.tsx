@@ -14,6 +14,12 @@ import { JourneyPassportCard } from './JourneyPassportCard'
 
 const CLOSE_ANIMATION_MS = 420
 
+// 콜라주 사진은 S3에서 바로 내려오는데 버킷이 CORS를 열어주지 않는다(백엔드/인프라 확인 필요).
+// html-to-image가 못 읽는 이미지를 빈 문자열로 남기면 캡처 자체가 통째로 실패하니,
+// 최소한 투명 1x1 픽셀로 대체해 나머지(틀·텍스트)는 저장되게 한다.
+const TRANSPARENT_PIXEL_PLACEHOLDER =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGBgAAAABQABpfZFQAAAAABJRU5ErkJggg=='
+
 /**
  * 여권 카드 탑시트. 배경 화면을 언마운트하지 않는 비차단 시트라는 점, 손잡이를 끌어 닫는 방식,
  * 닫힘 모션까지 하단 직원 호출 시트(EOverlay)와 같은 규칙을 따른다. 방향만 위쪽이다.
@@ -103,17 +109,15 @@ export function JourneyCardTopSheet() {
     setDragOffset(0)
   }
 
-  // 콜라주 초기화 — 서버 태그 이력을 지우는 API가 스펙에 없어 화면 표시용 상태만 비운다.
-  // TODO: 서버 쪽 태그 이력까지 초기화해야 하는지는 백엔드팀 확인 필요.
-  const resetCollage = () => {
-    setJourneyCard((current) => (current ? { ...current, collageImages: [] } : current))
-  }
-
   const saveImage = async () => {
     if (!cardRef.current || isSavingImage) return
     setIsSavingImage(true)
     try {
-      const dataUrl = await toPng(cardRef.current, { cacheBust: true, pixelRatio: 2 })
+      const dataUrl = await toPng(cardRef.current, {
+        cacheBust: true,
+        imagePlaceholder: TRANSPARENT_PIXEL_PLACEHOLDER,
+        pixelRatio: 2,
+      })
       const link = document.createElement('a')
       link.href = dataUrl
       link.download = `MCM_passport_${journeyCard?.sessionCode ?? state.sessionId ?? 'card'}.png`
@@ -141,7 +145,7 @@ export function JourneyCardTopSheet() {
             headline={`${nickname}님을 위한 여권을 저장해보세요!`}
             variant="md"
           />
-          <JourneyPassportCard journeyCard={journeyCard} onReset={resetCollage} ref={cardRef} />
+          <JourneyPassportCard journeyCard={journeyCard} ref={cardRef} />
           <div className="stage-top-sheet__actions">
             <button
               className="stage-c-action-button stage-c-action-button--primary"
