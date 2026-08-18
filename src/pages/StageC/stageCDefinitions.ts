@@ -41,7 +41,7 @@ export const stageCHubDefinitions: Record<StageCHubScreenId, HubScreenDefinition
   [STAGE_C_SCREEN_IDS.c2]: {
     heading: '제품의 어떤 이야기가 궁금하세요?',
     choices: [
-      { id: STAGE_C_SCREEN_IDS.c21, label: '제작 공정 · 소재', destination: STAGE_C_SCREEN_IDS.c21 },
+      { id: STAGE_C_SCREEN_IDS.c21, label: '소재 · 마감', destination: STAGE_C_SCREEN_IDS.c21 },
       { id: STAGE_C_SCREEN_IDS.c22, label: '헤리티지 · 브랜드 스토리', destination: STAGE_C_SCREEN_IDS.c22 },
       { id: STAGE_C_SCREEN_IDS.c23, label: '스타일링 · 코디', destination: STAGE_C_SCREEN_IDS.c23 },
     ],
