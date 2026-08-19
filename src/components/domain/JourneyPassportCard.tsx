@@ -6,6 +6,7 @@ import swatchPin from '../../assets/images/stage-b-journey-card-swatch-pin.svg'
 import dividerFold from '../../assets/images/stage-b-journey-card-divider-fold.svg'
 import dividerBottom1 from '../../assets/images/stage-b-journey-card-divider-bottom-1.svg'
 import dividerBottom2 from '../../assets/images/stage-b-journey-card-divider-bottom-2.svg'
+import resetIcon from '../../assets/images/stage-b-journey-card-reset-icon.png'
 import type { JourneyCardResponse } from '../../api/journeyCard'
 import { formatJourneyCardDate } from '../../api/journeyCard'
 
@@ -79,11 +80,6 @@ function CollageSlot4({ image, index }: CollageSlotProps) {
   )
 }
 
-/**
- * 초기화 버튼은 2026-08-19에 제거했다. 서버에 태그 이력을 지우는 API가 없어 화면 상태만
- * 비웠는데, 시트를 닫았다 열면 재조회로 되살아나 고객에게는 "지웠는데 다시 생겼다"로 보였다.
- * 되돌아오는 버튼을 두는 것보다 없는 편이 낫다고 판단했다(BACKEND_REQUEST P1-10).
- */
 type JourneyPassportCardProps = {
   journeyCard: JourneyCardResponse | null
 }
@@ -135,6 +131,16 @@ export const JourneyPassportCard = forwardRef<HTMLDivElement, JourneyPassportCar
       <img alt="" className="pointer-events-none absolute left-[-9px] top-[184px] w-[318px]" src={dividerFold} />
       <img alt="" className="pointer-events-none absolute left-0 top-[382px] w-[300px]" src={dividerBottom1} />
       <img alt="" className="pointer-events-none absolute left-0 top-[394.5px] w-[297px]" src={dividerBottom2} />
+
+      {/* PR #54의 카드 내 초기화 아이콘만 복구했다. 서버 초기화 API(P2-10) 전에는 클릭을 막는다. */}
+      <span
+        aria-label="담은 상품 초기화 (준비 중)"
+        className="stage-b-journey-card-reset-control absolute left-[269px] top-[356px] flex size-[28px] items-center justify-center"
+        role="img"
+        title="여권 초기화 기능을 준비하고 있어요"
+      >
+        <img alt="" className="size-[14.7px]" src={resetIcon} />
+      </span>
 
     </div>
   )
