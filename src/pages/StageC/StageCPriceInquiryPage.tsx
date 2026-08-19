@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { requestPriceInquiry } from '../../api/priceInquiry'
 import { Navigate, useParams } from 'react-router'
 import { usePreparedNavigate } from '../../app/usePreparedNavigate'
@@ -83,6 +83,11 @@ function PriceInquiryContent({ pageState, productName, sku }: PriceInquiryConten
     (event) => event.name === EVENT_NAMES.priceInquiryRequest && event.sku === sku,
   )
 
+  useLayoutEffect(() => {
+    setAreActionsVisible(false)
+    setIsDescriptionVisible(false)
+  }, [pageState])
+
   useEffect(() => {
     let active = true
 
@@ -119,9 +124,9 @@ function PriceInquiryContent({ pageState, productName, sku }: PriceInquiryConten
       <header className="stage-c-product-detail-topbar"><span>{productName}</span></header>
       <div className="stage-c-price-inquiry-content">
         <section aria-label="나이비스 AI 도슨트" className="stage-c-price-inquiry-docent"><DocentStage continuityKey="price-inquiry" cue={copy.cue} /></section>
-        <h1><KineticTextReveal autoPlay blur className="justify-center" distance={16} onRevealComplete={() => { setIsDescriptionVisible(true); setAreActionsVisible(true) }} splitBy="characters" stagger={0.035} text={copy.title} waitForDocent /></h1>
-        {isDescriptionVisible && <p><KineticTextReveal autoPlay blur={false} className="justify-center" distance={8} splitBy="words" stagger={0.1} text={copy.description} waitForDocent /></p>}
-        {pageState === 'request' && isDescriptionVisible && <span className="stage-c-price-inquiry-note">원하실 때만 요청해 주세요.</span>}
+        <h1><KineticTextReveal autoPlay blur className="justify-center" distance={16} onRevealComplete={() => setIsDescriptionVisible(true)} splitBy="characters" stagger={0.035} text={copy.title} waitForDocent /></h1>
+        {isDescriptionVisible && <p><KineticTextReveal autoPlay blur={false} className="justify-center" distance={8} onRevealComplete={() => setAreActionsVisible(true)} splitBy="words" stagger={0.1} text={copy.description} waitForDocent /></p>}
+        {pageState === 'request' && areActionsVisible && <span className="stage-c-price-inquiry-note">원하실 때만 요청해 주세요.</span>}
       </div>
       {areActionsVisible && <div className="stage-c-price-inquiry-actions">
         {pageState === 'request' && <button className="stage-c-action-button stage-c-action-button--primary" onClick={submitRequest} type="button">직원에게 가격 안내 요청하기</button>}

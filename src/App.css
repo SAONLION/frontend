@@ -1286,6 +1286,7 @@
 .stage-c-glass-card h1 {
   margin: 0 0 0.625rem;
   font-size: clamp(1.125rem, 5vw, 1.375rem);
+  font-weight: 600;
 }
 
 .stage-c-glass-card p {
@@ -1384,6 +1385,7 @@
 .stage-c-other-card h1 {
   margin-bottom: 0.5rem;
   font-size: clamp(1.5rem, 6vw, 1.875rem);
+  font-weight: 600;
 }
 
 .stage-c-other-card > p {
@@ -1586,6 +1588,7 @@
   margin: 1rem 0 0;
   color: var(--stage-c-glass-text);
   font-size: clamp(1.25rem, 5.5vw, 1.5rem);
+  font-weight: 600;
   line-height: 1.35;
   text-align: center;
   white-space: pre-line;
@@ -1648,6 +1651,7 @@
   margin: 1rem 0 0;
   color: var(--stage-c-glass-text);
   font-size: clamp(1rem, 4.5vw, 1.125rem);
+  font-weight: 600;
   line-height: 1.35;
   text-align: center;
   white-space: pre-line;
@@ -1716,6 +1720,7 @@
   margin: 1rem 0 0;
   color: var(--stage-c-glass-text);
   font-size: clamp(1.25rem, 5.2vw, 1.375rem);
+  font-weight: 600;
   line-height: 1.35;
   text-align: center;
   white-space: pre-line;
@@ -1777,6 +1782,7 @@
   margin: 1rem 0 0;
   color: var(--stage-c-glass-text);
   font-size: clamp(1.25rem, 5.2vw, 1.375rem);
+  font-weight: 600;
   line-height: 1.35;
   white-space: pre-line;
 }
@@ -1895,6 +1901,7 @@
   margin: 0;
   color: var(--stage-c-glass-text);
   font-size: clamp(1.25rem, 5.2vw, 1.375rem);
+  font-weight: 600;
   line-height: 1.35;
   white-space: pre-line;
   text-align: center;
@@ -1908,7 +1915,7 @@
 .stage-c-c5-answer-card {
   width: 100%;
   min-height: 7.5rem;
-  margin-top: clamp(3rem, 8dvh, 4.5rem);
+  margin-top: 2rem;
   padding: 1.25rem;
   border: 1px solid var(--stage-c-glass-border);
   border-radius: 1.25rem;
@@ -1926,7 +1933,8 @@
   min-height: clamp(8rem, 20dvh, 10rem);
 }
 
-.stage-c-c5-answer-card p {
+.stage-c-c5-answer-card p,
+.stage-c-c5-answer-text {
   margin: 0;
   font-size: 1rem;
   line-height: 1.55;
@@ -2038,6 +2046,7 @@
   margin: 1rem 0 0;
   color: var(--stage-c-glass-text);
   font-size: clamp(1.25rem, 5.2vw, 1.375rem);
+  font-weight: 600;
   line-height: 1.35;
 }
 
@@ -2770,6 +2779,7 @@
 .stage-c-selection-summary h1 {
   margin-bottom: 0.3rem;
   font-size: 1rem;
+  font-weight: 600;
   line-height: 1.35;
 }
 

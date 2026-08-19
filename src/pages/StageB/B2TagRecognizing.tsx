@@ -13,7 +13,7 @@ export default function B2TagRecognizing({
     <main aria-live="polite" className="stage-entry-page stage-entry-page--stage-b">
       <div className="stage-entry-content stage-entry-content--recognizing">
         <div aria-hidden="true" className="stage-entry-docent stage-entry-docent--wide" />
-        <ScreenHeadline className="stage-entry-intro-headline" headline={headline} reveal subtext={subtext} />
+        <ScreenHeadline className="stage-entry-intro-headline" headline={headline} reveal subtext={subtext} waitForDocent={false} />
       </div>
     </main>
   )

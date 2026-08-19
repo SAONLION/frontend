@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router'
 import { usePreparedNavigate } from '../../app/usePreparedNavigate'
 import { PreparedLink } from '../../components/common/PreparedLink'
 import { DocentStage } from '../../components/domain/DocentStage'
 import { StageCDetailShell } from '../../components/domain/StageCDetailShell'
-import { KineticTextReveal } from '../../components/ui/kinetic-text-reveal'
+import TextType from '../../components/TextType'
 import type { AiAnswerResult } from '../../features/ai-answer/AiAnswerService'
 import { useAiAnswerService } from '../../features/ai-answer/useAiAnswerService'
 import { useProductExit } from '../../features/product-explore/useProductExit'
@@ -39,11 +39,16 @@ export function StageCAiAnswerPage() {
   const contextKey = query ? `${query.id}:${sku}` : `missing:${sku}`
   const hasOtherStaffCall = queryContext ? hasOtherStaffCallForQuery(state, sku, queryContext.index) : false
   const [answerView, setAnswerView] = useState<AnswerView>(() => initialAnswerView(contextKey))
+  const [isAnswerTyped, setIsAnswerTyped] = useState(false)
   const requestRef = useRef<PendingAnswerRequest | null>(null)
   const staffRequested = useRef(false)
   const otherPath = stageCPath(STAGE_C_ROUTES.c5, sku)
   const staffPendingPath = stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.otherStaffPending, sku)
   const view = answerView.contextKey === contextKey ? answerView : initialAnswerView(contextKey)
+
+  useLayoutEffect(() => {
+    setIsAnswerTyped(false)
+  }, [contextKey])
 
   const requestStaff = useCallback(() => {
     if (!query || staffRequested.current) return
@@ -75,6 +80,7 @@ export function StageCAiAnswerPage() {
     if (request !== previous) {
       requestRef.current = request
       staffRequested.current = false
+      setIsAnswerTyped(false)
       setAnswerView(initialAnswerView(contextKey))
     }
 
@@ -89,6 +95,7 @@ export function StageCAiAnswerPage() {
         return
       }
       dispatch({ type: SESSION_ACTIONS.recordAiAnswer, queryId: query.id, sku, topic: query.topic, resolved: true })
+      setIsAnswerTyped(false)
       setAnswerView({ contextKey, status: 'resolved', title: result.title, lines: result.answerLines })
     }).catch(() => {
       if (active && requestRef.current === request) {
@@ -102,6 +109,7 @@ export function StageCAiAnswerPage() {
   if (product === undefined) return <StageCState title="제품 정보를 불러오는 중이에요" description="잠시만 기다려 주세요." />
   if (product === null) return <StageCState title="상품을 찾을 수 없어요" description="태그한 상품의 주소를 다시 확인해 주세요." />
   if (!query) return <MissingQuestion path={otherPath} />
+  const areActionsVisible = view.status === 'resolved' ? isAnswerTyped : view.status === 'error'
 
   return <StageCDetailShell className="stage-c-c5-response-shell">
     <header className="stage-c-c5-response-topbar">
@@ -117,19 +125,27 @@ export function StageCAiAnswerPage() {
             </span>
           )}
           {view.status === 'resolved' && (
-            <p><KineticTextReveal autoPlay blur={false} delay={0.2} distance={0} splitBy="characters" stagger={0.018} text={view.lines.join(' ')} /></p>
+            <TextType
+              className="stage-c-c5-answer-text"
+              initialDelay={220}
+              loop={false}
+              onSentenceComplete={() => setIsAnswerTyped(true)}
+              showCursor
+              text={view.lines.join(' ')}
+              typingSpeed={28}
+            />
           )}
           {view.status === 'error' && <p>잠시 후 다시 시도하거나 다른 질문을 남겨주세요.</p>}
         </section>
       </div>
     </div>
-    <div className="stage-c-c5-response-actions">
+    {areActionsVisible && <div className="stage-c-c5-response-actions">
       <PreparedLink className="stage-c-action-button" to={otherPath}>다른 것도 물어보기</PreparedLink>
       <div>
         <button className="stage-c-action-button" onClick={requestStaff} type="button">직원에게 문의하기</button>
         <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
       </div>
-    </div>
+    </div>}
   </StageCDetailShell>
 }
 
