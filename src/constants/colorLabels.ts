@@ -52,6 +52,19 @@ function normalizeColorLabel(label: string): string {
   return label.trim().replace(/\s+/g, ' ').toLowerCase()
 }
 
+/**
+ * 서버 표기(`Soft Pink`)와 화면 선택 키(`soft-pink`)를 같은 색으로 취급한다.
+ * 색상명은 표시용 라벨이므로 공백·하이픈·슬래시·플러스 기호 차이로 선택 상태가 갈라지면 안 된다.
+ */
+export function getColorSelectionKey(value: string): string {
+  return normalizeColorLabel(value).replace(/[+/_-]+/g, ' ').replace(/\s+/g, ' ').trim()
+}
+
+export function isSameColorSelection(left: string | null | undefined, right: string | null | undefined): boolean {
+  return left !== null && left !== undefined && right !== null && right !== undefined
+    && getColorSelectionKey(left) === getColorSelectionKey(right)
+}
+
 /** 모르는 신규 색은 원문을 보존해 잘못된 번역을 만들지 않는다. */
 export function getKoreanColorLabel(label: string): string {
   return KOREAN_COLOR_LABELS[normalizeColorLabel(label)] ?? label

@@ -1,4 +1,5 @@
 import { useSession } from '../session/useSession'
+import { isSameColorSelection } from '../../constants/colorLabels'
 import type { Product } from '../../types/product'
 
 export type SelectedProductImages = {
@@ -6,6 +7,8 @@ export type SelectedProductImages = {
   imageUrl: string
   /** 대표 컷 뒤로 이어지는 같은 색상의 다른 각도 컷 */
   detailImages: readonly string[]
+  /** 선택 색상에 대응하는 모델 컷. */
+  stylingImages: readonly string[]
 }
 
 /**
@@ -15,12 +18,20 @@ export type SelectedProductImages = {
 export function useSelectedProductImages(product: Product): SelectedProductImages {
   const { state } = useSession()
   const selected = state.selectedColorCode
-    ? product.colorOptions?.find((option) => option.code === state.selectedColorCode)
+    ? product.colorOptions?.find((option) => isSameColorSelection(option.code, state.selectedColorCode))
     : undefined
 
   if (!selected) {
-    return { imageUrl: product.imageUrl, detailImages: product.detailImages ?? [] }
+    return {
+      imageUrl: product.imageUrl,
+      detailImages: product.detailImages ?? [],
+      stylingImages: product.stylingImages ?? [],
+    }
   }
 
-  return { imageUrl: selected.imageUrl, detailImages: selected.detailImages ?? [] }
+  return {
+    imageUrl: selected.imageUrl,
+    detailImages: selected.detailImages ?? [],
+    stylingImages: selected.stylingImages ?? product.stylingImages ?? [],
+  }
 }

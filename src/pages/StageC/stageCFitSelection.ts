@@ -1,4 +1,5 @@
 import type { ColorOption, Product, SizeOption } from '../../types/product'
+import { isSameColorSelection } from '../../constants/colorLabels'
 
 export type FitSelection = {
   size: SizeOption
@@ -24,11 +25,11 @@ export function getFitSelection(
   const defaultSize = sizes.find((option) => option.sku === product.sku)
     ?? sizes.find((option) => option.code === product.fitDefaults?.sizeCode)
   const defaultColor = colors.find((option) => option.sku === product.sku)
-    ?? colors.find((option) => option.code === product.fitDefaults?.colorCode)
+    ?? colors.find((option) => isSameColorSelection(option.code, product.fitDefaults?.colorCode))
   const requestedSize = search.get('size') ?? fallback.sizeCode
   const requestedColor = search.get('color') ?? fallback.colorCode
-  const size = (requestedSize ? sizes.find((option) => option.code === requestedSize) : undefined) ?? defaultSize
-  const color = (requestedColor ? colors.find((option) => option.code === requestedColor) : undefined) ?? defaultColor
+  const size = (requestedSize ? sizes.find((option) => option.code === requestedSize) : undefined) ?? defaultSize ?? sizes[0]
+  const color = (requestedColor ? colors.find((option) => isSameColorSelection(option.code, requestedColor)) : undefined) ?? defaultColor ?? colors[0]
 
   return size && color ? { size, color } : null
 }
