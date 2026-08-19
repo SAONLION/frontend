@@ -85,12 +85,14 @@ export function ProductCoverflow({
           return (
             <motion.button
               animate={{
-                filter: isActive ? 'blur(0px)' : 'blur(1.5px)',
+                // `blur(0px)`도 브라우저에는 별도 필터 합성 레이어로 취급될 수 있다.
+                // 선택 컷은 원본을 그대로 그리도록 필터를 완전히 제거한다.
+                filter: isActive ? 'none' : 'blur(1.5px)',
                 opacity: Math.abs(distance) > 2 ? 0 : isActive ? 1 : 0.4,
                 rotateY: reducedMotion ? 0 : -distance * 34,
                 scale: reducedMotion ? (isActive ? 1 : 0.9) : isActive ? 1 : 0.78,
                 x: distance * 116,
-                z: reducedMotion ? 0 : isActive ? 32 : -80,
+                z: reducedMotion || isActive ? 0 : -80,
               }}
               aria-current={isActive ? 'true' : undefined}
               aria-label={`${index + 1}번째 이미지 보기`}

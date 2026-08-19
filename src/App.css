@@ -2190,8 +2190,10 @@
 }
 
 .stage-c-coverflow__card--product {
-  width: min(15rem, 76vw);
-  margin: 0 0 0 max(-7.5rem, -38vw);
+  /* 기존 대표 이미지와 같은 폭을 써서 3D 전환 전후의 제품 크기를 보존한다. */
+  width: var(--stage-c-featured-product-width);
+  margin: 0;
+  translate: -50% 0;
 }
 
 .stage-c-coverflow__card--styling {
@@ -2201,6 +2203,11 @@
 
 .stage-c-coverflow__card:active {
   cursor: grabbing;
+}
+
+/* 선택 컷은 정지 상태에서 별도 GPU 텍스처로 고정하지 않아 원본 선명도를 우선한다. */
+.stage-c-coverflow__card.is-active {
+  will-change: auto;
 }
 
 .stage-c-coverflow__card img,
