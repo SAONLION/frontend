@@ -58,7 +58,12 @@ export type ProductSummaryDTO = { id: number; name: string; category: string; im
 export type HubOptionDTO = { type: InterestType; label: string }
 export type ProductTagScanResponseDTO = { product: ProductSummaryDTO; hubOptions: readonly HubOptionDTO[] }
 
-export type SubOptionDTO = { id: number; label: string; type: string }
+export type SubOptionDTO = {
+  id: number
+  label: string
+  type: string
+  mediation?: 'INFO' | 'STAFF_MEDIATED'
+}
 
 export type HubOptionResponse = {
   optionId: string

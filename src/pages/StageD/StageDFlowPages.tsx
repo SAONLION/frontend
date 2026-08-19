@@ -40,7 +40,8 @@ const PURPOSE_PHRASE_MAP: Record<string, string> = {
   기타: '이런 제품',
 };
 
-// API 추천에는 sku가 없다. 그때는 데모 제품 sku로 대체하고 폴백임을 화면에 표시한다.
+// API 추천의 skuId는 서버 정수 식별자이고 Stage C route는 fixture style SKU 문자열을 쓴다.
+// Live SKU mapper를 붙이기 전까지 위치 안내 진입은 데모 SKU로 폴백한다.
 function toSelectedProduct(product: ProductCardData): SelectedProduct {
   return {
     sku: product.sku ?? DEFAULT_PRODUCT_SKU,
@@ -83,7 +84,7 @@ function useRecommendedProducts() {
       } else {
         setProducts(recommendations.slice(0, RECOMMENDATION_LIMIT).map((item) => ({
           id: String(item.productId),
-          image: emblemImage,
+          image: item.imageUrl ?? emblemImage,
           name: item.productName,
           description: item.reason ?? '',
         })));

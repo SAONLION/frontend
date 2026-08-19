@@ -863,21 +863,14 @@
 }
 
 .stage-c-hub-content .stage-c-heading--compact {
-  font-size: clamp(0.875rem, 3.5vw, 1rem);
-  letter-spacing: -0.06em;
-  white-space: nowrap;
+  font-size: clamp(1.25rem, 5vw, 1.375rem);
+  letter-spacing: -0.035em;
 }
 
 .stage-c-heading--intro span {
   display: block;
   max-width: 100%;
-  overflow: hidden;
   color: inherit;
-  font-size: clamp(0.8125rem, 3.4vw, 0.9375rem);
-  letter-spacing: -0.06em;
-  line-height: 1.35;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .stage-c-choice-list + .stage-c-other-link {
@@ -1285,7 +1278,7 @@
 
 .stage-c-glass-card h1 {
   margin: 0 0 0.625rem;
-  font-size: clamp(1.125rem, 5vw, 1.375rem);
+  font-size: clamp(1.25rem, 5vw, 1.375rem);
   font-weight: 600;
 }
 
@@ -1650,7 +1643,7 @@
   max-width: none;
   margin: 1rem 0 0;
   color: var(--stage-c-glass-text);
-  font-size: clamp(1rem, 4.5vw, 1.125rem);
+  font-size: clamp(1.25rem, 5vw, 1.375rem);
   font-weight: 600;
   line-height: 1.35;
   text-align: center;

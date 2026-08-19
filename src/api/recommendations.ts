@@ -4,7 +4,15 @@ import { fetchMockRecommendations } from '../mocks/recommendations'
 // 서버에 배포 완료 — 실제 API를 사용한다. 다시 mock으로 돌리려면 이 값만 true로 바꾸면 된다.
 export const USE_MOCK_RECOMMENDATIONS = false
 
-export type RecommendationItem = { productId: number; productName: string; reason?: string }
+export type RecommendationItem = {
+  productId: number
+  productName: string
+  reason?: string
+  /** 서버 추천에는 있지만 기존 Mock 추천에는 없다. */
+  skuId?: number
+  /** 서버 추천에는 있지만 기존 Mock 추천에는 없다. */
+  imageUrl?: string
+}
 type RecommendationsResponse = { recommendations: readonly RecommendationItem[] }
 
 const RECOMMENDATIONS_TIMEOUT_MS = 10_000
