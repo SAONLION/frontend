@@ -147,6 +147,11 @@ function AppContent() {
                       <AppRoutes />
                       <PendingActionWatcher />
                     </SessionBootstrap>
+                    {DevDiagnosticsPanel && (
+                      <Suspense fallback={null}>
+                        <DevDiagnosticsPanel dataSources={DEV_DATA_SOURCES} />
+                      </Suspense>
+                    )}
                   </SessionProvider>
                 </ContactProvider>
               </TryOnRequestProvider>
@@ -155,11 +160,6 @@ function AppContent() {
         </AiAnswerProvider>
       </ProductContentProvider>
       </div>
-      {DevDiagnosticsPanel && (
-        <Suspense fallback={null}>
-          <DevDiagnosticsPanel dataSources={DEV_DATA_SOURCES} />
-        </Suspense>
-      )}
     </div>
   )
 }

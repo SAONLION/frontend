@@ -15,7 +15,7 @@ import '../../features/demo-tools/DemoTools.css'
  *
  * **왜 동작하는가.** 서버가 CB3는 직원 호출 5분 뒤, CB6는 착장 요청 15분 뒤에 만든다.
  * 시연에서 그 시간을 기다릴 수 없으므로 `internal-test` 백데이트 훅으로 요청 시각을 과거로 돌려
- * 조건을 즉시 성립시킨다. 팝업 자체는 iframe 안 앱의 4초 폴링이 가져온다.
+ * 조건을 즉시 성립시킨다. 팝업 자체는 iframe 안 앱의 5초 폴링이 가져온다.
  *
  * **세션은 `localStorage`로 공유한다.** 셸과 앱이 같은 오리진이라 앱이 발급한 세션을 그대로 읽는다.
  */
@@ -40,7 +40,7 @@ export default function ShellBlockerTriggers() {
       productId: context?.productId ?? undefined,
       reason: STAFF_CALL_REASONS.other,
     })
-    await backdateStaffCallRequestedAt(call.callId)
+    await backdateStaffCallRequestedAt(sessionId, call.callId)
     return `CB3 조건 성립 (호출 #${call.callId}). ${DETECTION_HINT}.`
   }
 
@@ -55,7 +55,7 @@ export default function ShellBlockerTriggers() {
       size: TRYON_FALLBACK_SIZE,
       color: TRYON_FALLBACK_COLOR,
     })
-    await backdateTryonRequestedAt(tryon.tryonRequestId)
+    await backdateTryonRequestedAt(sessionId, tryon.tryonRequestId)
     return `CB6 조건 성립 (착장 #${tryon.tryonRequestId}). ${DETECTION_HINT}.`
   }
 
@@ -71,12 +71,12 @@ export default function ShellBlockerTriggers() {
     void task(sessionId)
       .then((message) => setStatus({ tone: 'info', message }))
       .catch((error: unknown) => {
-        // 백데이트 훅이 서버에 없으면 404다. CB6는 아직 그 상태라 원인을 구분해 알린다.
+        // 테스트 훅이 배포 환경에서 비활성화돼 있으면 404다.
         const notFound = error instanceof ApiError && error.status === 404
         setStatus({
           tone: 'error',
           message: notFound
-            ? `${code} 백데이트 훅이 서버에 없다(404). 백엔드 요청 대기 중.`
+            ? `${code} 백데이트 훅이 현재 환경에서 비활성화돼 있다(404).`
             : `${code} 실패: ${error instanceof Error ? error.message : String(error)}`,
         })
       })

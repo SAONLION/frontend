@@ -48,9 +48,8 @@ export type BlockerTriggerId =
   | 'T-CB6-b'
   | 'T-CB6-c'
   /**
-   * 서버가 감지했으나 어느 트리거였는지 알려주지 않은 경우.
-   * 서버 `pending-action` 응답에 `triggerId`가 없어서 생긴 값이며,
-   * 트리거 단위 적중률을 내려면 서버가 실제 트리거 ID를 함께 보내야 한다.
+   * 서버가 감지했으나 어느 트리거였는지 알려주지 않거나 알 수 없는 값을 준 경우.
+   * 정상 서버 응답은 `triggerId`를 보낸다.
    */
   | 'T-SERVER'
 

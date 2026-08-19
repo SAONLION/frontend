@@ -2114,6 +2114,15 @@
   padding: var(--stage-c-product-detail-image-top-space) 1rem 0.25rem;
 }
 
+/* C2-3은 설명 카드 없이 모델 컷에 집중한다. 남는 공간의 중앙에만 이미지를 놓아
+   상단 헤더와 하단 고정 액션 사이의 균형을 유지한다. */
+.stage-c-product-detail-shell--styling .stage-c-product-detail-media {
+  flex: 1 1 auto;
+  align-items: center;
+  min-height: 0;
+  padding-block: 0;
+}
+
 .stage-c-product-detail-media > img {
   display: block;
   width: var(--stage-c-featured-product-width);
@@ -2122,85 +2131,110 @@
   object-fit: contain;
 }
 
-.stage-c-product-detail-media--styling .stage-c-gallery {
-  --stage-c-styling-gallery-height: min(21rem, 40dvh);
+.stage-c-coverflow--product {
+  width: min(100%, 22rem);
+  outline: none;
+}
+
+.stage-c-coverflow--styling {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-self: stretch;
+  width: 100%;
+  min-height: 0;
+  outline: none;
+}
+
+.stage-c-coverflow:focus-visible {
+  outline: 0.125rem solid #ffffff;
+  outline-offset: 0.25rem;
+}
+
+/* The translucent surface gives transparent product cutouts a readable silhouette,
+   without pretending that their transparent area is a photographed background. */
+.stage-c-coverflow__viewport--product {
   position: relative;
-  display: block;
-  width: min(100%, 17.5rem);
-  height: auto;
-  margin: 0;
-  overflow: visible;
+  height: var(--stage-c-featured-product-height);
+  overflow: hidden;
+  overscroll-behavior-x: none;
+  perspective: 46rem;
+  touch-action: pan-y;
+  transform-style: preserve-3d;
+}
+
+.stage-c-coverflow__viewport--styling {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  overscroll-behavior-x: none;
+  perspective: 46rem;
+  touch-action: pan-y;
+  transform-style: preserve-3d;
+}
+
+.stage-c-coverflow__card {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 100%;
+  padding: 0;
   border: 0;
-  border-radius: 0;
   background: transparent;
   box-shadow: none;
+  cursor: grab;
+  touch-action: pan-y;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
 }
 
-.stage-c-product-detail-media--styling .stage-c-gallery-track {
+.stage-c-coverflow__card--product {
+  width: min(15rem, 76vw);
+  margin: 0 0 0 max(-7.5rem, -38vw);
+}
+
+.stage-c-coverflow__card--styling {
+  width: min(18rem, 88vw);
+  margin: 0 0 0 max(-9rem, -44vw);
+}
+
+.stage-c-coverflow__card:active {
+  cursor: grabbing;
+}
+
+.stage-c-coverflow__card img,
+.stage-c-coverflow__single-image {
+  display: block;
   width: 100%;
-  height: var(--stage-c-styling-gallery-height);
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
-/* C2-3은 모델 착장샷 한 장뿐이라 좌우 컨트롤 자리를 회수하고 이미지를 키운다. */
-.stage-c-product-detail-media--styling .stage-c-gallery--single {
-  --stage-c-styling-gallery-height: min(27rem, 50dvh);
-  width: 100%;
-}
-
-/* No `mix-blend-mode: multiply` here: it existed to knock out the white background of
-   the former opaque JPEGs. The styling shots are transparent cutouts now, so multiply
-   would only darken the product against the dark shell. */
-.stage-c-product-detail-media--styling .stage-c-gallery-track img {
+  height: 100%;
   object-fit: contain;
+  pointer-events: none;
+  user-select: none;
 }
 
-.stage-c-product-detail-media--styling .stage-c-gallery-controls {
-  position: absolute;
-  top: calc(var(--stage-c-styling-gallery-height) / 2);
-  right: -3.25rem;
-  bottom: auto;
-  left: -3.25rem;
-  justify-content: space-between;
-  translate: 0 -50%;
-  padding: 0;
-  background: transparent;
+/* A product with only one styling shot keeps the existing generous, uncluttered stage. */
+.stage-c-coverflow__single-image--product {
+  width: min(100%, 18rem);
+  height: var(--stage-c-featured-product-height);
 }
 
-.stage-c-product-detail-media--styling .stage-c-gallery-controls button {
-  display: grid;
-  width: 2.125rem;
-  height: 2.125rem;
-  place-items: center;
-  padding: 0;
-  border: 1px solid rgb(255 255 255 / 24%);
-  border-radius: 50%;
-  background: rgb(217 217 217 / 20%);
-  box-shadow:
-    inset 0 0.0625rem 0 rgb(255 255 255 / 24%),
-    0 0.25rem 0.75rem rgb(0 0 0 / 18%);
-  backdrop-filter: blur(0.75rem) saturate(1.15);
-  color: #ffffff;
-  font-size: 1.625rem;
-  font-weight: 400;
-  line-height: 1;
+.stage-c-product-detail-media--styling > .stage-c-coverflow__single-image--styling {
+  width: 100%;
+  /* 기존 C2-3 무대 높이를 유지해 하단 액션의 안전 여백을 침범하지 않는다. */
+  height: min(27rem, 50dvh);
+  max-height: none;
+  object-fit: contain;
+  transform: scale(1.2);
+  transform-origin: center;
 }
 
-.stage-c-product-detail-media--styling .stage-c-gallery-controls button:hover,
-.stage-c-product-detail-media--styling
-  .stage-c-gallery-controls
-  button:focus-visible {
-  background: rgb(217 217 217 / 28%);
-}
-
-.stage-c-product-detail-media--styling .stage-c-gallery-dots {
-  position: static;
-  width: max-content;
-  margin: 0.5rem auto 0;
+.stage-c-coverflow__indicators {
   display: flex;
   align-items: center;
+  width: max-content;
   min-height: 1.25rem;
+  margin: 0.5rem auto 0;
   padding: 0.25rem 0.4375rem;
   gap: 0.25rem;
   border: 1px solid rgb(255 255 255 / 20%);
@@ -2210,7 +2244,12 @@
     inset 0 0.0625rem 0 rgb(255 255 255 / 18%),
     0 0.1875rem 0.5rem rgb(0 0 0 / 14%);
   backdrop-filter: blur(0.625rem) saturate(1.1);
-  translate: none;
+}
+
+/* 스타일링 다중 컷은 점 인디케이터 자리를 아래에 먼저 확보한다.
+   뷰포트가 그만큼 줄어 모델이 약간 위로 올라가며, 하단 액션은 움직이지 않는다. */
+.stage-c-coverflow--styling .stage-c-coverflow__indicators {
+  flex: 0 0 auto;
 }
 
 .stage-c-gallery-dots i {

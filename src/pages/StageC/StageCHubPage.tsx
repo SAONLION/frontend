@@ -125,7 +125,7 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
     <MobileShell>
       <section className="stage-c-page" aria-labelledby="stage-c-heading">
         <div className="stage-c-product-context-pill">{displayName}</div>
-        <ProductMedia product={product} />
+        <ProductMedia enableCoverflow={isProductIntro || screenId === STAGE_C_SCREEN_IDS.c3} product={product} />
         <div className="stage-c-hub-content">
           {screen.intro && <p className="stage-c-intro">{screen.intro}</p>}
           <h1 className={headingClassName} id="stage-c-heading">
