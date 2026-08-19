@@ -7,7 +7,7 @@ import { KineticTextReveal } from '../../components/ui/kinetic-text-reveal'
 import { ProductCoverflow } from '../../components/domain/ProductCoverflow'
 import { StageCDetailShell } from '../../components/domain/StageCDetailShell'
 import { STAGE_A_ROUTES } from '../../constants/appRoutes'
-import { getKoreanColorLabel } from '../../constants/colorLabels'
+import { getColorSelectionKey, getKoreanColorLabel, isSameColorSelection } from '../../constants/colorLabels'
 import { EVENT_NAMES, type SessionEvent } from '../../constants/events'
 import { STAGE_C_PRODUCT_DETAIL_ROUTES, stageCPath } from '../../constants/stageC'
 import { useProductExit } from '../../features/product-explore/useProductExit'
@@ -124,7 +124,11 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
 
   const setColor = (next: ColorOption) => {
     if (next.code === selection.color.code) return
-    dispatch({ type: SESSION_ACTIONS.recordColorSwitch, sku, from: selection.color.code, to: next.code })
+    dispatch({ type: SESSION_ACTIONS.recordColorSwitch, sku, from: selection.color.code, to: getColorSelectionKey(next.label) })
+    const nextSkuId = Number(next.sku)
+    if (Number.isInteger(nextSkuId) && nextSkuId > 0) {
+      dispatch({ type: SESSION_ACTIONS.setCurrentSkuId, skuId: nextSkuId })
+    }
     navigateSelection(fitSearchPath(kind === 'color' ? paths.color : paths.tryOn, { ...selection, color: next }), { replace: true })
   }
 
@@ -343,6 +347,10 @@ function SizeOptions({ label, onSelect, product, selection }: { label?: string; 
 function ColorOptions({ label, onSelect, product, selection }: { label?: string; onSelect: (option: ColorOption) => void; product: Product; selection: FitSelection }) {
   const referenceColors = product.colorOptions ?? []
 
+  const getSelectionOutlineColor = (option: ColorOption): string => (
+    isSameColorSelection(option.label, 'black') ? '#8e8e93' : option.swatch
+  )
+
   return <section className="stage-c-fit-reference-options stage-c-fit-reference-options--color">
     {label && <h2>{label}</h2>}
     <div
@@ -353,9 +361,10 @@ function ColorOptions({ label, onSelect, product, selection }: { label?: string;
     >
       {referenceColors.map((option) => (
         <button
-          aria-pressed={option.code === selection.color.code}
+          aria-pressed={isSameColorSelection(option.code, selection.color.code)}
           key={option.code}
           onClick={() => onSelect(option)}
+          style={{ '--stage-c-selected-swatch-ink': getSelectionOutlineColor(option) } as CSSProperties}
           type="button"
         >
           {/* 칩은 단색이 아니라 그 색상으로 찍힌 실제 제품 사진이다.

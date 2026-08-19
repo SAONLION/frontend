@@ -120,7 +120,7 @@ export const JourneyPassportCard = forwardRef<HTMLDivElement, JourneyPassportCar
 
       <p className="absolute left-[133.2px] top-[236.7px] whitespace-nowrap font-mono text-[10.8px] font-bold text-black">BRAND</p>
       <p className="absolute left-[133.2px] top-[268.2px] whitespace-nowrap font-mono text-[10.8px] font-bold text-black">DATE</p>
-      <p className="absolute left-[133.2px] top-[299.7px] whitespace-nowrap font-mono text-[10.8px] font-bold text-black">NICKNAME</p>
+      <p className="absolute left-[133.2px] top-[299.7px] whitespace-nowrap font-mono text-[10.8px] font-bold text-black">NAME</p>
       <p className="absolute left-[133.2px] top-[331.2px] whitespace-nowrap font-mono text-[10.8px] font-bold text-black">SESSION</p>
 
       <p className="stage-b-journey-card-value absolute left-[190.8px] top-[236.7px] max-w-[80px] truncate whitespace-nowrap font-mono text-[10.8px] text-black">{brand}</p>

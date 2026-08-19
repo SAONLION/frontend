@@ -14,6 +14,8 @@ export type ColorOption = {
   swatch: string
   /** 그 색상으로 찍힌 다른 각도 컷. C3-2 갤러리는 선택한 색상의 컷만 보여준다. */
   detailImages?: readonly string[]
+  /** 인물이 포함된 해당 색상 모델 컷. 스타일링·코디 화면에서만 사용한다. */
+  stylingImages?: readonly string[]
 }
 
 export type Product = {

@@ -1,6 +1,7 @@
 import { apiClient } from './client'
 import type {
   ProductTagScanResponseDTO,
+  HubOptionResponse,
   SkuDetailResponse,
   SkuListItemResponse,
 } from './types'
@@ -40,13 +41,15 @@ export async function getSkus(productId: number): Promise<readonly SkuListItemRe
   return request
 }
 
-/**
- * 아직 호출부가 없다. **제품 콘텐츠 Live 전환의 진입점**으로 남겨둔 것이다 —
- * 사이즈·치수를 서버에서 받아오려면 이 응답이 필요하다(OPEN_QUESTIONS 21번).
- * 현재 서버는 `size` 코드만 주고 치수·사이즈별 제품명이 없다(BACKEND_REQUEST P2-5).
- */
+/** 제품 콘텐츠 mapper가 C3의 사이즈·치수·수납·스트랩을 읽는 SKU 상세 진입점이다. */
 // GET /api/v1/products/{productId}/skus/{skuId}
 export async function getSkuDetail(productId: number, skuId: number): Promise<SkuDetailResponse> {
   const { data } = await apiClient.get<SkuDetailResponse>(`/api/v1/products/${productId}/skus/${skuId}`)
+  return data
+}
+
+// GET /api/v1/products/{productId}/hub/options/{optionId}
+export async function getHubOption(productId: number, optionId: number): Promise<HubOptionResponse> {
+  const { data } = await apiClient.get<HubOptionResponse>(`/api/v1/products/${productId}/hub/options/${optionId}`)
   return data
 }
