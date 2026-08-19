@@ -95,7 +95,7 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
 
   // C2-3은 모델 착장샷만 크게 보여준다. 나머지 제품 컷은 대표 컷과 함께 이미지 갤러리로 옮겼다.
   const images = topic === 'styling'
-    ? product.stylingImages ?? [stylingLifestyleImage]
+    ? selectedImages.stylingImages.length > 0 ? selectedImages.stylingImages : [stylingLifestyleImage]
     : [selectedImages.imageUrl, ...selectedImages.detailImages]
   // C2-1은 카탈로그에 실제로 있는 항목만 `라벨 : 값`으로 보여준다(가방 기준 하드웨어 97% · 안감 94% ·
   // 소재 90% · 제조국 100%). 없는 항목은 문구로 때우지 않고 줄을 감춘다.
