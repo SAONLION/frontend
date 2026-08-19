@@ -7,6 +7,7 @@ import {
   STAFF_CALL_TEST_STATUSES,
 } from '../../api/internalTest'
 import { getActiveStaffCallId, subscribeActiveStaffCall } from '../sa-call/activeStaffCall'
+import { useSession } from '../session/useSession'
 import {
   getActiveDegradations,
   getDegradationMessage,
@@ -32,6 +33,7 @@ function StatusChip({ status, failed }: { status: number | null; failed: boolean
  * production 번들에는 포함되지 않는다 — `App.tsx`가 `import.meta.env.DEV`로 import 자체를 막는다.
  */
 export function DevDiagnosticsPanel({ dataSources }: DevDiagnosticsPanelProps) {
+  const { state } = useSession()
   const [isOpen, setIsOpen] = useState(false)
   const records = useSyncExternalStore(subscribeApiCallLog, getApiCallRecords, getApiCallRecords)
   const degradations = useSyncExternalStore(subscribeDegradation, getActiveDegradations, getActiveDegradations)
@@ -100,10 +102,12 @@ export function DevDiagnosticsPanel({ dataSources }: DevDiagnosticsPanelProps) {
               <div className="dev-diagnostics__actions">
                 <button
                   onClick={() => {
-                    void backdateStaffCallRequestedAt(activeStaffCallId).catch((error: unknown) => {
+                    if (!state.sessionId) return
+                    void backdateStaffCallRequestedAt(state.sessionId, activeStaffCallId).catch((error: unknown) => {
                       console.error('시연용 요청 시각 변경에 실패했습니다.', error)
                     })
                   }}
+                  disabled={!state.sessionId}
                   type="button"
                 >
                   CB3 즉시 발동

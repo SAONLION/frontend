@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { respondToAction } from '../../api/pendingActions'
 import { BlockerSheet } from '../../components/domain/BlockerSheet'
-import { toCustomerBlockerCode } from './serverBlocker'
+import { toBlockerTriggerId, toCustomerBlockerCode } from './serverBlocker'
 import { usePendingActionPolling } from './usePendingActionPolling'
 import { SESSION_ACTIONS } from '../session/sessionTypes'
 import { useSession } from '../session/useSession'
@@ -118,7 +118,7 @@ function StaffRequestReceivedSheet({ requestLabel, onClose }: { requestLabel: st
  * 서버가 감지한 Blocker 팝업을 폴링해 어느 화면에서든 띄운다.
  *
  * Blocker 감지의 소유자는 서버다. 프론트엔드는 감지하지 않고, 노출·응답만 세션 타임라인에 기록한다.
- * 서버가 트리거 ID를 주지 않아 `T-SERVER`로 기록한다.
+ * 서버가 준 `triggerId`를 기록하며, 누락되거나 알 수 없는 값만 `T-SERVER`로 남긴다.
  *
  * **선택 이후가 이 컴포넌트의 책임이다.** 서버는 `actionNextStep`으로 다음 단계를 지시하는데,
  * 이 값을 읽지 않으면 고객이 버튼을 눌러도 시트만 닫혀 고장으로 보인다. CB3·CB6가 실제로
@@ -137,8 +137,9 @@ export function PendingActionWatcher() {
   useEffect(() => {
     if (!action || !code || recordedIds.current.has(action.actionId)) return
     recordedIds.current.add(action.actionId)
-    dispatch({ type: SESSION_ACTIONS.recordBlockerDetected, code, triggerId: 'T-SERVER' })
-    dispatch({ type: SESSION_ACTIONS.recordActionImpression, code, triggerId: 'T-SERVER' })
+    const triggerId = toBlockerTriggerId(action.triggerId)
+    dispatch({ type: SESSION_ACTIONS.recordBlockerDetected, code, triggerId })
+    dispatch({ type: SESSION_ACTIONS.recordActionImpression, code, triggerId })
   }, [action, code, dispatch])
 
   // STAGE E와 같은 오버레이 구조를 그대로 쓴다. 같은 모양을 내는 CSS를 두 벌 두지 않는다.

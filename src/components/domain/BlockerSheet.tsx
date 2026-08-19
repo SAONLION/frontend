@@ -82,6 +82,12 @@ export function BlockerSheet({ title, body, actions, onDismiss, onSelect, labell
 
   return (
     <div className={`blocker-sheet-overlay${isClosing ? ' blocker-sheet-overlay--closing' : ''}`}>
+      <button
+        aria-label="블로커 안내 닫기"
+        className="blocker-sheet__backdrop"
+        onClick={() => closeThen(onDismiss)}
+        type="button"
+      />
       <section
         aria-labelledby={labelledById}
         aria-modal="true"

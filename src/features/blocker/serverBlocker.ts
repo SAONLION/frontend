@@ -1,4 +1,4 @@
-import type { BlockerCode } from '../../constants/events'
+import type { BlockerCode, BlockerTriggerId } from '../../constants/events'
 
 /**
  * 서버 `pending-action`의 `blockerType`(임의 문자열)을 프론트엔드 `BlockerCode`로 좁힌다.
@@ -18,4 +18,18 @@ export function toCustomerBlockerCode(blockerType: string): BlockerCode | null {
 /** 고객에게 팝업으로 띄울 대상인지. CB1과 미지의 코드는 제외된다. */
 export function isCustomerFacingBlocker(blockerType: string): boolean {
   return toCustomerBlockerCode(blockerType) !== null
+}
+
+const SERVER_BLOCKER_TRIGGER_IDS: readonly Exclude<BlockerTriggerId, 'T-SERVER'>[] = [
+  'T-CB3-2',
+  'T-CB5-1',
+  'T-CB5-2',
+  'T-CB6-a',
+  'T-CB6-b',
+  'T-CB6-c',
+]
+
+/** 서버가 보낸 트리거를 세션 이벤트 타입으로 안전하게 좁힌다. */
+export function toBlockerTriggerId(triggerId: string | undefined): BlockerTriggerId {
+  return SERVER_BLOCKER_TRIGGER_IDS.find((knownId) => knownId === triggerId) ?? 'T-SERVER'
 }

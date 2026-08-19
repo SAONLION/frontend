@@ -3,6 +3,8 @@ import type {
   StaffCallResponse,
   StaffCallTestRequestedAtRequest,
   StaffCallTestStatusRequest,
+  TryonRequestResponse,
+  TryonRequestTestRequestedAtRequest,
 } from './types'
 
 export const STAFF_CALL_TEST_STATUSES = ['requested', 'acknowledged', 'in_progress', 'completed'] as const
@@ -51,10 +53,11 @@ function toServerLocalDateTime(minutesAgo: number): string {
  * `status`와 같은 플래그(`app.internal-test-endpoints.enabled`)로 등록되며 꺼져 있으면 404다.
  */
 export async function backdateStaffCallRequestedAt(
+  sessionId: string,
   callId: number,
   minutesAgo: number = CB3_THRESHOLD_MINUTES * 2,
 ): Promise<StaffCallResponse> {
-  const body: StaffCallTestRequestedAtRequest = { requestedAt: toServerLocalDateTime(minutesAgo) }
+  const body: StaffCallTestRequestedAtRequest = { sessionId, requestedAt: toServerLocalDateTime(minutesAgo) }
   const { data } = await apiClient.patch<StaffCallResponse>(
     `/internal/test/staff-calls/${callId}/requested-at`,
     body,
@@ -65,16 +68,18 @@ export async function backdateStaffCallRequestedAt(
 /**
  * PATCH /internal/test/tryon-requests/{tryonRequestId}/requested-at
  *
- * **아직 서버에 없다.** CB3용과 같은 형태로 만들어달라고 요청해 둔 상태다
- * (BACKEND_REQUEST P1-2 부록). 없으면 404가 오므로 호출부가 그 경우를 안내한다.
- *
- * 이것 없이는 CB6를 띄우려면 착장 요청 후 **실제로 15분**을 기다려야 한다.
- * 서버가 만드는 즉시 코드 변경 없이 동작하도록 미리 붙여둔다.
+ * CB6를 15분 기다리지 않고 시연하는 테스트 훅이다. 소유 세션 ID를 함께 보내므로
+ * 다른 세션의 요청 시각을 변경할 수 없다.
  */
 export async function backdateTryonRequestedAt(
+  sessionId: string,
   tryonRequestId: number,
   minutesAgo: number = CB6_THRESHOLD_MINUTES * 2,
-): Promise<void> {
-  const body: StaffCallTestRequestedAtRequest = { requestedAt: toServerLocalDateTime(minutesAgo) }
-  await apiClient.patch(`/internal/test/tryon-requests/${tryonRequestId}/requested-at`, body)
+): Promise<TryonRequestResponse> {
+  const body: TryonRequestTestRequestedAtRequest = { sessionId, requestedAt: toServerLocalDateTime(minutesAgo) }
+  const { data } = await apiClient.patch<TryonRequestResponse>(
+    `/internal/test/tryon-requests/${tryonRequestId}/requested-at`,
+    body,
+  )
+  return data
 }

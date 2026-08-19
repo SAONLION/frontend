@@ -4,7 +4,7 @@ import { usePreparedNavigate } from '../../app/usePreparedNavigate'
 import { PreparedLink } from '../../components/common/PreparedLink'
 import { DocentStage } from '../../components/domain/DocentStage'
 import { KineticTextReveal } from '../../components/ui/kinetic-text-reveal'
-import { ProductImageGallery } from '../../components/domain/ProductImageGallery'
+import { ProductCoverflow } from '../../components/domain/ProductCoverflow'
 import { StageCDetailShell } from '../../components/domain/StageCDetailShell'
 import { STAGE_A_ROUTES } from '../../constants/appRoutes'
 import { getKoreanColorLabel } from '../../constants/colorLabels'
@@ -257,10 +257,13 @@ function FitShell({ children, kind, selection, sizeScale = 1 }: { children: Reac
   return <StageCDetailShell className={`stage-c-fit-reference-shell stage-c-fit-reference-shell--${kind}`}>
     <div className="stage-c-fit-reference-pill">{labels[kind as 'size' | 'color' | 'try-on']}</div>
     <section className={`stage-c-fit-reference-media${images.length > 1 ? ' stage-c-fit-reference-media--gallery' : ''}`}>
-      <ProductImageGallery
+      <ProductCoverflow
         alt={`${selection.color.label} 컬러 대표 이미지`}
         images={images}
+        imageClassName="stage-c-primary-cutout"
         imageStyle={{ '--stage-c-primary-cutout-scale': sizeScale } as CSSProperties}
+        label={`${selection.color.label} 컬러 이미지`}
+        variant="product"
       />
     </section>
     {children}
