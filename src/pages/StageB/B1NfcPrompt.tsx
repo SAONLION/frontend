@@ -70,6 +70,7 @@ export default function B1NfcPrompt({
             reveal
             subtext={subtext}
             variant="md"
+            waitForDocent={false}
           />
           </div>
         </div>

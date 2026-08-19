@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router'
 import { usePreparedNavigate } from '../../app/usePreparedNavigate'
 import { PreparedLink } from '../../components/common/PreparedLink'
@@ -41,6 +41,7 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
   const staffCallService = useStaffCallService()
   const pendingRequestRef = useRef<PendingStaffRequest | null>(null)
   const [revealedCompletedState, setRevealedCompletedState] = useState<boolean | null>(null)
+  const [isOtherCallSupportingCopyVisible, setIsOtherCallSupportingCopyVisible] = useState(false)
   const exitProduct = useProductExit(sku)
   const returnPath = stageCPath(callType === 'info' ? STAGE_C_ROUTES.c2 : STAGE_C_ROUTES.c5, sku)
   const completedPath = stageCPath(callType === 'info' ? STAGE_C_PRODUCT_DETAIL_ROUTES.staffCompleted : STAGE_C_PRODUCT_DETAIL_ROUTES.otherStaffCompleted, sku)
@@ -49,6 +50,11 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
   const hasRequestContext = callType === 'other'
     ? Boolean(latestQuery && hasOtherStaffCallForQuery(state, sku, latestQuery.index))
     : state.events.some((event) => event.name === EVENT_NAMES.saCall && event.sku === sku && event.type === callType)
+
+  useLayoutEffect(() => {
+    setIsOtherCallSupportingCopyVisible(false)
+    setRevealedCompletedState(null)
+  }, [callType, completed, sku])
 
   // 서버가 알려주는 응대 진행 문구. 없으면 기존 안내만 보여준다.
   const [progressMessage, setProgressMessage] = useState<string | null>(null)
@@ -127,7 +133,7 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
               ? '제가 직원분께 궁금해 하시는\n부분을 잘 전달했어요!'
               : '더 자세히 설명드리기 위해\n직원에게 알림을 보내는 중이에요!'} waitForDocent /></h1>
           {/* 서버가 알려주는 응대 단계. 제목은 그대로 두고 이 줄만 바뀌어 대기가 진행 중임을 보인다. */}
-          {!completed && progressMessage && (
+          {!completed && revealedCompletedState === completed && progressMessage && (
             <p aria-live="polite" className="stage-c-staff-call-progress" key={progressMessage}>{progressMessage}</p>
           )}
         </div>
@@ -152,8 +158,8 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
       </header>
       <div className="stage-c-c5-staff-content">
         <section aria-label="나이비스 AI 도슨트" className="stage-c-c5-staff-docent"><DocentStage continuityKey={`staff-call-${callType}`} cue={completed ? 'success' : 'sending'} /></section>
-        <h1><KineticTextReveal autoPlay blur className="justify-center" distance={16} onRevealComplete={() => setRevealedCompletedState(completed)} splitBy="characters" stagger={0.035} text={'직원에게 궁금한 사항에 대해\n문의 알림을 보냈어요!'} waitForDocent /></h1>
-        {revealedCompletedState === completed && <p><KineticTextReveal autoPlay blur={false} className="justify-center" distance={8} splitBy="words" stagger={0.1} text="더 자세한 상담을 받아보세요" waitForDocent /></p>}
+        <h1><KineticTextReveal autoPlay blur className="justify-center" distance={16} onRevealComplete={() => setIsOtherCallSupportingCopyVisible(true)} splitBy="characters" stagger={0.035} text={'직원에게 궁금한 사항에 대해\n문의 알림을 보냈어요!'} waitForDocent /></h1>
+        {isOtherCallSupportingCopyVisible && <p><KineticTextReveal autoPlay blur={false} className="justify-center" distance={8} onRevealComplete={() => setRevealedCompletedState(completed)} splitBy="words" stagger={0.1} text="더 자세한 상담을 받아보세요" waitForDocent /></p>}
       </div>
       {revealedCompletedState === completed && <div className="stage-c-c5-response-actions">
         <PreparedLink className="stage-c-action-button" to={returnPath}>다른 것도 물어보기</PreparedLink>

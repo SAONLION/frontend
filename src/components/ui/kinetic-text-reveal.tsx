@@ -186,7 +186,7 @@ export const KineticTextReveal = forwardRef<
     const [visible, setVisible] = useState(false);
     const previousText = useRef(text);
 
-    const segments = useMemo(() => getSegments(text, splitBy), [text, splitBy]);
+    const segments = useMemo(() => getSegments(text, splitBy), [splitBy, text]);
     const animatedTotal = segments.filter((segment) => segment.animated).length;
 
     // 화면 간 Canvas를 유지할 때는 같은 리빌 인스턴스가 다음 문구를 받는다.

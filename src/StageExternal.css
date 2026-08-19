@@ -225,7 +225,9 @@
   min-height: min(31rem, 70dvh);
   justify-content: center;
   gap: 1.25rem;
-  padding-block: max(3.5rem, var(--app-safe-area-top)) max(2rem, var(--app-safe-area-bottom));
+  /* E2는 시트 안에서 아래쪽에 더 여유를 둔다. 상단은 하단의 절반으로 맞춘다. */
+  padding-top: max(1.25rem, calc(var(--app-content-edge-inset) / 2));
+  padding-bottom: var(--app-content-edge-inset);
 }
 
 .stage-overlay .stage-external-page__content--e2 > :first-child {

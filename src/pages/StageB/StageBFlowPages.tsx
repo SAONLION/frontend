@@ -15,7 +15,7 @@ import { useSession } from '../../features/session/useSession'
 import B1NfcPrompt from './B1NfcPrompt'
 import B2TagRecognizing from './B2TagRecognizing'
 
-const TAG_RECOGNITION_DELAY_MS = 900
+const TAG_RECOGNITION_DELAY_MS = 2_000
 // 실물 NFC 태그가 아직 없어 스캔 시뮬레이션에서 쓰는 기본 태그(SKU) id. 스펙 예시값과 동일하게 맞춘다.
 const DEFAULT_TAG_ID = 1
 

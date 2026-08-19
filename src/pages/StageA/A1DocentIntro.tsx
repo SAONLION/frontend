@@ -15,6 +15,7 @@ export default function A1DocentIntro({
 }: A1DocentIntroProps) {
   const [isDocentReady, setIsDocentReady] = useState(getDocentReadyState)
   const [isSubtextVisible, setIsSubtextVisible] = useState(false)
+  const [isIntroCopyComplete, setIsIntroCopyComplete] = useState(false)
 
   useEffect(() => {
     if (isDocentReady) return
@@ -65,6 +66,7 @@ export default function A1DocentIntro({
                   autoPlay
                   blur={false}
                   distance={8}
+                  onRevealComplete={() => setIsIntroCopyComplete(true)}
                   splitBy="words"
                   stagger={0.1}
                   text={subtext}
@@ -75,7 +77,7 @@ export default function A1DocentIntro({
         )}
         {/* 화면 어디를 눌러도 넘어간다는 힌트. 문구를 읽는 흐름을 방해하지 않도록
             본문이 다 나타난 뒤에 옅게 깜빡인다. */}
-        {isSubtextVisible && <p className="stage-entry-tap-hint">화면을 터치하세요</p>}
+        {isIntroCopyComplete && <p className="stage-entry-tap-hint">화면을 터치하세요</p>}
       </div>
     </main>
   )
