@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react'
-import { toPng } from 'html-to-image'
+import html2canvas from 'html2canvas-pro'
 import { ApiError } from '../../api/client'
 import { fetchJourneyCard, type JourneyCardResponse } from '../../api/journeyCard'
 import { clearDegraded, DEGRADATION_KEYS, markDegraded } from '../../features/degradation/degradationStore'
@@ -13,12 +13,6 @@ import { useSession } from '../../features/session/useSession'
 import { JourneyPassportCard } from './JourneyPassportCard'
 
 const CLOSE_ANIMATION_MS = 420
-
-// 콜라주 사진은 S3에서 바로 내려오는데 버킷이 CORS를 열어주지 않는다(백엔드/인프라 확인 필요).
-// html-to-image가 못 읽는 이미지를 빈 문자열로 남기면 캡처 자체가 통째로 실패하니,
-// 최소한 투명 1x1 픽셀로 대체해 나머지(틀·텍스트)는 저장되게 한다.
-const TRANSPARENT_PIXEL_PLACEHOLDER =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGBgAAAABQABpfZFQAAAAABJRU5ErkJggg=='
 
 /**
  * 여권 카드 탑시트. 배경 화면을 언마운트하지 않는 비차단 시트라는 점, 손잡이를 끌어 닫는 방식,
@@ -113,13 +107,13 @@ export function JourneyCardTopSheet() {
     if (!cardRef.current || isSavingImage) return
     setIsSavingImage(true)
     try {
-      const dataUrl = await toPng(cardRef.current, {
-        cacheBust: true,
-        imagePlaceholder: TRANSPARENT_PIXEL_PLACEHOLDER,
-        pixelRatio: 2,
-      })
+      // html-to-image(svg foreignObject 방식)는 WebKit/Safari에서 카드 오른쪽이 잘려
+      // 캡처되는 고질적인 버그가 있어, DOM을 직접 순회해 그리는 html2canvas로 교체했다.
+      // 콜라주 사진은 S3 버킷이 CORS를 안 열어줘서(백엔드/인프라 확인 필요) 못 읽는데,
+      // allowTaint:false(기본값)면 그 사진만 건너뛰고 나머지(틀·텍스트)는 정상 캡처된다.
+      const canvas = await html2canvas(cardRef.current, { backgroundColor: null, scale: 2 })
       const link = document.createElement('a')
-      link.href = dataUrl
+      link.href = canvas.toDataURL('image/png')
       link.download = `MCM_passport_${journeyCard?.sessionCode ?? state.sessionId ?? 'card'}.png`
       link.click()
     } catch (error) {
