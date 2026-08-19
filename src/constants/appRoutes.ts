@@ -27,5 +27,13 @@ export const STAGE_D_ROUTES = {
 
 export const SESSION_END_ROUTE = '/session-end'
 
+// 서버 Blocker의 콘텐츠 제안 후속 화면. 팝업 위에 쌓지 않고 URL을 갖는 독립 화면으로 이동한다.
+export const CONTENT_OFFER_ROUTES = {
+  email: '/content-offer/email',
+  sent: '/content-offer/sent',
+  value: '/content-offer/value',
+  staff: '/content-offer/staff',
+} as const
+
 // 시연용 목업 셸. 앱 라우터 바깥에서 처리되므로 AppRoutes에는 등록하지 않는다.
 export const DEMO_SHELL_ROUTE = '/demo'

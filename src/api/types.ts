@@ -95,11 +95,12 @@ export type PendingActionOptionDTO = { key: string; label: string }
 export type PendingActionDetailDTO = {
   actionId: number
   blockerType: string
+  ruleGroup?: string
   triggerId?: string
   tier?: number
   productId: number | null
   popupTitle: string
-  popupBody: string
+  popupBody: string | null
   options: readonly PendingActionOptionDTO[]
 }
 export type PendingActionResponse = { hasAction: boolean; action?: PendingActionDetailDTO }
@@ -125,4 +126,4 @@ export const QNA_QUESTION_TYPES = [
 export type QnaQuestionType = (typeof QNA_QUESTION_TYPES)[number]
 /** `question`은 FREE_TEXT일 때만 의미가 있다. 나머지 타입은 서버가 정형 답변을 돌려준다. */
 export type QnaRequest = { questionType: QnaQuestionType; question?: string }
-export type QnaResponse = { answer: string }
+export type QnaResponse = { answer: string; resolved: boolean }

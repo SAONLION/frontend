@@ -410,6 +410,7 @@
   width: calc(50% - 0.3125rem);
 }
 
+
 /* 손잡이는 시트 아래쪽 가장자리에 붙는다. 위로 끌어 닫는다. */
 .stage-top-sheet__drag-handle {
   position: absolute;
