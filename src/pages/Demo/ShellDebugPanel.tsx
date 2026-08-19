@@ -1,7 +1,7 @@
 import { useEffect, useState, type RefObject } from 'react'
 import { DEFAULT_PRODUCT_SKU } from '../../constants/appRoutes'
-import type { ApiCallRecord } from '../../features/demo-tools/apiCallLog'
-import { readApiLogBridge } from '../../features/demo-tools/apiLogBridge'
+import { getApiCallRecords, subscribeApiCallLog, type ApiCallRecord } from '../../features/demo-tools/apiCallLog'
+import { readApiLogBridge, type ApiLogBridge } from '../../features/demo-tools/apiLogBridge'
 import { buildScreenCatalog } from '../../features/demo-tools/screenCatalog'
 import { getStoredProductContext } from '../../features/session/sessionStorage'
 import '../../features/demo-tools/DemoTools.css'
@@ -32,11 +32,20 @@ function useAppApiRecords(iframeRef: RefObject<HTMLIFrameElement | null>, active
     if (!active) return
 
     let unsubscribe: (() => void) | null = null
+    let subscribedBridge: ApiLogBridge | null = null
 
     const attach = () => {
-      if (unsubscribe) return
       const bridge = readApiLogBridge(iframeRef.current)
-      if (!bridge) return
+      if (bridge === subscribedBridge) return
+      // 목업의 `새로고침`은 iframe 문서를 통째로 바꾼다. 이전 창의 구독을 그대로 두면
+      // 새 앱이 보내는 pending-action 기록을 영원히 못 읽는다.
+      unsubscribe?.()
+      unsubscribe = null
+      subscribedBridge = bridge
+      if (!bridge) {
+        setRecords([])
+        return
+      }
       setRecords(bridge.getRecords())
       unsubscribe = bridge.subscribe(() => setRecords(bridge.getRecords()))
     }
@@ -44,12 +53,7 @@ function useAppApiRecords(iframeRef: RefObject<HTMLIFrameElement | null>, active
     attach()
     // iframe이 새로고침되면 이전 구독은 죽은 창을 가리킨다. 주기적으로 다시 붙인다.
     const timer = window.setInterval(() => {
-      const bridge = readApiLogBridge(iframeRef.current)
-      if (!bridge) {
-        unsubscribe = null
-        return
-      }
-      if (!unsubscribe) attach()
+      attach()
     }, BRIDGE_POLL_MS)
 
     return () => {
@@ -61,13 +65,28 @@ function useAppApiRecords(iframeRef: RefObject<HTMLIFrameElement | null>, active
   return records
 }
 
+/** 좌측 하단 트리거는 iframe 바깥 셸에서 호출한다. 셸 자신의 기록도 따로 구독해야 한다. */
+function useShellApiRecords(active: boolean) {
+  const [records, setRecords] = useState<readonly ApiCallRecord[]>([])
+
+  useEffect(() => {
+    if (!active) return
+    setRecords(getApiCallRecords())
+    return subscribeApiCallLog(() => setRecords(getApiCallRecords()))
+  }, [active])
+
+  return records
+}
+
 export default function ShellDebugPanel({ iframeRef }: ShellDebugPanelProps) {
   const [tab, setTab] = useState<Tab | null>(null)
-  const records = useAppApiRecords(iframeRef, tab === 'api')
+  const isApiTabActive = tab === 'api'
+  const appRecords = useAppApiRecords(iframeRef, isApiTabActive)
+  const shellRecords = useShellApiRecords(isApiTabActive)
 
   // `:sku` 자리는 앱이 저장해 둔 제품으로 채운다. 태그 전이면 시연 기본 제품을 쓴다.
   const catalog = buildScreenCatalog(getStoredProductContext()?.currentSku ?? DEFAULT_PRODUCT_SKU)
-  const failedCount = records.filter((record) => record.failed).length
+  const failedCount = [...appRecords, ...shellRecords].filter((record) => record.failed).length
 
   const go = (path: string) => {
     const frame = iframeRef.current
@@ -90,7 +109,7 @@ export default function ShellDebugPanel({ iframeRef }: ShellDebugPanelProps) {
           화면
         </button>
         <button className="demo-tools__button" onClick={() => toggle('api')} type="button">
-          API{records.length > 0 ? ` ${records.length}` : ''}
+          API{appRecords.length + shellRecords.length > 0 ? ` ${appRecords.length + shellRecords.length}` : ''}
           {failedCount > 0 && <em className="demo-tools__failed"> ●{failedCount}</em>}
         </button>
       </div>
@@ -110,12 +129,23 @@ export default function ShellDebugPanel({ iframeRef }: ShellDebugPanelProps) {
         </nav>
       )}
 
-      {tab === 'api' && (
-        <section aria-label="API 호출 기록" className="demo-tools__panel">
-          <p className="demo-tools__group">앱 호출 기록 (최근 40건)</p>
-          {records.length === 0
-            ? <p className="demo-tools__empty">아직 호출이 없어요.</p>
-            : records.map((record) => (
+        {tab === 'api' && (
+          <section aria-label="API 호출 기록" className="demo-tools__panel">
+          <ApiRecordGroup label="셸 호출 기록 (좌측 하단 트리거 · 최근 40건)" records={shellRecords} />
+          <ApiRecordGroup label="앱 호출 기록 (목업 화면 · 최근 40건)" records={appRecords} />
+          </section>
+        )}
+    </div>
+  )
+}
+
+function ApiRecordGroup({ label, records }: { label: string; records: readonly ApiCallRecord[] }) {
+  return (
+    <div>
+      <p className="demo-tools__group">{label}</p>
+      {records.length === 0
+        ? <p className="demo-tools__empty">아직 호출이 없어요.</p>
+        : records.map((record) => (
               <div className="demo-tools__row" data-failed={record.failed ? '' : undefined} key={record.id}>
                 <span>{record.method} {record.path}</span>
                 <span>
@@ -125,8 +155,6 @@ export default function ShellDebugPanel({ iframeRef }: ShellDebugPanelProps) {
                 </span>
               </div>
             ))}
-        </section>
-      )}
     </div>
   )
 }

@@ -30,13 +30,14 @@ function emit() {
   listeners.forEach((listener) => listener())
 }
 
-/** 세션 ID는 길기만 하고 호출을 구분하는 데 도움이 안 되므로 가린다. */
+/** 세션 ID 전체는 가리되, 셸과 iframe이 같은 세션을 썼는지는 확인할 수 있게 앞 8자리만 남긴다. */
 function toDisplayPath(url: string | undefined): string {
   if (!url) return '(unknown)'
   const [path = '', query] = url.split('?')
   if (!query) return path
   const params = new URLSearchParams(query)
-  if (params.has('sessionId')) params.set('sessionId', '…')
+  const sessionId = params.get('sessionId')
+  if (sessionId) params.set('sessionId', `${sessionId.slice(0, 8)}…`)
   return `${path}?${params.toString()}`
 }
 

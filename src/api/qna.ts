@@ -6,9 +6,11 @@ export async function askProductQna(
   productId: number,
   sessionId: string,
   input: QnaRequest,
+  options?: { timeoutMs?: number },
 ): Promise<QnaResponse> {
   const { data } = await apiClient.post<QnaResponse>(`/api/v1/products/${productId}/qna`, input, {
     params: { sessionId },
+    timeout: options?.timeoutMs,
   })
   return data
 }

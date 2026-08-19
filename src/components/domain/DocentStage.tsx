@@ -32,12 +32,15 @@ export function DocentStage({
   cue,
   className = '',
   continuityKey,
+  cameraMode = 'default',
   immediate = false,
   onReady,
 }: {
   cue: DocentCue;
   className?: string;
   continuityKey?: string;
+  /** A2와 같은 근접 프레이밍이 필요한 독립 안내 화면에서만 쓴다. */
+  cameraMode?: 'default' | 'close';
   immediate?: boolean;
   onReady?: () => void;
 }) {
@@ -68,7 +71,7 @@ export function DocentStage({
       ) : (
         <DocentErrorBoundary>
           <Suspense fallback={<div aria-hidden="true" className={FALLBACK_CLASSNAME} />}>
-            <DocentCanvas cue={cue} continuityKey={continuityKey} onReady={() => {
+          <DocentCanvas cameraMode={cameraMode} cue={cue} continuityKey={continuityKey} onReady={() => {
               markDocentReady();
               onReady?.();
             }} />

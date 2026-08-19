@@ -46,7 +46,7 @@ export function usePendingActionPolling() {
             !next
             || respondedIds.current.has(next.actionId)
             || dismissedSignatures.current.has(actionSignature(next))
-            || !isCustomerFacingBlocker(next.blockerType)
+            || !isCustomerFacingBlocker(next.blockerType, next.ruleGroup)
           ) {
             setAction(null)
             return

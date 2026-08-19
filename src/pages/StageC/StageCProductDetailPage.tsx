@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useLocation, useParams } from 'react-router'
 import stylingLifestyleImage from '../../assets/images/product-styling-lifestyle.webp'
 import { usePreparedNavigate } from '../../app/usePreparedNavigate'
 import { PreparedLink } from '../../components/common/PreparedLink'
-import { ProductImageGallery } from '../../components/domain/ProductImageGallery'
+import { ProductCoverflow } from '../../components/domain/ProductCoverflow'
 import { GlassInfoCard, StageCDetailShell } from '../../components/domain/StageCDetailShell'
 import {
   STAGE_C_PRODUCT_DETAIL_ROUTES,
@@ -64,8 +64,6 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
   const navigate = usePreparedNavigate()
   const exitProduct = useProductExit(sku)
   const viewed = useRef(false)
-  const galleryTrackRef = useRef<HTMLDivElement>(null)
-  const [activeImageIndex, setActiveImageIndex] = useState(0)
   const devScenario = import.meta.env.DEV && isStageFDevScenario(location.state)
     ? location.state.stageFDevScenario
     : null
@@ -113,39 +111,6 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
       : topicLines.length > 0 ? topicLines : ['정확한 제품 안내는 직원에게 문의해 주세요.']
   const imageCount = images.length
 
-  const scrollToImage = (nextIndex: number) => {
-    if (imageCount === 0) {
-      return
-    }
-
-    const normalizedIndex = (nextIndex + imageCount) % imageCount
-    const track = galleryTrackRef.current
-
-    if (track) {
-      track.scrollTo({
-        left: track.clientWidth * normalizedIndex,
-        behavior: 'smooth',
-      })
-    }
-
-    setActiveImageIndex(normalizedIndex)
-  }
-
-  const syncActiveImageFromScroll = () => {
-    const track = galleryTrackRef.current
-
-    if (!track || imageCount === 0 || track.clientWidth === 0) {
-      return
-    }
-
-    const nextIndex = Math.max(
-      0,
-      Math.min(imageCount - 1, Math.round(track.scrollLeft / track.clientWidth)),
-    )
-
-    setActiveImageIndex(nextIndex)
-  }
-
   const openPurchaseInquiry = () => {
     navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn, sku))
   }
@@ -162,58 +127,19 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
       </header>
 
       <section className={`stage-c-product-detail-media stage-c-product-detail-media--${topic}`} aria-label={`${topicTitles[topic]} 안내 미디어`}>
-        {topic !== 'styling' && <ProductImageGallery alt={product.name} images={images} />}
-        {topic === 'styling' && imageCount > 0 && (
-          <div className={`stage-c-gallery${imageCount === 1 ? ' stage-c-gallery--single' : ''}`}>
-            <div
-              aria-label="스타일링 제품 이미지"
-              className="stage-c-gallery-track"
-              onScroll={syncActiveImageFromScroll}
-              ref={galleryTrackRef}
-              role="region"
-              tabIndex={0}
-            >
-              {images.map((image, imageIndex) => (
-                <img
-                  alt={`${product.name} ${imageIndex + 1}번째 이미지`}
-                  decoding="async"
-                  key={image}
-                  loading={imageIndex === 0 ? 'eager' : 'lazy'}
-                  src={image}
-                />
-              ))}
-            </div>
-            {imageCount > 1 && <div className="stage-c-gallery-controls">
-              <button
-                aria-label="이전 제품 이미지"
-                onClick={() => scrollToImage(activeImageIndex - 1)}
-                type="button"
-              >
-                ‹
-              </button>
-              <button
-                aria-label="다음 제품 이미지"
-                onClick={() => scrollToImage(activeImageIndex + 1)}
-                type="button"
-              >
-                ›
-              </button>
-            </div>}
-            {imageCount > 1 && <span aria-label={`${activeImageIndex + 1}번째 이미지, 전체 ${imageCount}개`} className="stage-c-gallery-dots">
-              {images.map((image, imageIndex) => <i aria-hidden="true" className={imageIndex === activeImageIndex ? 'is-active' : ''} key={image} />)}
-            </span>}
-          </div>
-        )}
+        {imageCount > 0 && <ProductCoverflow alt={product.name} images={images} label={`${topicTitles[topic]} 제품 이미지`} variant={topic === 'styling' ? 'styling' : 'product'} />}
         {topic === 'styling' && imageCount === 0 && <img alt={product.name} className="stage-c-primary-cutout" decoding="async" fetchPriority="high" src={product.imageUrl} />}
       </section>
 
-      <section className="stage-c-product-detail-summary">
-        {materialFacts.length > 0
-          ? materialFacts.map((fact) => (
-            <p key={fact.label}>· <span className="stage-c-product-detail-summary__label">{fact.label}</span> : {fact.value}</p>
-          ))
-          : lines.map((line) => <p key={line}>· {renderSummaryLine(line)}</p>)}
-      </section>
+      {topic !== 'styling' && (
+        <section className="stage-c-product-detail-summary">
+          {materialFacts.length > 0
+            ? materialFacts.map((fact) => (
+              <p key={fact.label}>· <span className="stage-c-product-detail-summary__label">{fact.label}</span> : {fact.value}</p>
+            ))
+            : lines.map((line) => <p key={line}>· {renderSummaryLine(line)}</p>)}
+        </section>
+      )}
 
       {topic !== 'styling' && (
         <button className="stage-c-action-button stage-c-product-detail-more-button" onClick={requestStaffDetails} type="button">

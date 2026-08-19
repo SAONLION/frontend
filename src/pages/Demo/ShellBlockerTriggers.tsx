@@ -13,9 +13,10 @@ import '../../features/demo-tools/DemoTools.css'
  * **왜 바깥인가.** 관객이 보는 것은 폰 목업 화면이다. 버튼이 그 안에 있으면 시연 화면에 잡힌다.
  * 셸에 두면 진행자만 쓰고 관객에게는 보이지 않는다.
  *
- * **왜 동작하는가.** 서버가 CB3는 직원 호출 5분 뒤, CB6는 착장 요청 15분 뒤에 만든다.
+ * **왜 동작하는가.** 서버가 CB3는 직원 호출 5분 뒤, CB6 조건은 착장 요청 15분 뒤에 감지한다.
+ * CB6 조건의 고객 팝업은 현재 F23-1 `CONTENT_OFFER`로 통합되어 내려온다.
  * 시연에서 그 시간을 기다릴 수 없으므로 `internal-test` 백데이트 훅으로 요청 시각을 과거로 돌려
- * 조건을 즉시 성립시킨다. 팝업 자체는 iframe 안 앱의 4초 폴링이 가져온다.
+ * 조건을 즉시 성립시킨다. 팝업 자체는 iframe 안 앱의 5초 폴링이 가져온다.
  *
  * **세션은 `localStorage`로 공유한다.** 셸과 앱이 같은 오리진이라 앱이 발급한 세션을 그대로 읽는다.
  */
@@ -40,7 +41,7 @@ export default function ShellBlockerTriggers() {
       productId: context?.productId ?? undefined,
       reason: STAFF_CALL_REASONS.other,
     })
-    await backdateStaffCallRequestedAt(call.callId)
+    await backdateStaffCallRequestedAt(sessionId, call.callId)
     return `CB3 조건 성립 (호출 #${call.callId}). ${DETECTION_HINT}.`
   }
 
@@ -50,13 +51,19 @@ export default function ShellBlockerTriggers() {
     if (!context || context.currentSkuId === null) {
       throw new ApiError(0, null, '앱에서 제품을 먼저 태그해야 한다')
     }
+    // 세션이 끝나 재발급됐거나 목업을 다시 연 직후에는 이전 세션의 제품 문맥이 잠시 남을 수 있다.
+    // 이 상태의 SKU로 새 세션에 착장 요청을 만들면 201이어도 서버가 해당 세션의 F23 조건으로
+    // 인식하지 않을 수 있다. 버튼이 애매한 성공 문구를 보이지 않게 명시적으로 막는다.
+    if (context.sessionId !== sessionId) {
+      throw new ApiError(0, null, '현재 세션과 제품 태그 정보가 달라요. “처음부터” 후 제품을 다시 태그해주세요')
+    }
     const tryon = await createTryonRequest(sessionId, {
       sku: context.currentSkuId,
       size: TRYON_FALLBACK_SIZE,
       color: TRYON_FALLBACK_COLOR,
     })
-    await backdateTryonRequestedAt(tryon.tryonRequestId)
-    return `CB6 조건 성립 (착장 #${tryon.tryonRequestId}). ${DETECTION_HINT}.`
+    await backdateTryonRequestedAt(sessionId, tryon.tryonRequestId)
+    return `F23-1(CB6 조건) 성립 (착장 #${tryon.tryonRequestId}). ${DETECTION_HINT}.`
   }
 
   const run = (code: 'CB3' | 'CB6', task: (sessionId: string) => Promise<string>) => {
@@ -71,12 +78,12 @@ export default function ShellBlockerTriggers() {
     void task(sessionId)
       .then((message) => setStatus({ tone: 'info', message }))
       .catch((error: unknown) => {
-        // 백데이트 훅이 서버에 없으면 404다. CB6는 아직 그 상태라 원인을 구분해 알린다.
+        // 테스트 훅이 배포 환경에서 비활성화돼 있으면 404다.
         const notFound = error instanceof ApiError && error.status === 404
         setStatus({
           tone: 'error',
           message: notFound
-            ? `${code} 백데이트 훅이 서버에 없다(404). 백엔드 요청 대기 중.`
+            ? `${code} 백데이트 훅이 현재 환경에서 비활성화돼 있다(404).`
             : `${code} 실패: ${error instanceof Error ? error.message : String(error)}`,
         })
       })
@@ -99,7 +106,7 @@ export default function ShellBlockerTriggers() {
         onClick={() => run('CB6', triggerCb6)}
         type="button"
       >
-        {busy === 'CB6' ? '…' : 'CB6 발동'}
+        {busy === 'CB6' ? '…' : 'F23 발동 (CB6 조건)'}
       </button>
       {status && (
         <p className="demo-tools__status" data-tone={status.tone} role="status">

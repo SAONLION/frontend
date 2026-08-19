@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router'
 import { usePreparedNavigate } from '../../app/usePreparedNavigate'
 import { PreparedLink } from '../../components/common/PreparedLink'
 import { DocentStage } from '../../components/domain/DocentStage'
 import { KineticTextReveal } from '../../components/ui/kinetic-text-reveal'
-import { ProductImageGallery } from '../../components/domain/ProductImageGallery'
+import { ProductCoverflow } from '../../components/domain/ProductCoverflow'
 import { StageCDetailShell } from '../../components/domain/StageCDetailShell'
 import { STAGE_A_ROUTES } from '../../constants/appRoutes'
 import { getKoreanColorLabel } from '../../constants/colorLabels'
@@ -227,12 +227,17 @@ function FitStatusScreen({
     'purchase-completed': { title: '직원에게 구매 안내 요청을 보냈어요!', description: '가격과 관련 정보들을 곧 안내해 드릴게요!' },
   }[status]
 
+  useLayoutEffect(() => {
+    setIsDescriptionVisible(false)
+    setRevealedStatus(null)
+  }, [status])
+
   return (
     <StageCDetailShell className="stage-c-fit-status-shell">
       <div className="stage-c-fit-status-content">
         <section aria-label="나이비스 AI 도슨트" className="stage-c-fit-status-docent"><DocentStage continuityKey="fit-status" cue={status === 'pending' ? 'waiting' : 'success'} /></section>
-        <h1 className={status === 'pending' ? 'stage-c-fit-status-title--pending' : 'stage-c-fit-status-title--single-line'}><KineticTextReveal autoPlay blur className="justify-center" distance={16} onRevealComplete={() => { setIsDescriptionVisible(true); setRevealedStatus(status) }} splitBy="characters" stagger={0.035} text={content.title} waitForDocent /></h1>
-        {content.description && isDescriptionVisible && <p><KineticTextReveal autoPlay blur={false} className="justify-center" distance={8} splitBy="words" stagger={0.1} text={content.description} waitForDocent /></p>}
+        <h1 className={status === 'pending' ? 'stage-c-fit-status-title--pending' : 'stage-c-fit-status-title--single-line'}><KineticTextReveal autoPlay blur className="justify-center" distance={16} onRevealComplete={() => { setIsDescriptionVisible(true); if (!content.description) setRevealedStatus(status) }} splitBy="characters" stagger={0.035} text={content.title} waitForDocent /></h1>
+        {content.description && isDescriptionVisible && <p><KineticTextReveal autoPlay blur={false} className="justify-center" distance={8} onRevealComplete={() => setRevealedStatus(status)} splitBy="words" stagger={0.1} text={content.description} waitForDocent /></p>}
       </div>
       {revealedStatus === status && status === 'completed' && onPurchaseInquiry && onExitProduct && (
         <div className="stage-c-fit-status-actions">
@@ -257,10 +262,13 @@ function FitShell({ children, kind, selection, sizeScale = 1 }: { children: Reac
   return <StageCDetailShell className={`stage-c-fit-reference-shell stage-c-fit-reference-shell--${kind}`}>
     <div className="stage-c-fit-reference-pill">{labels[kind as 'size' | 'color' | 'try-on']}</div>
     <section className={`stage-c-fit-reference-media${images.length > 1 ? ' stage-c-fit-reference-media--gallery' : ''}`}>
-      <ProductImageGallery
+      <ProductCoverflow
         alt={`${selection.color.label} 컬러 대표 이미지`}
         images={images}
+        imageClassName="stage-c-primary-cutout"
         imageStyle={{ '--stage-c-primary-cutout-scale': sizeScale } as CSSProperties}
+        label={`${selection.color.label} 컬러 이미지`}
+        variant="product"
       />
     </section>
     {children}

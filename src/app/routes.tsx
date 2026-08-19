@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router';
-import { SESSION_END_ROUTE, STAGE_A_ROUTES, STAGE_B_ROUTES, STAGE_D_ROUTES } from '../constants/appRoutes';
+import { CONTENT_OFFER_ROUTES, SESSION_END_ROUTE, STAGE_A_ROUTES, STAGE_B_ROUTES, STAGE_D_ROUTES } from '../constants/appRoutes';
 import { STAGE_C_PRODUCT_DETAIL_ROUTES, STAGE_C_ROUTES, STAGE_C_SCREEN_IDS } from '../constants/stageC';
 import AppLayout from './AppLayout';
 import { StageAIntroPage, StageANicknamePage } from '../pages/StageA/StageAFlowPages';
@@ -17,6 +17,7 @@ import { StageCStaffCallTriggerPage } from '../pages/StageC/StageCOverlayTrigger
 import SessionEndPage from '../pages/SessionEndPage';
 import NotFoundPage from '../pages/NotFoundPage';
 import { StageFDevPreviewPage } from '../pages/StageF/StageFDevPreviewPage';
+import { ContentOfferPage } from '../features/blocker/ContentOfferFlow';
 
 const STAGE_D1_HANDOFF_PATH = STAGE_C_ROUTES.comingSoon.replace(':screenId', STAGE_C_SCREEN_IDS.stageD1);
 const STAGE_E1_HANDOFF_PATH = STAGE_C_ROUTES.comingSoon.replace(':screenId', STAGE_C_SCREEN_IDS.stageE1);
@@ -32,6 +33,11 @@ export function AppRoutes() {
 
         <Route element={<StageBNfcPromptPage />} path={STAGE_B_ROUTES.nfcPrompt} />
         <Route element={<StageBRecognizingPage />} path={STAGE_B_ROUTES.recognizing} />
+
+        <Route element={<ContentOfferPage screen="email" />} path={CONTENT_OFFER_ROUTES.email} />
+        <Route element={<ContentOfferPage screen="sent" />} path={CONTENT_OFFER_ROUTES.sent} />
+        <Route element={<ContentOfferPage screen="value" />} path={CONTENT_OFFER_ROUTES.value} />
+        <Route element={<ContentOfferPage screen="staff" />} path={CONTENT_OFFER_ROUTES.staff} />
 
         <Route element={<StageCHubPage screenId={STAGE_C_SCREEN_IDS.c1} />} path={STAGE_C_ROUTES.c1} />
         <Route element={<StageCHubPage screenId={STAGE_C_SCREEN_IDS.c2} />} path={STAGE_C_ROUTES.c2} />

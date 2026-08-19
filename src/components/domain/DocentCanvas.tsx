@@ -474,13 +474,13 @@ function useReducedMotionPreference() {
   return reducedMotion
 }
 
-function CameraFraming({ cue }: { cue: DocentCue }) {
+function CameraFraming({ cue, cameraMode }: { cue: DocentCue; cameraMode: 'default' | 'close' }) {
   const { camera } = useThree()
 
   useEffect(() => {
     if (!(camera instanceof THREE.PerspectiveCamera)) return
 
-    if (cue === 'listen') {
+    if (cue === 'listen' || cameraMode === 'close') {
       // 물음표까지 담을 만큼 세로 프레임을 넓히되, 카메라를 가까이 옮겨
       // A1의 greet cue와 도슨트 본체가 같은 크기로 보이도록 보정한다.
       camera.fov = LISTEN_CAMERA_FOV
@@ -490,7 +490,7 @@ function CameraFraming({ cue }: { cue: DocentCue }) {
       camera.position.set(0, 0, 9.75)
     }
     camera.updateProjectionMatrix()
-  }, [camera, cue])
+  }, [camera, cameraMode, cue])
 
   return null
 }
@@ -663,7 +663,7 @@ function smoothstep(progress: number) {
   return progress * progress * (3 - 2 * progress)
 }
 
-export default function DocentCanvas({ cue, continuityKey, onReady }: { cue: DocentCue; continuityKey?: string; onReady?: () => void }) {
+export default function DocentCanvas({ cameraMode = 'default', cue, continuityKey, onReady }: { cameraMode?: 'default' | 'close'; cue: DocentCue; continuityKey?: string; onReady?: () => void }) {
   const reducedMotion = useReducedMotionPreference()
 
   return (
@@ -683,7 +683,7 @@ export default function DocentCanvas({ cue, continuityKey, onReady }: { cue: Doc
         {/* 하단 필: 구의 중·하단까지 빛이 돌아 들어오게 한다 */}
         <pointLight color="#ffd79b" distance={7} intensity={1.35} position={[0, -2.6, 2.4]} />
         <StudioEnvironment />
-      <CameraFraming cue={cue} />
+      <CameraFraming cameraMode={cameraMode} cue={cue} />
         <Model continuityKey={continuityKey} cue={cue} onReady={onReady} reducedMotion={reducedMotion} />
       </Canvas>
     </>

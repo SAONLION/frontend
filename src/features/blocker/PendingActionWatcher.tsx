@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { respondToAction } from '../../api/pendingActions'
 import { BlockerSheet } from '../../components/domain/BlockerSheet'
-import { toCustomerBlockerCode } from './serverBlocker'
+import { toBlockerTriggerId, toCustomerBlockerCode } from './serverBlocker'
 import { usePendingActionPolling } from './usePendingActionPolling'
 import { SESSION_ACTIONS } from '../session/sessionTypes'
 import { useSession } from '../session/useSession'
 import { usePreparedNavigate } from '../../app/usePreparedNavigate'
-import { STAGE_D_ROUTES } from '../../constants/appRoutes'
+import { CONTENT_OFFER_ROUTES, STAGE_D_ROUTES } from '../../constants/appRoutes'
 import E2RequestReceived from '../../pages/StageE/E2RequestReceived'
 
 const DISMISS_RESPONSE_KEY = 'dismissed'
@@ -20,6 +20,8 @@ const SHEET_TITLE_ID = 'blocker-sheet-title'
  */
 const NEXT_STEP_STAFF_CALL = 'STAFF_CALL_CREATED'
 const NEXT_STEP_RECOMMENDATIONS = 'SHOW_RECOMMENDATIONS'
+const NEXT_STEP_VALUE_CONTENT = 'SHOW_VALUE_CONTENT'
+const NEXT_STEP_CAPTURE_CONTACT = 'CAPTURE_CONTACT'
 const SHEET_CLOSE_ANIMATION_MS = 420
 
 /**
@@ -118,11 +120,11 @@ function StaffRequestReceivedSheet({ requestLabel, onClose }: { requestLabel: st
  * 서버가 감지한 Blocker 팝업을 폴링해 어느 화면에서든 띄운다.
  *
  * Blocker 감지의 소유자는 서버다. 프론트엔드는 감지하지 않고, 노출·응답만 세션 타임라인에 기록한다.
- * 서버가 트리거 ID를 주지 않아 `T-SERVER`로 기록한다.
+ * 서버가 준 `triggerId`를 기록하며, 누락되거나 알 수 없는 값만 `T-SERVER`로 남긴다.
  *
  * **선택 이후가 이 컴포넌트의 책임이다.** 서버는 `actionNextStep`으로 다음 단계를 지시하는데,
- * 이 값을 읽지 않으면 고객이 버튼을 눌러도 시트만 닫혀 고장으로 보인다. CB3·CB6가 실제로
- * 발동하기 시작한 2026-08-19부터 실사용 경로가 됐다.
+ * 이 값을 읽지 않으면 고객이 버튼을 눌러도 시트만 닫혀 고장으로 보인다. F23-1은
+ * `CONTENT_OFFER`로 표시하되 ruleGroup(CB5/CB6)은 세션 이벤트에 보존한다.
  */
 export function PendingActionWatcher() {
   const { action, clear, dismiss } = usePendingActionPolling()
@@ -131,20 +133,35 @@ export function PendingActionWatcher() {
   const recordedIds = useRef(new Set<number>())
   /** 직원 호출이 만들어졌을 때 띄우는 접수 화면. 눌린 선택지 라벨을 담는다. */
   const [staffRequestLabel, setStaffRequestLabel] = useState<string | null>(null)
+  const [responseError, setResponseError] = useState(false)
 
-  const code = action ? toCustomerBlockerCode(action.blockerType) : null
+  const code = action ? toCustomerBlockerCode(action.blockerType, action.ruleGroup) : null
 
   useEffect(() => {
     if (!action || !code || recordedIds.current.has(action.actionId)) return
     recordedIds.current.add(action.actionId)
-    dispatch({ type: SESSION_ACTIONS.recordBlockerDetected, code, triggerId: 'T-SERVER' })
-    dispatch({ type: SESSION_ACTIONS.recordActionImpression, code, triggerId: 'T-SERVER' })
+    const triggerId = toBlockerTriggerId(action.triggerId)
+    dispatch({ type: SESSION_ACTIONS.recordBlockerDetected, code, triggerId })
+    dispatch({ type: SESSION_ACTIONS.recordActionImpression, code, triggerId })
   }, [action, code, dispatch])
 
   // STAGE E와 같은 오버레이 구조를 그대로 쓴다. 같은 모양을 내는 CSS를 두 벌 두지 않는다.
   if (staffRequestLabel !== null) {
     return (
       <StaffRequestReceivedSheet requestLabel={staffRequestLabel} onClose={() => setStaffRequestLabel(null)} />
+    )
+  }
+
+  if (responseError) {
+    return (
+      <BlockerSheet
+        actions={[{ key: 'close', label: '확인' }]}
+        body="선택을 전달하지 못했어요. 잠시 후 다시 시도해주세요."
+        labelledById={SHEET_TITLE_ID}
+        title="안내를 준비하지 못했어요"
+        onDismiss={() => setResponseError(false)}
+        onSelect={() => setResponseError(false)}
+      />
     )
   }
 
@@ -172,11 +189,21 @@ export function PendingActionWatcher() {
         if (result.actionNextStep === NEXT_STEP_RECOMMENDATIONS) {
           // D3는 진입 가드가 없다. 방문 목적이 없으면 '방문'으로 대체되고 추천은 새로 조회한다.
           navigate(STAGE_D_ROUTES.personalizedRecommend)
+          return
+        }
+        if (result.actionNextStep === NEXT_STEP_VALUE_CONTENT || result.actionNextStep === NEXT_STEP_CAPTURE_CONTACT) {
+          navigate(result.actionNextStep === NEXT_STEP_CAPTURE_CONTACT ? CONTENT_OFFER_ROUTES.email : CONTENT_OFFER_ROUTES.value, {
+            state: {
+              actionId: action.actionId,
+              productId: action.productId,
+            },
+          })
         }
       })
       .catch((error: unknown) => {
-        // 후속 화면을 띄우지 못해도 팝업은 이미 닫혔다. 화면을 막지 않는다.
+        // 응답 기록 실패를 조용히 닫으면 고객에게 무반응으로 보인다.
         console.error('팝업 응답 기록에 실패했습니다.', error)
+        setResponseError(true)
       })
   }
 
@@ -184,6 +211,7 @@ export function PendingActionWatcher() {
     <BlockerSheet
       actions={action.options}
       body={action.popupBody}
+      highlightedActionKeys={action.blockerType === 'CONTENT_OFFER' ? ['ask_price', 'show_detail_reason'] : []}
       labelledById={SHEET_TITLE_ID}
       title={action.popupTitle}
       onDismiss={() => respond(DISMISS_RESPONSE_KEY)}

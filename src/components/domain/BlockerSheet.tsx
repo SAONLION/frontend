@@ -15,6 +15,8 @@ type BlockerSheetProps = {
   onDismiss: () => void
   onSelect: (key: string) => void
   labelledById: string
+  /** F23처럼 동등한 두 개의 적극 선택지가 있는 경우 브론즈 스타일을 적용한다. */
+  highlightedActionKeys?: readonly string[]
 }
 
 /**
@@ -23,7 +25,7 @@ type BlockerSheetProps = {
  * F2~F4 개발 오버레이의 시트 디자인을 서버 `pending-action` 팝업에 적용한 것이다.
  * 문구와 선택지는 서버가 주고, 시각 언어와 상호작용(아래로 끌어 닫기)만 여기서 담당한다.
  */
-export function BlockerSheet({ title, body, actions, onDismiss, onSelect, labelledById }: BlockerSheetProps) {
+export function BlockerSheet({ title, body, actions, onDismiss, onSelect, labelledById, highlightedActionKeys = [] }: BlockerSheetProps) {
   const sheetRef = useRef<HTMLElement | null>(null)
   const dragStartYRef = useRef<number | null>(null)
   const dragOffsetRef = useRef(0)
@@ -82,6 +84,12 @@ export function BlockerSheet({ title, body, actions, onDismiss, onSelect, labell
 
   return (
     <div className={`blocker-sheet-overlay${isClosing ? ' blocker-sheet-overlay--closing' : ''}`}>
+      <button
+        aria-label="블로커 안내 닫기"
+        className="blocker-sheet__backdrop"
+        onClick={() => closeThen(onDismiss)}
+        type="button"
+      />
       <section
         aria-labelledby={labelledById}
         aria-modal="true"
@@ -104,7 +112,7 @@ export function BlockerSheet({ title, body, actions, onDismiss, onSelect, labell
           {actions.map((action, index) => (
             <button
               key={action.key}
-              className={`blocker-sheet__button${index === 0 ? ' blocker-sheet__button--primary' : ''}`}
+              className={`blocker-sheet__button${index === 0 || highlightedActionKeys.includes(action.key) ? ' blocker-sheet__button--primary' : ''}`}
               type="button"
               onClick={() => closeThen(() => onSelect(action.key))}
             >

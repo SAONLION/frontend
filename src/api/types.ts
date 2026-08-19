@@ -40,7 +40,8 @@ export type PurchaseInquiryResponse = { purchaseInquiryId: number; sku: number; 
 // --- InternalTest (시연 전용) ---
 export type StaffCallTestStatusRequest = { status: string }
 /** 오프셋 없는 `LocalDateTime` 문자열(`2026-08-18T17:33:43`)을 보낸다. */
-export type StaffCallTestRequestedAtRequest = { requestedAt: string }
+export type StaffCallTestRequestedAtRequest = { sessionId: string; requestedAt: string }
+export type TryonRequestTestRequestedAtRequest = { sessionId: string; requestedAt: string }
 
 // --- InteractionLog ---
 export type InteractionLogRequest = { sku: number; interestType: InterestType; subOption?: string; durationSeconds?: number }
@@ -57,7 +58,12 @@ export type ProductSummaryDTO = { id: number; name: string; category: string; im
 export type HubOptionDTO = { type: InterestType; label: string }
 export type ProductTagScanResponseDTO = { product: ProductSummaryDTO; hubOptions: readonly HubOptionDTO[] }
 
-export type SubOptionDTO = { id: number; label: string; type: string }
+export type SubOptionDTO = {
+  id: number
+  label: string
+  type: string
+  mediation?: 'INFO' | 'STAFF_MEDIATED'
+}
 
 export type HubOptionResponse = {
   optionId: string
@@ -89,9 +95,12 @@ export type PendingActionOptionDTO = { key: string; label: string }
 export type PendingActionDetailDTO = {
   actionId: number
   blockerType: string
+  ruleGroup?: string
+  triggerId?: string
+  tier?: number
   productId: number | null
   popupTitle: string
-  popupBody: string
+  popupBody: string | null
   options: readonly PendingActionOptionDTO[]
 }
 export type PendingActionResponse = { hasAction: boolean; action?: PendingActionDetailDTO }
@@ -117,4 +126,4 @@ export const QNA_QUESTION_TYPES = [
 export type QnaQuestionType = (typeof QNA_QUESTION_TYPES)[number]
 /** `question`은 FREE_TEXT일 때만 의미가 있다. 나머지 타입은 서버가 정형 답변을 돌려준다. */
 export type QnaRequest = { questionType: QnaQuestionType; question?: string }
-export type QnaResponse = { answer: string }
+export type QnaResponse = { answer: string; resolved: boolean }
