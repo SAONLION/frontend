@@ -61,11 +61,20 @@ function arrangeCollageImages(images: readonly JourneyCardCollageImage[]): reado
 function CollagePhoto({ image, index = 0 }: CollageSlotProps) {
   const [isVisible, setIsVisible] = useState(false)
   const imageLoadVersion = useRef(0)
+  const imageElementRef = useRef<HTMLImageElement>(null)
+  const imageUrl = image?.imageUrl
 
   useEffect(() => {
     imageLoadVersion.current += 1
     setIsVisible(false)
-  }, [image?.imageUrl])
+    const element = imageElementRef.current
+    if (!imageUrl || !element) return
+
+    // React prop 반영 순서에 기대지 않고, S3 CORS 계약의 요구대로 `crossOrigin`을
+    // 실제 요청 URL보다 먼저 설정한다. 이 한 개의 <img>가 화면 표시와 PNG 저장에 공용된다.
+    element.crossOrigin = 'anonymous'
+    element.src = imageUrl
+  }, [imageUrl])
 
   if (!image) return null
 
@@ -81,13 +90,10 @@ function CollagePhoto({ image, index = 0 }: CollageSlotProps) {
     <img
       alt=""
       className={`stage-b-journey-card-photo${isVisible ? ' stage-b-journey-card-photo--visible' : ''} size-full object-contain object-center mix-blend-multiply`}
-      // 여권 저장 시 html2canvas가 이 S3 이미지를 캔버스로 내보낼 수 있어야 한다.
-      // 한 번만 로드하는 실제 표시용 이미지에 CORS 모드를 지정한다.
-      crossOrigin="anonymous"
       decoding="async"
       onError={reveal}
       onLoad={(event) => { void event.currentTarget.decode().catch(() => undefined).then(reveal) }}
-      src={image.imageUrl}
+      ref={imageElementRef}
     />
   )
 }
@@ -103,22 +109,21 @@ function StampBackdrop() {
         <mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
           <rect fill="white" height="100" width="100" />
           {perforations.flatMap((position) => [
-            <circle cx={position} cy="0" fill="black" key={`top-${position}`} r="2.35" />,
-            <circle cx={position} cy="100" fill="black" key={`bottom-${position}`} r="2.35" />,
-            <circle cx="0" cy={position} fill="black" key={`left-${position}`} r="2.35" />,
-            <circle cx="100" cy={position} fill="black" key={`right-${position}`} r="2.35" />,
+            <rect fill="black" height="4.4" key={`top-${position}`} width="5.4" x={position - 2.7} y="0" />,
+            <rect fill="black" height="4.4" key={`bottom-${position}`} width="5.4" x={position - 2.7} y="95.6" />,
+            <rect fill="black" height="5.4" key={`left-${position}`} width="4.4" x="0" y={position - 2.7} />,
+            <rect fill="black" height="5.4" key={`right-${position}`} width="4.4" x="95.6" y={position - 2.7} />,
           ])}
         </mask>
       </defs>
       <rect fill="#fffefb" height="100" mask={`url(#${maskId})`} width="100" />
-      <rect fill="none" height="95.5" mask={`url(#${maskId})`} stroke="#e4ddd4" strokeWidth="0.65" width="95.5" x="2.25" y="2.25" />
     </svg>
   )
 }
 
 function CollageSlot1({ image, index }: CollageSlotProps) {
   return (
-    <div className="stage-b-journey-card-collage-slot absolute left-[23.35px] top-[62.32px] h-[109.541px] w-[78.075px] overflow-hidden">
+    <div className={`stage-b-journey-card-collage-slot absolute left-[23.35px] top-[62.32px] h-[109.541px] w-[78.075px] overflow-hidden${image ? '' : ' border-[0.838px] border-dashed border-[#beafad] shadow-[0px_0.856px_3.423px_0px_rgba(0,0,0,0.18)]'}`}>
       {image && <StampBackdrop />}
       <CollagePhoto image={image} index={index} />
     </div>
@@ -127,7 +132,7 @@ function CollageSlot1({ image, index }: CollageSlotProps) {
 
 function CollageSlot2({ image, index }: CollageSlotProps) {
   return (
-    <div className="stage-b-journey-card-collage-slot absolute left-[86.68px] top-[25.53px] h-[70.178px] w-[58.191px] overflow-hidden">
+    <div className={`stage-b-journey-card-collage-slot absolute left-[86.68px] top-[25.53px] h-[70.178px] w-[58.191px] overflow-hidden${image ? '' : ' border-[0.838px] border-dashed border-[#beafad] shadow-[0px_0px_3.423px_0px_rgba(0,0,0,0.25)]'}`}>
       <CollagePhoto image={image} index={index} />
     </div>
   )
@@ -135,7 +140,7 @@ function CollageSlot2({ image, index }: CollageSlotProps) {
 
 function CollageSlot3({ image, index }: CollageSlotProps) {
   return (
-    <div className="stage-b-journey-card-collage-slot absolute left-[185.95px] top-[66.6px] h-[70.174px] w-[89.857px] overflow-hidden">
+    <div className={`stage-b-journey-card-collage-slot absolute left-[185.95px] top-[66.6px] h-[70.174px] w-[89.857px] overflow-hidden${image ? '' : ' border-[0.838px] border-dashed border-[#beafad] shadow-[0px_0px_3.423px_0px_rgba(0,0,0,0.13)]'}`}>
       {image && <StampBackdrop />}
       <CollagePhoto image={image} index={index} />
     </div>
@@ -144,7 +149,7 @@ function CollageSlot3({ image, index }: CollageSlotProps) {
 
 function CollageSlot4({ image, index }: CollageSlotProps) {
   return (
-    <div className="stage-b-journey-card-collage-slot absolute left-[115.35px] top-[73px] h-[101.911px] w-[100.412px] overflow-hidden">
+    <div className={`stage-b-journey-card-collage-slot absolute left-[115.35px] top-[73px] h-[101.911px] w-[100.412px] overflow-hidden${image ? '' : ' border-[0.713px] border-dashed border-[#beafad] shadow-[0px_0px_3.423px_0px_rgba(0,0,0,0.18)]'}`}>
       <CollagePhoto image={image} index={index} />
     </div>
   )
