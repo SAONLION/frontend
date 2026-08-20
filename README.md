@@ -1,3 +1,5 @@
+![TagOn AI](.github/readme/hero.webp)
+
 # TagOn AI · Frontend
 
 > 명품 매장에 부착된 NFC 태그를 스캔하면 열리는, AI 기반 매장 컨시어지 서비스의 프론트엔드입니다.
