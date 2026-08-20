@@ -24,7 +24,7 @@ export type Product = {
   imageUrl: string
   dimensions: string
   detailImages?: readonly string[]
-  /** C2-3 스타일링 화면에 쓰는 모델 착장 컷. */
+  /** C3-2 스타일링 화면에 쓰는 모델 착장 컷. */
   stylingImages?: readonly string[]
   productDetail?: { craft: readonly string[]; heritage: readonly string[]; styling: readonly string[] }
   /** 두 화면이 공유하는 제조국. 카탈로그 전 상품이 갖고 있는 값이다. */

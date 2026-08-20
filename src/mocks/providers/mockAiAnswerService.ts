@@ -19,7 +19,11 @@ function resolveAnswer(request: AiAnswerRequest): AiAnswerResult {
       ],
     }
   }
-  return { resolved: false, handoffMessage: '정확한 안내를 위해 직원에게 연결해 드릴게요.' }
+  return {
+    resolved: false,
+    title: '직원에게 확인이 필요한 내용이에요',
+    answerLines: ['정확한 안내를 위해 직원에게 문의해 주세요.'],
+  }
 }
 
 export const mockAiAnswerService: AiAnswerService = {

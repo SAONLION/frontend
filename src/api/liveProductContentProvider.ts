@@ -1,7 +1,7 @@
 import { getHubOption, getSkuDetail, getSkus, scanTag } from './products'
 import { getColorSelectionKey, isSameColorSelection } from '../constants/colorLabels'
 import { getServerProduct, setServerProduct, type ServerProduct } from '../features/product-explore/serverProduct'
-import { getStoredSessionId } from '../features/session/sessionStorage'
+import { getStoredProductContext, getStoredSessionId } from '../features/session/sessionStorage'
 import { mockProductContentProvider } from '../mocks/providers/mockProductContentProvider'
 import type { SkuDetailResponse, SkuListItemResponse } from './types'
 import type { ColorOption, Product, ProductContentProviderValue, SizeOption } from '../types/product'
@@ -46,6 +46,23 @@ function rescanServerProduct(sku: string): Promise<ServerProduct | null> {
 
   serverProductRescans.set(sku, request)
   return request
+}
+
+function restoreStoredServerProduct(sku: string): ServerProduct | null {
+  const sessionId = getStoredSessionId()
+  const stored = getStoredProductContext()
+  const product = stored?.serverProduct
+  if (
+    !sessionId
+    || !stored
+    || stored.sessionId !== sessionId
+    || !product
+    || product.sku !== sku
+    || product.id !== stored.productId
+    || product.skuId !== stored.currentSkuId
+  ) return null
+  setServerProduct(product)
+  return product
 }
 
 function isBlank(value: string | null | undefined): value is null | undefined {
@@ -235,8 +252,10 @@ function parseMaterialContent(content: string | null): Pick<Product, 'materialDe
 export const liveProductContentProvider: ProductContentProviderValue = {
   async getProduct(sku: string): Promise<Product | null> {
     const fixture = await mockProductContentProvider.getProduct(sku)
-    const stored = getServerProduct()
-    const server = stored && stored.sku === sku ? stored : await rescanServerProduct(sku)
+    const inMemory = getServerProduct()
+    const server = inMemory && inMemory.sku === sku
+      ? inMemory
+      : restoreStoredServerProduct(sku) ?? await rescanServerProduct(sku)
     if (!server) return fixture
 
     try {

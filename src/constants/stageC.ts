@@ -43,9 +43,9 @@ export const STAGE_C_PRODUCT_DETAIL_ROUTES = {
 export const STAGE_C_PRODUCT_DETAIL_ROUTE_KEYS = {
   [STAGE_C_SCREEN_IDS.c21]: 'craft',
   [STAGE_C_SCREEN_IDS.c22]: 'heritage',
-  [STAGE_C_SCREEN_IDS.c23]: 'styling',
+  [STAGE_C_SCREEN_IDS.c23]: 'fitColor',
   [STAGE_C_SCREEN_IDS.c31]: 'fitSize',
-  [STAGE_C_SCREEN_IDS.c32]: 'fitColor',
+  [STAGE_C_SCREEN_IDS.c32]: 'styling',
   [STAGE_C_SCREEN_IDS.c33]: 'fitTryOn',
   [STAGE_C_SCREEN_IDS.c41]: 'priceInquiry',
 } as const
