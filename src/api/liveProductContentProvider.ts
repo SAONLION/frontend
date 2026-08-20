@@ -1,6 +1,7 @@
-import { getHubOption, getSkuDetail, getSkus } from './products'
+import { getHubOption, getSkuDetail, getSkus, scanTag } from './products'
 import { getColorSelectionKey, isSameColorSelection } from '../constants/colorLabels'
-import { getServerProduct } from '../features/product-explore/serverProduct'
+import { getServerProduct, setServerProduct, type ServerProduct } from '../features/product-explore/serverProduct'
+import { getStoredSessionId } from '../features/session/sessionStorage'
 import { mockProductContentProvider } from '../mocks/providers/mockProductContentProvider'
 import type { SkuDetailResponse, SkuListItemResponse } from './types'
 import type { ColorOption, Product, ProductContentProviderValue, SizeOption } from '../types/product'
@@ -9,6 +10,43 @@ type LiveSkuContent = { listItem: SkuListItemResponse; detail: SkuDetailResponse
 type LiveProductContent = { skus: readonly LiveSkuContent[]; heritage: string | null; material: string | null }
 
 const productContentRequests = new Map<number, Promise<LiveProductContent>>()
+
+// B2가 만드는 sku는 항상 `tag-{tagId}`다. 새로고침·직접 진입으로 태그 스캔 시점의
+// serverProduct(메모리 전용)가 사라졌을 때, 이 형식에서 tagId를 되짚어 다시 스캔한다.
+const TAG_SKU_PATTERN = /^tag-(\d+)$/
+const serverProductRescans = new Map<string, Promise<ServerProduct | null>>()
+
+function rescanServerProduct(sku: string): Promise<ServerProduct | null> {
+  const match = TAG_SKU_PATTERN.exec(sku)
+  const sessionId = getStoredSessionId()
+  if (!match || !sessionId) return Promise.resolve(null)
+
+  const cached = serverProductRescans.get(sku)
+  if (cached) return cached
+
+  const tagId = Number(match[1])
+  const request = scanTag(tagId, sessionId)
+    .then((result): ServerProduct => {
+      const product: ServerProduct = {
+        id: result.product.id,
+        name: result.product.name,
+        category: result.product.category,
+        imageUrl: result.product.imageUrl,
+        sku,
+        skuId: tagId,
+      }
+      setServerProduct(product)
+      return product
+    })
+    .catch((error: unknown) => {
+      console.error('새로고침 뒤 제품 태그 재조회에 실패했습니다.', error)
+      serverProductRescans.delete(sku)
+      return null
+    })
+
+  serverProductRescans.set(sku, request)
+  return request
+}
 
 function isBlank(value: string | null | undefined): value is null | undefined {
   return value === null || value === undefined || value.trim() === ''
@@ -197,8 +235,9 @@ function parseMaterialContent(content: string | null): Pick<Product, 'materialDe
 export const liveProductContentProvider: ProductContentProviderValue = {
   async getProduct(sku: string): Promise<Product | null> {
     const fixture = await mockProductContentProvider.getProduct(sku)
-    const server = getServerProduct()
-    if (!server || server.sku !== sku) return fixture
+    const stored = getServerProduct()
+    const server = stored && stored.sku === sku ? stored : await rescanServerProduct(sku)
+    if (!server) return fixture
 
     try {
       const liveContent = await fetchLiveProductContent(server.id)
