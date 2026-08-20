@@ -36,7 +36,6 @@ export function AppRoutes() {
 
         <Route element={<ContentOfferPage screen="email" />} path={CONTENT_OFFER_ROUTES.email} />
         <Route element={<ContentOfferPage screen="sent" />} path={CONTENT_OFFER_ROUTES.sent} />
-        <Route element={<ContentOfferPage screen="value" />} path={CONTENT_OFFER_ROUTES.value} />
         <Route element={<ContentOfferPage screen="staff" />} path={CONTENT_OFFER_ROUTES.staff} />
 
         <Route element={<StageCHubPage screenId={STAGE_C_SCREEN_IDS.c1} />} path={STAGE_C_ROUTES.c1} />
@@ -49,6 +48,7 @@ export function AppRoutes() {
         <Route element={<StageCAiAnswerPage />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.otherAnswer} />
         <Route element={<StageCProductDetailPage topic="craft" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.craft} />
         <Route element={<StageCProductDetailPage topic="heritage" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.heritage} />
+        <Route element={<StageCFitPage kind="heritage-purchase" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.heritagePurchase} />
         <Route element={<StageCProductDetailPage topic="styling" />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.styling} />
 
         <Route element={<StaffCallPage />} path={STAGE_C_PRODUCT_DETAIL_ROUTES.staffPending} />

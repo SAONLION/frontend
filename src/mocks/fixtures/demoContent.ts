@@ -18,7 +18,3 @@ export const mockD2Recommendations: readonly DemoRecommendation[] = [
   { id: 'visetos-weekender', sku: 'MMVGATT01CO001', image: weekenderImage, name: '비세토스 위켄더', description: '여행 목적에 맞는 제품으로 함께 살펴볼 수 있어요.' },
   { id: 'visetos-trolley', sku: 'MMVDSTT02CO001', image: trolleyImage, name: '비세토스 트롤리', description: '크기와 사용 목적은 직원에게 정확히 안내받을 수 있어요.' },
 ]
-
-export function getMockValueContentCopy(productName: string): string {
-  return `${productName}의 소재와 스타일링 정보는 직원에게 정확히 안내받을 수 있어요.`
-}

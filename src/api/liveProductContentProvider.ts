@@ -202,8 +202,14 @@ function createLiveColorOptions(
 
 function splitHeritage(content: string | null): readonly string[] | null {
   if (isBlank(content)) return null
-  const paragraphs = content.split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean)
-  return paragraphs.length > 0 ? paragraphs : null
+  // 서버 헤리티지는 여러 문장이 한 문단으로 오기도 한다. 화면의 각 문장을 독립 문단으로
+  // 보여 주기 위해 종결 부호 뒤에서만 나눈다. 부호가 없는 마지막 조각도 보존한다.
+  const sentences = content
+    .split(/\r?\n+/)
+    .flatMap((paragraph) => paragraph.match(/[^.!?。]+[.!?。]+|[^.!?。]+$/g) ?? [])
+    .map((sentence) => sentence.trim())
+    .filter(Boolean)
+  return sentences.length > 0 ? sentences : null
 }
 
 function getCurrentSkuContent(

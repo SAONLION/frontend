@@ -13,6 +13,11 @@ import { useSession } from '../session/useSession'
 // foreground 세션의 조회량을 분당 15회에서 12회로 낮춘다.
 const POLL_INTERVAL_MS = 5_000
 
+const MAX_EXPOSURES_BY_GROUP: Readonly<Record<BlockerExposureGroup, number>> = {
+  CB3: 1,
+  CB56: 2,
+}
+
 function actionSignature(action: PendingActionDetailDTO): string {
   // 서버가 "dismissed" 응답을 처리하지 못한 경우 동일 조건을 새 actionId로 다시 만들 수 있다.
   // actionId만 기억하면 그 새 레코드를 곧바로 다시 띄우므로, 고객에게 보이는 개입 단위로 막는다.
@@ -22,7 +27,7 @@ function actionSignature(action: PendingActionDetailDTO): string {
 function toExposureGroup(action: PendingActionDetailDTO): BlockerExposureGroup | null {
   const code = toCustomerBlockerCode(action.blockerType, action.ruleGroup)
   if (!code) return null
-  // CB5·CB6은 고객에게 같은 콘텐츠 제안 시트(F23-1)로 노출되므로 하나의 cap을 공유한다.
+  // CB5·CB6은 고객에게 같은 콘텐츠 제안 시트(F23-1)로 노출되므로 2회 cap을 공유한다.
   return code === 'CB3' ? 'CB3' : 'CB56'
 }
 
@@ -36,7 +41,7 @@ export function usePendingActionPolling(isEnabled: boolean) {
   // 서버가 새 actionId를 만들더라도 CB3 시트가 즉시 되살아나는 것을 막는다.
   const dismissedSignatures = useRef(new Set<string>())
   // 새로고침 뒤에도 같은 서버 세션이면 이미 노출한 개입을 다시 보이지 않게 한다.
-  const exposedGroups = useRef<Set<BlockerExposureGroup>>(new Set())
+  const exposureCounts = useRef<Map<BlockerExposureGroup, number>>(new Map())
   // 시트가 떠 있는 동안의 다음 폴링은 현재 시트를 닫거나 다른 action으로 교체하면 안 된다.
   const visibleActionId = useRef<number | null>(null)
 
@@ -44,7 +49,7 @@ export function usePendingActionPolling(isEnabled: boolean) {
   useEffect(() => {
     respondedIds.current.clear()
     dismissedSignatures.current.clear()
-    exposedGroups.current = sessionId ? new Set(getStoredBlockerExposureGroups(sessionId)) : new Set()
+    exposureCounts.current = sessionId ? new Map(getStoredBlockerExposureGroups(sessionId)) : new Map()
     visibleActionId.current = null
     setAction(null)
   }, [sessionId])
@@ -75,13 +80,13 @@ export function usePendingActionPolling(isEnabled: boolean) {
             || dismissedSignatures.current.has(actionSignature(next))
             || !isCustomerFacingBlocker(next.blockerType, next.ruleGroup)
             || exposureGroup === null
-            || exposedGroups.current.has(exposureGroup)
+            || (exposureCounts.current.get(exposureGroup) ?? 0) >= MAX_EXPOSURES_BY_GROUP[exposureGroup]
           ) {
             setAction(null)
             return
           }
-          exposedGroups.current.add(exposureGroup)
-          setStoredBlockerExposureGroups(sessionId, exposedGroups.current)
+          exposureCounts.current.set(exposureGroup, (exposureCounts.current.get(exposureGroup) ?? 0) + 1)
+          setStoredBlockerExposureGroups(sessionId, exposureCounts.current)
           visibleActionId.current = next.actionId
           setAction((current) => (current?.actionId === next.actionId ? current : next))
         })

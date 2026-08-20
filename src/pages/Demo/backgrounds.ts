@@ -5,6 +5,7 @@ export const BACKGROUND_PRESETS = {
   black: '블랙',
   spotlight: '스포트라이트',
   studio: '스튜디오',
+  cognac: '꼬냑',
 } as const
 
 export type BackgroundId = keyof typeof BACKGROUND_PRESETS
