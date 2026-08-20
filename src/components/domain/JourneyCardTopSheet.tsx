@@ -107,6 +107,8 @@ export function JourneyCardTopSheet() {
     if (!cardCaptureRef.current || isSavingImage) return
     setIsSavingImage(true)
     try {
+      // 캡처 직전에 번들 글꼴 로딩까지 기다려 웹 카드와 PNG의 글자 모양을 맞춘다.
+      await document.fonts.ready
       // 웹에서는 카드 바깥의 시트 색과 그림자까지 함께 보인다. 카드 본체만 캡처하면
       // 그림자가 잘리고 저장본이 다른 카드처럼 보이므로, 동일한 배경 여백을 둔 래퍼를 캡처한다.
       // html-to-image(svg foreignObject 방식)는 WebKit/Safari에서 카드 오른쪽이 잘리는 문제가 있어
