@@ -2139,6 +2139,19 @@
   object-fit: contain;
 }
 
+.stage-c-product-detail-empty {
+  max-width: 17rem;
+  margin: 0;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--stage-c-glass-border);
+  border-radius: 1rem;
+  background: var(--stage-c-surface);
+  color: rgb(255 255 255 / 72%);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
 .stage-c-coverflow--product {
   width: min(100%, 22rem);
   outline: none;
