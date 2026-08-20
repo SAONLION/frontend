@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router'
 import { usePreparedNavigate } from '../../app/usePreparedNavigate'
 import { PreparedLink } from '../../components/common/PreparedLink'
@@ -32,7 +32,9 @@ type PendingStaffRequest = {
   completion: Promise<'completed'>
 }
 
-const STAFF_CALL_INFO_TRANSITION_DELAY_MS = 2_000
+// SA 대시보드가 없어 실제 응대 완료를 기다릴 수 없다. C2-1-1(대기) 화면의 텍스트 노출이
+// 끝나면 실제 응답 여부와 무관하게 이 시간만큼 뒤에 C2-1-2(완료) 화면으로 넘어간다.
+const STAFF_CALL_INFO_AUTO_COMPLETE_DELAY_MS = 1_500
 
 export function StaffCallPage({ completed = false, callType = 'info' }: StaffCallPageProps) {
   const { sku = '' } = useParams()
@@ -87,11 +89,19 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
 
     pendingRequestRef.current = request
 
-    const minimumDisplayTime = new Promise<void>((resolve) => {
-      window.setTimeout(resolve, callType === 'info' ? STAFF_CALL_INFO_TRANSITION_DELAY_MS : 0)
-    })
+    if (callType === 'info') {
+      // SA 대시보드가 없어 실제 응대를 기다리지 않는다. 요청 자체는 기록을 위해 그대로 보내지만,
+      // 화면 전환은 이 요청의 완료·실패와 무관하게 아래 텍스트 노출 기반 타이머가 담당한다.
+      void request.completion.then(() => clearDegraded(DEGRADATION_KEYS.staffCall)).catch((error: unknown) => {
+        console.error('직원 호출에 실패했습니다.', error)
+        markDegraded(DEGRADATION_KEYS.staffCall)
+      })
+      return () => {
+        active = false
+      }
+    }
 
-    void Promise.all([request.completion, minimumDisplayTime]).then(() => {
+    void request.completion.then(() => {
       clearDegraded(DEGRADATION_KEYS.staffCall)
       if (active) {
         navigate(completedPath, { replace: true })
@@ -110,6 +120,18 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
       active = false
     }
   }, [callType, completed, completedPath, hasRequestContext, navigate, returnPath, sku, staffCallService, state.productId, state.sessionId])
+
+  // C2-1-1(대기) 화면의 텍스트 노출이 끝나면(= revealedCompletedState가 false로 잡히면)
+  // 실제 응답을 기다리지 않고 곧장 C2-1-2(완료) 화면으로 넘어간다.
+  useEffect(() => {
+    if (callType !== 'info' || completed || revealedCompletedState !== false) return
+
+    const timer = window.setTimeout(() => {
+      navigate(completedPath, { replace: true })
+    }, STAFF_CALL_INFO_AUTO_COMPLETE_DELAY_MS)
+
+    return () => window.clearTimeout(timer)
+  }, [callType, completed, completedPath, navigate, revealedCompletedState])
 
   if (!hasRequestContext) {
     return (
@@ -158,15 +180,14 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
       </header>
       <div className="stage-c-c5-staff-content">
         <section aria-label="나이비스 AI 도슨트" className="stage-c-c5-staff-docent"><DocentStage continuityKey={`staff-call-${callType}`} cue={completed ? 'success' : 'sending'} /></section>
-        <h1><KineticTextReveal autoPlay blur className="justify-center" distance={16} onRevealComplete={() => setIsOtherCallSupportingCopyVisible(true)} splitBy="characters" stagger={0.035} text={'직원에게 궁금한 사항에 대해\n문의 알림을 보냈어요!'} waitForDocent /></h1>
+        {/* pending→completed 전환 때 문구가 그대로라 텍스트만으론 리빌이 다시 안 돈다(완료 화면이
+            영원히 안 뜨는 원인이었다). completed로 key를 갈아 강제로 다시 태운다. */}
+        <h1><KineticTextReveal autoPlay blur className="justify-center" distance={16} key={completed ? 'completed' : 'pending'} onRevealComplete={() => setIsOtherCallSupportingCopyVisible(true)} splitBy="characters" stagger={0.035} text={'직원에게 궁금한 사항에 대해\n문의 알림을 보냈어요!'} waitForDocent /></h1>
         {isOtherCallSupportingCopyVisible && <p><KineticTextReveal autoPlay blur={false} className="justify-center" distance={8} onRevealComplete={() => setRevealedCompletedState(completed)} splitBy="words" stagger={0.1} text="더 자세한 상담을 받아보세요" waitForDocent /></p>}
       </div>
       {revealedCompletedState === completed && <div className="stage-c-c5-response-actions">
         <PreparedLink className="stage-c-action-button" to={returnPath}>다른 것도 물어보기</PreparedLink>
-        <div>
-          <PreparedLink className="stage-c-action-button" to={returnPath}>직원에게 문의하기</PreparedLink>
-          <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
-        </div>
+        <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
       </div>}
     </StageCDetailShell>
   )
