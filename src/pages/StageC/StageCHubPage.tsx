@@ -125,7 +125,13 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
     <MobileShell>
       <section className="stage-c-page" aria-labelledby="stage-c-heading">
         <div className="stage-c-product-context-pill">{displayName}</div>
-        <ProductMedia enableCoverflow={isProductIntro || screenId === STAGE_C_SCREEN_IDS.c3} product={product} />
+        <ProductMedia
+          // C2에도 여러 제품 컷의 인디케이터가 보인다. 스크롤형 갤러리에서는 다음 컷이
+          // 화면 밖에만 있어 존재를 알아차리기 어려우므로, C1·C3와 동일하게 옆 컷까지 보이는
+          // coverflow로 통일한다.
+          enableCoverflow={isProductIntro || screenId === STAGE_C_SCREEN_IDS.c2 || screenId === STAGE_C_SCREEN_IDS.c3}
+          product={product}
+        />
         <div className="stage-c-hub-content">
           {screen.intro && <p className="stage-c-intro">{screen.intro}</p>}
           <h1 className={headingClassName} id="stage-c-heading">

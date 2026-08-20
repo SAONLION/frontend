@@ -351,6 +351,10 @@
   transition: opacity 320ms var(--motion-ease-enter);
 }
 
+.stage-b-journey-card-passport-text {
+  font-family: 'Courier Prime', 'Pretendard', monospace;
+}
+
 .stage-b-journey-card--loaded .stage-b-journey-card-value {
   opacity: 0.75;
 }
