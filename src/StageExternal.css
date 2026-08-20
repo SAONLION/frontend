@@ -394,6 +394,15 @@
   width: 100%;
 }
 
+/* 저장할 때는 이 래퍼까지 캡처해 웹에서 카드 주변에 보이는 시트색·그림자를 보존한다.
+   음수 여백으로 실제 시트의 카드 배치와 버튼 간격은 바꾸지 않는다. */
+.stage-b-journey-card-capture {
+  display: inline-flex;
+  padding: 1.25rem 0.75rem;
+  margin: -1.25rem -0.75rem;
+  background: #1e1710;
+}
+
 .stage-top-sheet__headline h1 {
   font-size: clamp(1.25rem, 5.1vw, 1.5rem);
 }

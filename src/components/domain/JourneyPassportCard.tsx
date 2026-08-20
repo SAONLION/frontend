@@ -71,7 +71,7 @@ function CollagePhoto({ image, index = 0 }: CollageSlotProps) {
   return (
     <img
       alt=""
-      className={`stage-b-journey-card-photo${isVisible ? ' stage-b-journey-card-photo--visible' : ''} size-full object-cover mix-blend-multiply`}
+      className={`stage-b-journey-card-photo${isVisible ? ' stage-b-journey-card-photo--visible' : ''} size-full object-contain object-center mix-blend-multiply`}
       src={image.imageUrl}
     />
   )

@@ -35,7 +35,7 @@ export function JourneyCardTopSheet() {
   const closeTimerRef = useRef<number | null>(null)
   const dragStartYRef = useRef<number | null>(null)
   const dragOffsetRef = useRef(0)
-  const cardRef = useRef<HTMLDivElement>(null)
+  const cardCaptureRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => () => {
     if (closeTimerRef.current !== null) window.clearTimeout(closeTimerRef.current)
@@ -104,14 +104,35 @@ export function JourneyCardTopSheet() {
   }
 
   const saveImage = async () => {
-    if (!cardRef.current || isSavingImage) return
+    if (!cardCaptureRef.current || isSavingImage) return
     setIsSavingImage(true)
     try {
-      // html-to-image(svg foreignObject 방식)는 WebKit/Safari에서 카드 오른쪽이 잘려
-      // 캡처되는 고질적인 버그가 있어, DOM을 직접 순회해 그리는 html2canvas로 교체했다.
-      // 콜라주 사진은 S3 버킷이 CORS를 안 열어줘서(백엔드/인프라 확인 필요) 못 읽는데,
-      // allowTaint:false(기본값)면 그 사진만 건너뛰고 나머지(틀·텍스트)는 정상 캡처된다.
-      const canvas = await html2canvas(cardRef.current, { backgroundColor: null, scale: 2 })
+      // 웹에서는 카드 바깥의 시트 색과 그림자까지 함께 보인다. 카드 본체만 캡처하면
+      // 그림자가 잘리고 저장본이 다른 카드처럼 보이므로, 동일한 배경 여백을 둔 래퍼를 캡처한다.
+      // html-to-image(svg foreignObject 방식)는 WebKit/Safari에서 카드 오른쪽이 잘리는 문제가 있어
+      // DOM을 직접 순회해 그리는 html2canvas를 계속 사용한다.
+      const canvas = await html2canvas(cardCaptureRef.current, {
+        backgroundColor: '#1e1710',
+        scale: 2,
+        imageTimeout: 15_000,
+        onclone: (document) => {
+          // 화면에서 이미 끝난 카드 채움 모션을 저장본에서도 같은 최종 상태로 고정한다.
+          document.querySelectorAll<HTMLElement>('.stage-b-journey-card-photo').forEach((element) => {
+            element.style.opacity = '1'
+            element.style.transform = 'scale(1)'
+            element.style.transition = 'none'
+          })
+          document.querySelectorAll<HTMLElement>('.stage-b-journey-card-value').forEach((element) => {
+            element.style.opacity = '0.75'
+            element.style.transition = 'none'
+          })
+          document.querySelectorAll<HTMLElement>('.stage-b-journey-card-completion-stamp').forEach((element) => {
+            element.style.opacity = '1'
+            element.style.animation = 'none'
+            element.style.transform = 'scale(1) rotate(0deg)'
+          })
+        },
+      })
       const link = document.createElement('a')
       link.href = canvas.toDataURL('image/png')
       link.download = `MCM_passport_${journeyCard?.sessionCode ?? state.sessionId ?? 'card'}.png`
@@ -139,7 +160,9 @@ export function JourneyCardTopSheet() {
             headline={`${nickname}님을 위한 여권을 저장해보세요!`}
             variant="md"
           />
-          <JourneyPassportCard journeyCard={journeyCard} ref={cardRef} />
+          <div className="stage-b-journey-card-capture" ref={cardCaptureRef}>
+            <JourneyPassportCard journeyCard={journeyCard} />
+          </div>
           <div className="stage-top-sheet__actions">
             <button
               className="stage-c-action-button stage-c-action-button--primary"
