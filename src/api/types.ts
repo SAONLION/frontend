@@ -79,12 +79,18 @@ export type PickupCheckResponse = { available: boolean; nextStep: string; messag
 
 // --- Sku ---
 export type SkuListItemResponse = { skuId: number; color: string; imageUrl: string }
+export type SkuImageResponse = {
+  url: string
+  shotType: 'MODEL' | 'PRODUCT'
+  /** 참고용 인물 노출 여부. 화면 분기는 shotType을 기준으로 한다. */
+  hasPerson: boolean
+}
 export type SkuDetailResponse = {
   skuId: number
   color: string
   /** 콤마로 구분된 선택 가능 사이즈 목록. */
   size: string
-  images: readonly string[]
+  images: readonly SkuImageResponse[]
   /** 값이 없는 제품은 null이다. */
   dimensions: string | null
   /** 값이 없는 제품은 null이다. */
