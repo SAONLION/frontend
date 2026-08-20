@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useId, useRef, useState } from 'react'
+import { forwardRef, useEffect, useId, useMemo, useRef, useState } from 'react'
 import cardTexture from '../../assets/images/stage-b-journey-card-texture.webp'
 import emblemWatermark from '../../assets/images/stage-b-journey-card-emblem-watermark.webp'
 import stampTexture from '../../assets/images/stage-b-journey-card-texture-overlay.webp'
@@ -54,6 +54,13 @@ function arrangeCollageImages(images: readonly JourneyCardCollageImage[]): reado
   return [primaryModel, ...productShots].slice(0, JOURNEY_CARD_COLLAGE_SLOTS)
 }
 
+function withJourneyCorsCacheBust(imageUrl: string): string {
+  const separator = imageUrl.includes('?') ? '&' : '?'
+  // C 화면이 먼저 no-CORS로 가져온 원본 URL의 HTTP 캐시와 절대 섞이지 않게 한다.
+  // 같은 여권을 여는 동안에는 URL을 고정하고, 새로 열면 새 CORS 응답을 받는다.
+  return `${imageUrl}${separator}__journey_cors=${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
 /**
  * 사진은 디코딩이 끝난 뒤 순서대로 나타난다. 슬롯 자체는 항상 자리에 있어서
  * 사진이 채워져도 레이아웃이 움직이지 않는다(스탬프가 붙는 연출).
@@ -63,18 +70,18 @@ function CollagePhoto({ image, index = 0 }: CollageSlotProps) {
   const imageLoadVersion = useRef(0)
   const imageElementRef = useRef<HTMLImageElement>(null)
   const imageUrl = image?.imageUrl
+  const corsImageUrl = useMemo(() => imageUrl ? withJourneyCorsCacheBust(imageUrl) : undefined, [imageUrl])
 
   useEffect(() => {
     imageLoadVersion.current += 1
     setIsVisible(false)
     const element = imageElementRef.current
-    if (!imageUrl || !element) return
+    if (!corsImageUrl || !element) return
 
-    // React prop 반영 순서에 기대지 않고, S3 CORS 계약의 요구대로 `crossOrigin`을
-    // 실제 요청 URL보다 먼저 설정한다. 이 한 개의 <img>가 화면 표시와 PNG 저장에 공용된다.
+    // `crossOrigin`을 src보다 먼저 지정하고, C 화면의 일반 이미지 캐시와 분리된 URL을 쓴다.
     element.crossOrigin = 'anonymous'
-    element.src = imageUrl
-  }, [imageUrl])
+    element.src = corsImageUrl
+  }, [corsImageUrl])
 
   if (!image) return null
 
