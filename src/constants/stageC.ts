@@ -6,6 +6,7 @@ export const STAGE_C_SCREEN_IDS = {
   c5: 'C5',
   c21: 'C2-1',
   c22: 'C2-2',
+  c221: 'C2-2-1',
   c23: 'C2-3',
   c31: 'C3-1',
   c32: 'C3-2',
@@ -23,6 +24,7 @@ export const STAGE_C_SCREEN_IDS = {
 export const STAGE_C_PRODUCT_DETAIL_ROUTES = {
   craft: '/stage-c/:sku/product/craft',
   heritage: '/stage-c/:sku/product/heritage',
+  heritagePurchase: '/stage-c/:sku/product/heritage/purchase',
   styling: '/stage-c/:sku/product/styling',
   staffPending: '/stage-c/:sku/product/staff-call/pending',
   staffCompleted: '/stage-c/:sku/product/staff-call/completed',

@@ -2,7 +2,7 @@ const SESSION_ID_STORAGE_KEY = 'tagon.sessionId'
 const PRODUCT_CONTEXT_STORAGE_KEY = 'tagon.productContext'
 const BLOCKER_EXPOSURE_STORAGE_KEY = 'tagon.blockerExposure'
 
-/** 고객에게는 CB3과 통합 콘텐츠 제안(CB5·CB6)을 세션당 한 번씩만 보여준다. */
+/** 고객에게는 CB3은 1회, 통합 콘텐츠 제안(CB5·CB6)은 2회까지 보여준다. */
 export type BlockerExposureGroup = 'CB3' | 'CB56'
 
 type StoredBlockerExposure = {
@@ -119,27 +119,37 @@ export function clearStoredSessionId(): void {
   }
 }
 
-export function getStoredBlockerExposureGroups(sessionId: string): ReadonlySet<BlockerExposureGroup> {
+/**
+ * 저장 형식은 배열을 유지해 기존의 `['CB3', 'CB56']` 값도 그대로 읽는다.
+ * 같은 그룹의 중복 항목은 해당 세션에서 노출한 횟수다.
+ */
+export function getStoredBlockerExposureGroups(sessionId: string): ReadonlyMap<BlockerExposureGroup, number> {
   try {
     const raw = window.localStorage.getItem(BLOCKER_EXPOSURE_STORAGE_KEY)
-    if (!raw) return new Set()
+    if (!raw) return new Map()
 
     const parsed: unknown = JSON.parse(raw)
-    if (typeof parsed !== 'object' || parsed === null) return new Set()
+    if (typeof parsed !== 'object' || parsed === null) return new Map()
     const value = parsed as Partial<StoredBlockerExposure>
-    if (value.sessionId !== sessionId || !Array.isArray(value.groups)) return new Set()
+    if (value.sessionId !== sessionId || !Array.isArray(value.groups)) return new Map()
 
-    return new Set(value.groups.filter((group): group is BlockerExposureGroup => group === 'CB3' || group === 'CB56'))
+    return value.groups
+      .filter((group): group is BlockerExposureGroup => group === 'CB3' || group === 'CB56')
+      .reduce<Map<BlockerExposureGroup, number>>((counts, group) => {
+        counts.set(group, (counts.get(group) ?? 0) + 1)
+        return counts
+      }, new Map())
   } catch {
-    return new Set()
+    return new Map()
   }
 }
 
-export function setStoredBlockerExposureGroups(sessionId: string, groups: ReadonlySet<BlockerExposureGroup>): void {
+export function setStoredBlockerExposureGroups(sessionId: string, exposureCounts: ReadonlyMap<BlockerExposureGroup, number>): void {
   try {
+    const groups = [...exposureCounts].flatMap(([group, count]) => Array.from({ length: count }, () => group))
     window.localStorage.setItem(BLOCKER_EXPOSURE_STORAGE_KEY, JSON.stringify({
       sessionId,
-      groups: [...groups],
+      groups,
     } satisfies StoredBlockerExposure))
   } catch {
     // ignore

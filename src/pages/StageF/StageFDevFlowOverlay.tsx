@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type FormEvent, type PointerEvent } from 'react'
 import CircleButton from '../../components/common/CircleButton'
 import { DocentStage } from '../../components/domain/DocentStage'
-import { getMockValueContentCopy } from '../../mocks/fixtures/demoContent'
 import type { Product } from '../../types/product'
 
 export type StageFDevScenario = 'f2' | 'f3' | 'f4'
@@ -12,7 +11,7 @@ type StageFDevFlowOverlayProps = {
   onExit: () => void
 }
 
-type FlowStep = 'prompt' | 'email' | 'sent' | 'value' | 'staff'
+type FlowStep = 'prompt' | 'email' | 'sent' | 'staff'
 
 const flowTitles: Record<StageFDevScenario, string> = {
   f2: 'F2 · CB6 콘텐츠 제안',
@@ -70,7 +69,7 @@ export function StageFDevFlowOverlay({ product, scenario, onExit }: StageFDevFlo
           title: `관심있던 ${product.name}는\n비 오거나 젖지 않는다는 것을\n알고 계셨나요?`,
           accept: '몰랐어요! 궁금해요',
           decline: '관심없어요',
-          onAccept: () => setStep('value'),
+          onAccept: () => setStep('staff'),
         }
       : {
           title: '직원에게 직접 안내를\n받아보시겠어요?',
@@ -153,18 +152,6 @@ export function StageFDevFlowOverlay({ product, scenario, onExit }: StageFDevFlo
           <h1 id="stage-f-dev-sent-title">등록하신 이메일로 {product.name} 관련<br />콘텐츠를 보내드릴게요!</h1>
           <button className="stage-f-dev-flow__button" type="button" onClick={closeFlow}>다른 제품 보기 →</button>
           <button className="stage-f-dev-flow__button stage-f-dev-flow__button--primary" type="button" onClick={closeFlow}>종료하기</button>
-        </section>
-      )}
-
-      {step === 'value' && (
-        <section aria-labelledby="stage-f-dev-value-title" className="stage-f-dev-flow__full stage-f-dev-flow__full--value">
-          {product.imageUrl && <img alt={product.name} className="stage-f-dev-flow__product" src={product.imageUrl} />}
-          <h1 id="stage-f-dev-value-title">{product.name}</h1>
-          <p>{getMockValueContentCopy(product.name)}</p>
-          <div className="stage-f-dev-flow__actions">
-            <button className="stage-f-dev-flow__button" type="button" onClick={() => setStep('staff')}>직원에게 더 물어보기</button>
-            <button className="stage-f-dev-flow__button" type="button" onClick={closeFlow}>다른 제품 보기 →</button>
-          </div>
         </section>
       )}
 

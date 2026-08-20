@@ -95,7 +95,6 @@
 .stage-f-dev-flow__arrow { align-self: flex-end; margin-top: auto; }
 .stage-f-dev-flow__arrow.stage-entry-circle-button { border: 1px solid var(--stage-entry-glass-border) !important; background-image: linear-gradient(135deg, rgb(255 255 255 / 15%), transparent 43%, rgb(255 255 255 / 3%)) !important; }
 .stage-f-dev-flow__full--complete { justify-content: center; gap: 1rem; }.stage-f-dev-flow__full--complete h1 { margin-bottom: 0; }.stage-f-dev-flow__full--complete > .stage-f-dev-flow__button { margin-top: 3rem; }.stage-f-dev-flow__full--complete > .stage-f-dev-flow__button + .stage-f-dev-flow__button { margin-top: 0; }.stage-f-dev-flow__full--complete p { margin: 0; color: rgb(255 255 255 / 78%); }
-.stage-f-dev-flow__full--value { justify-content: center; }.stage-f-dev-flow__product { width: min(88%, 19rem); height: clamp(16rem, 37dvh, 22rem); object-fit: contain; }.stage-f-dev-flow__full--value h1 { margin: 1rem 0; }.stage-f-dev-flow__full--value > p { width: 100%; margin: 0 0 2rem; padding: .9rem 1rem; border-radius: 1rem; background: rgb(217 217 217 / 22%); color: rgb(255 255 255 / 88%); font-size: .9rem; line-height: 1.65; text-align: left; }
 @media (max-height: 42rem) { .stage-f-dev-flow__full { padding-top: 3rem; }.stage-f-dev-flow h1 { margin: 1.4rem 0; } }
 
 /* Action controls are intentionally flat: their hierarchy comes from fill, copy, and motion. */
