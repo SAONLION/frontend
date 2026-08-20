@@ -348,12 +348,6 @@
   opacity: 0.75;
 }
 
-/* 초기화 API가 준비되기 전의 장식 아이콘이다. 버튼 요소를 쓰지 않아 브라우저
-   기본 컨트롤 배경이 카드 위에 생기지 않는다. */
-.stage-b-journey-card-reset-control {
-  background: transparent;
-}
-
 /* 버튼이 뜨기 전에도 같은 높이를 차지해 위 요소가 밀리지 않게 한다.
    opacity로 감추면 진입 애니메이션(fill: both)이 opacity를 덮어써서 무력화된다. */
 .stage-entry-actions__placeholder {
