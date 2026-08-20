@@ -42,6 +42,7 @@ export function buildScreenCatalog(sku: string): readonly ScreenGroup[] {
         { label: 'C2 제품 이해 허브', path: c(STAGE_C_ROUTES.c2) },
         { label: 'C2-1 소재·마감', path: c(STAGE_C_PRODUCT_DETAIL_ROUTES.craft) },
         { label: 'C2-2 헤리티지', path: c(STAGE_C_PRODUCT_DETAIL_ROUTES.heritage) },
+        { label: 'C2-2-1 구매 요청', path: c(STAGE_C_PRODUCT_DETAIL_ROUTES.heritagePurchase) },
         { label: 'C2-3 컬러', path: c(STAGE_C_PRODUCT_DETAIL_ROUTES.fitColor) },
         { label: 'C3 핏·취향 허브', path: c(STAGE_C_ROUTES.c3) },
         { label: 'C3-1 사이즈', path: c(STAGE_C_PRODUCT_DETAIL_ROUTES.fitSize) },

@@ -46,6 +46,10 @@
   background: radial-gradient(85% 75% at 50% 32%, #34343a 0%, #1b1b1f 55%, #0d0d0f 100%);
 }
 
+.demo-stage[data-background='cognac'] {
+  background: #D4803D;
+}
+
 /* ?bgImage=로 넘긴 그림. 프리셋 위에 덮어 깔린다. */
 .demo-stage[data-background-image]::before {
   position: absolute;

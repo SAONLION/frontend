@@ -18,6 +18,7 @@ import { useSession } from '../../features/session/useSession'
 import { StageCState } from './StageCHubPage'
 import { StageFDevFlowOverlay, type StageFDevScenario } from '../StageF/StageFDevFlowOverlay'
 import { BRAND_HERITAGE_LINES } from '../../constants/brandHeritage'
+import { EVENT_NAMES } from '../../constants/events'
 
 // `LOOK 1 — …` 형태의 줄은 앞머리를 굵게 보여준다. 시안과 같은 강조 방식이다.
 function renderSummaryLine(line: string) {
@@ -58,7 +59,7 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
   const { sku = '' } = useParams()
   const location = useLocation()
   const product = useStageCProduct(sku)
-  const { dispatch } = useSession()
+  const { state, dispatch } = useSession()
   const selectedImages = useSelectedProductImages(product ?? EMPTY_PRODUCT)
   const navigate = usePreparedNavigate()
   const exitProduct = useProductExit(sku)
@@ -102,9 +103,12 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
   const topicLines = product.productDetail?.[topic] ?? []
   // 룩 설명은 카탈로그에 없다. 문구가 채워지기 전까지 착장컷 수만큼 자리만 만들어 둔다 —
   // 개수가 이미지와 어긋나면 어떤 컷을 가리키는지 알 수 없기 때문이다.
-  // 헤리티지는 브랜드 서사가 먼저고 제품 이야기가 뒤따른다. 브랜드 문구는 제품과 무관하게 같다.
+  // 헤리티지는 브랜드 서사가 먼저고 제품 이야기가 뒤따른다. 제품별 문단은 API/Provider가
+  // 내려준 값이므로 항상 표시하고, 제품과 무관하게 반복되는 프론트 하드코딩 브랜드 서사만
+  // 첫 태그 제품에서 보여 준다.
+  const tagCount = state.events.filter((event) => event.name === EVENT_NAMES.nfcTag).length
   const lines = topic === 'heritage'
-    ? [...BRAND_HERITAGE_LINES, ...topicLines]
+    ? [...(tagCount <= 1 ? BRAND_HERITAGE_LINES : []), ...topicLines]
     : topic === 'styling' && topicLines.length === 0
       ? images.map((_, index) => `LOOK ${index + 1} — AI 생성 필요`)
       : topicLines.length > 0 ? topicLines : ['정확한 제품 안내는 직원에게 문의해 주세요.']
@@ -114,9 +118,8 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
     navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn, sku))
   }
 
-  const requestStaffDetails = () => {
-    dispatch({ type: SESSION_ACTIONS.recordSaCall, sku, callType: 'info' })
-    navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.staffPending, sku))
+  const openHeritagePurchaseRequest = () => {
+    navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.heritagePurchase, sku))
   }
 
   return (
@@ -143,7 +146,7 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
       )}
 
       {topic !== 'styling' && (
-        <button className="stage-c-action-button stage-c-product-detail-more-button" onClick={requestStaffDetails} type="button">
+        <button className="stage-c-action-button stage-c-product-detail-more-button" onClick={openHeritagePurchaseRequest} type="button">
           더 자세한 내용이 궁금하다면
         </button>
       )}

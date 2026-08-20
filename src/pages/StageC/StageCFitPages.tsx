@@ -21,7 +21,7 @@ import type { ColorOption, Product, SizeOption } from '../../types/product'
 import { StageCState } from './StageCHubPage'
 import { fitSearchPath, getFitSelection, type FitSelection } from './stageCFitSelection'
 
-type FitPageKind = 'size' | 'color' | 'try-on' | 'pending' | 'completed' | 'purchase-completed'
+type FitPageKind = 'size' | 'color' | 'try-on' | 'heritage-purchase' | 'pending' | 'completed' | 'purchase-completed'
 
 const FIT_REQUEST_TRANSITION_DELAY_MS = 2_000
 
@@ -201,6 +201,18 @@ function StageCFitContent({ kind, product, selection, sku }: StageCFitContentPro
     </FitShell>
   }
 
+  // C2-2-1은 C3-3의 옵션 선택 UI를 재사용하되, 착장 요청을 만들지 않고 구매 문의를
+  // 바로 접수한 뒤 C3-3-4 구매 문의 완료 화면으로 이동한다.
+  if (kind === 'heritage-purchase') {
+    return <FitShell kind={kind} selection={selection} sizeScale={getSizeScale(product, selection)} sku={sku}>
+      <div className="stage-c-fit-try-on-options">
+        <SizeOptions label="사이즈" onSelect={setSize} product={product} selection={selection} />
+        <ColorOptions label="컬러" onSelect={setColor} product={product} selection={selection} />
+      </div>
+      <button className="stage-c-fit-proceed-button" onClick={requestPurchase} type="button">위 제품으로 진행 <span aria-hidden="true">→</span></button>
+    </FitShell>
+  }
+
   if (kind === 'pending') {
     return <FitStatusScreen status="pending" />
   }
@@ -259,12 +271,12 @@ function FitStatusScreen({
 }
 
 function FitShell({ children, kind, selection, sizeScale = 1 }: { children: ReactNode; kind: FitPageKind; selection: FitSelection; sizeScale?: number; sku: string }) {
-  const labels: Record<'size' | 'color' | 'try-on', string> = { size: '사이즈 · 용량', color: '컬러', 'try-on': '착장 요청' }
+  const labels: Record<'size' | 'color' | 'try-on' | 'heritage-purchase', string> = { size: '사이즈 · 용량', color: '컬러', 'try-on': '착장 요청', 'heritage-purchase': '구매 요청' }
   // 다른 각도 컷도 선택한 색상으로 찍힌 것만 쓴다. 없으면 대표 컷 한 장만 보여준다.
   const images = [selection.color.imageUrl, ...(selection.color.detailImages ?? [])]
 
   return <StageCDetailShell className={`stage-c-fit-reference-shell stage-c-fit-reference-shell--${kind}`}>
-    <div className="stage-c-fit-reference-pill">{labels[kind as 'size' | 'color' | 'try-on']}</div>
+    <div className="stage-c-fit-reference-pill">{labels[kind as 'size' | 'color' | 'try-on' | 'heritage-purchase']}</div>
     <section className={`stage-c-fit-reference-media${images.length > 1 ? ' stage-c-fit-reference-media--gallery' : ''}`}>
       <ProductCoverflow
         alt={`${selection.color.label} 컬러 대표 이미지`}

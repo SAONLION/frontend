@@ -35,7 +35,6 @@ export const SESSION_END_ROUTE = '/session-end'
 export const CONTENT_OFFER_ROUTES = {
   email: '/content-offer/email',
   sent: '/content-offer/sent',
-  value: '/content-offer/value',
   staff: '/content-offer/staff',
 } as const
 

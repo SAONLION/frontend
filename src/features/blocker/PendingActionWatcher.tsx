@@ -8,6 +8,8 @@ import { SESSION_ACTIONS } from '../session/sessionTypes'
 import { useSession } from '../session/useSession'
 import { usePreparedNavigate } from '../../app/usePreparedNavigate'
 import { CONTENT_OFFER_ROUTES, STAGE_D_ROUTES } from '../../constants/appRoutes'
+import { createStaffCall } from '../../api/staffCalls'
+import { STAFF_CALL_REASONS } from '../../constants/staffCallReasons'
 import E2RequestReceived from '../../pages/StageE/E2RequestReceived'
 
 const DISMISS_RESPONSE_KEY = 'dismissed'
@@ -132,7 +134,7 @@ export function PendingActionWatcher() {
   // A1·A2는 온보딩에만 집중한다. 서버 개입 폴링과 시트 노출을 모두 하지 않는다.
   const isPollingEnabled = !pathname.startsWith('/stage-a/')
   const { action, clear, dismiss } = usePendingActionPolling(isPollingEnabled)
-  const { dispatch } = useSession()
+  const { state, dispatch } = useSession()
   const navigate = usePreparedNavigate()
   const recordedIds = useRef(new Set<number>())
   /** 직원 호출이 만들어졌을 때 띄우는 접수 화면. 눌린 선택지 라벨을 담는다. */
@@ -195,8 +197,20 @@ export function PendingActionWatcher() {
           navigate(STAGE_D_ROUTES.personalizedRecommend)
           return
         }
-        if (result.actionNextStep === NEXT_STEP_VALUE_CONTENT || result.actionNextStep === NEXT_STEP_CAPTURE_CONTACT) {
-          navigate(result.actionNextStep === NEXT_STEP_CAPTURE_CONTACT ? CONTENT_OFFER_ROUTES.email : CONTENT_OFFER_ROUTES.value, {
+        if (result.actionNextStep === NEXT_STEP_VALUE_CONTENT) {
+          if (!state.sessionId) throw new Error('가격 안내 직원 호출에 필요한 세션이 없습니다.')
+          return createStaffCall(state.sessionId, {
+            productId: action.productId ?? undefined,
+            reason: STAFF_CALL_REASONS.price,
+          }).then(() => {
+            if (state.currentSku) dispatch({ type: SESSION_ACTIONS.recordSaCall, sku: state.currentSku, callType: 'info' })
+            navigate(CONTENT_OFFER_ROUTES.staff, {
+              state: { actionId: action.actionId, productId: action.productId },
+            })
+          })
+        }
+        if (result.actionNextStep === NEXT_STEP_CAPTURE_CONTACT) {
+          navigate(CONTENT_OFFER_ROUTES.email, {
             state: {
               actionId: action.actionId,
               productId: action.productId,
