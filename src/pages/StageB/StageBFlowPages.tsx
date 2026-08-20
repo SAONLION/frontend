@@ -64,9 +64,9 @@ export function StageBNfcPromptPage() {
       journeyCard={journeyCard}
       onCallStaff={() => dispatch({ type: SESSION_ACTIONS.setActiveOverlay, overlay: 'E' })}
       onNfcDetected={() => {
-        // 실물 태그가 없으므로 시연용 태그 풀에서 고른다. 직전 제품은 피해 매번 다른 제품이 나온다.
-        const tag = pickDemoTag(state.currentSku)
-        navigate(stageBRecognizingPath(tag.sku, tag.tagId))
+        // 실물 태그가 없으므로 서버가 보장한 SKU(=태그) 범위에서 하나를 고른다.
+        const tagId = pickDemoTag()
+        navigate(stageBRecognizingPath(`tag-${tagId}`, tagId))
       }}
     />
   )
@@ -98,6 +98,7 @@ export function StageBRecognizingPage() {
             category: result.product.category,
             imageUrl: result.product.imageUrl,
             sku,
+            skuId: tagId,
           })
           dispatch({ type: SESSION_ACTIONS.setProductId, productId: result.product.id })
           return getSkus(result.product.id).catch((error: unknown) => {
@@ -106,8 +107,9 @@ export function StageBRecognizingPage() {
           })
         })
         .then((skus) => {
-          const firstSku = skus?.[0]
-          if (firstSku) dispatch({ type: SESSION_ACTIONS.setCurrentSkuId, skuId: firstSku.skuId })
+          // 태그 ID와 SKU ID가 같으므로, 목록 정렬과 무관하게 스캔한 색상 SKU를 현재값으로 둔다.
+          const scannedSku = skus?.find((item) => item.skuId === tagId) ?? skus?.[0]
+          if (scannedSku) dispatch({ type: SESSION_ACTIONS.setCurrentSkuId, skuId: scannedSku.skuId })
         })
         .catch((error: unknown) => {
           console.error('제품 태그 조회에 실패했습니다.', error)

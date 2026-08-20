@@ -19,7 +19,9 @@ export function useSelectedProductImages(product: Product): SelectedProductImage
   const { state } = useSession()
   const selected = state.selectedColorCode
     ? product.colorOptions?.find((option) => isSameColorSelection(option.code, state.selectedColorCode))
-    : undefined
+    : product.colorOptions?.find((option) => Number(option.sku) === state.currentSkuId)
+      ?? product.colorOptions?.find((option) => isSameColorSelection(option.code, product.fitDefaults?.colorCode))
+      ?? product.colorOptions?.[0]
 
   if (!selected) {
     return {

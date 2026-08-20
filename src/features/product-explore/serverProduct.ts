@@ -11,12 +11,10 @@ export type ServerProduct = {
   name: string
   category: string
   imageUrl: string | null
+  /** 태그 스캔에 사용한 ID. 현재 서버 계약에서 SKU ID와 같다. */
+  skuId: number
   /**
-   * 이 서버 제품이 어느 fixture 제품을 대신해 스캔됐는지.
-   *
-   * 화면은 URL의 style number로 fixture를 찾고 서버 값은 이 store에서 따로 온다. 둘을 묶어 두지
-   * 않으면 서로 다른 제품이 한 화면에 섞인다 — D2-1·D4에서 추천 제품을 누르면 `scanTag`을 거치지
-   * 않고 C1으로 바로 가므로, 이 값이 없으면 직전 스캔의 제품명이 그대로 남는다.
+   * 현재 화면 URL의 제품 키. 서버 제품과 화면을 묶어, 다른 제품의 서버 값이 남지 않게 한다.
    */
   sku: string
 }
