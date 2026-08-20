@@ -180,15 +180,14 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
       </header>
       <div className="stage-c-c5-staff-content">
         <section aria-label="나이비스 AI 도슨트" className="stage-c-c5-staff-docent"><DocentStage continuityKey={`staff-call-${callType}`} cue={completed ? 'success' : 'sending'} /></section>
-        <h1><KineticTextReveal autoPlay blur className="justify-center" distance={16} onRevealComplete={() => setIsOtherCallSupportingCopyVisible(true)} splitBy="characters" stagger={0.035} text={'직원에게 궁금한 사항에 대해\n문의 알림을 보냈어요!'} waitForDocent /></h1>
+        {/* pending→completed 전환 때 문구가 그대로라 텍스트만으론 리빌이 다시 안 돈다(완료 화면이
+            영원히 안 뜨는 원인이었다). completed로 key를 갈아 강제로 다시 태운다. */}
+        <h1><KineticTextReveal autoPlay blur className="justify-center" distance={16} key={completed ? 'completed' : 'pending'} onRevealComplete={() => setIsOtherCallSupportingCopyVisible(true)} splitBy="characters" stagger={0.035} text={'직원에게 궁금한 사항에 대해\n문의 알림을 보냈어요!'} waitForDocent /></h1>
         {isOtherCallSupportingCopyVisible && <p><KineticTextReveal autoPlay blur={false} className="justify-center" distance={8} onRevealComplete={() => setRevealedCompletedState(completed)} splitBy="words" stagger={0.1} text="더 자세한 상담을 받아보세요" waitForDocent /></p>}
       </div>
       {revealedCompletedState === completed && <div className="stage-c-c5-response-actions">
         <PreparedLink className="stage-c-action-button" to={returnPath}>다른 것도 물어보기</PreparedLink>
-        <div>
-          <PreparedLink className="stage-c-action-button" to={returnPath}>직원에게 문의하기</PreparedLink>
-          <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
-        </div>
+        <button className="stage-c-action-button" onClick={exitProduct} type="button">다른 제품 보기 <span aria-hidden="true">→</span></button>
       </div>}
     </StageCDetailShell>
   )
