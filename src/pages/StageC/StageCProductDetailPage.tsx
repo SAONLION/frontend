@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import { useLocation, useParams } from 'react-router'
-import stylingLifestyleImage from '../../assets/images/product-styling-lifestyle.webp'
 import { usePreparedNavigate } from '../../app/usePreparedNavigate'
 import { PreparedLink } from '../../components/common/PreparedLink'
 import { ProductCoverflow } from '../../components/domain/ProductCoverflow'
@@ -95,7 +94,7 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
 
   // C2-3은 모델 착장샷만 크게 보여준다. 나머지 제품 컷은 대표 컷과 함께 이미지 갤러리로 옮겼다.
   const images = topic === 'styling'
-    ? selectedImages.stylingImages.length > 0 ? selectedImages.stylingImages : [stylingLifestyleImage]
+    ? selectedImages.stylingImages
     : [selectedImages.imageUrl, ...selectedImages.detailImages]
   // C2-1은 카탈로그에 실제로 있는 항목만 `라벨 : 값`으로 보여준다(가방 기준 하드웨어 97% · 안감 94% ·
   // 소재 90% · 제조국 100%). 없는 항목은 문구로 때우지 않고 줄을 감춘다.
@@ -128,7 +127,9 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
 
       <section className={`stage-c-product-detail-media stage-c-product-detail-media--${topic}`} aria-label={`${topicTitles[topic]} 안내 미디어`}>
         {imageCount > 0 && <ProductCoverflow alt={product.name} images={images} label={`${topicTitles[topic]} 제품 이미지`} variant={topic === 'styling' ? 'styling' : 'product'} />}
-        {topic === 'styling' && imageCount === 0 && <img alt={product.name} className="stage-c-primary-cutout" decoding="async" fetchPriority="high" src={product.imageUrl} />}
+        {topic === 'styling' && imageCount === 0 && (
+          <p className="stage-c-product-detail-empty">이 제품에는 스타일링 모델 이미지가 아직 없어요.</p>
+        )}
       </section>
 
       {topic !== 'styling' && (

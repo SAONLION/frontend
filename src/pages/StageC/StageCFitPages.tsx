@@ -304,7 +304,6 @@ function getFitFacts(product: Product, selection: FitSelection): readonly Fact[]
     { label: '제품 치수', value: selection.size.dimensions },
     { label: '수납 구성', value: product.fitDetail?.storage },
     { label: '스트랩 · 핸들', value: product.fitDetail?.strap },
-    { label: '제조국', value: product.origin },
   ].filter((row): row is Fact => Boolean(row.value))
 }
 
