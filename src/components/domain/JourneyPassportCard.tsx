@@ -6,8 +6,9 @@ import swatchPin from '../../assets/images/stage-b-journey-card-swatch-pin.svg'
 import dividerFold from '../../assets/images/stage-b-journey-card-divider-fold.svg'
 import dividerBottom1 from '../../assets/images/stage-b-journey-card-divider-bottom-1.svg'
 import dividerBottom2 from '../../assets/images/stage-b-journey-card-divider-bottom-2.svg'
+import completionStamp from '../../assets/images/stage-b-journey-card-completion-stamp.webp'
 import type { JourneyCardResponse } from '../../api/journeyCard'
-import { formatJourneyCardDate } from '../../api/journeyCard'
+import { formatJourneyCardDate, JOURNEY_CARD_COLLAGE_SLOTS } from '../../api/journeyCard'
 
 // 여권 카드 안 콜라주 사진 4칸의 위치·크기 (Figma 디자인 기준 고정값).
 // 서버도 최대 4장까지만 만든다(모델샷 1장 + 제품샷으로 채움). 슬롯 수와 일치하므로 잘리는 사진은 없다.
@@ -94,6 +95,8 @@ export const JourneyPassportCard = forwardRef<HTMLDivElement, JourneyPassportCar
   const sessionCode = journeyCard?.sessionCode ?? '—'
 
   const isLoaded = journeyCard !== null
+  // 4칸이 다 채워졌을 때만 "쾅" 찍히는 완성 도장을 보여준다.
+  const isComplete = images.length >= JOURNEY_CARD_COLLAGE_SLOTS
 
   return (
     <div
@@ -106,6 +109,14 @@ export const JourneyPassportCard = forwardRef<HTMLDivElement, JourneyPassportCar
       <CollageSlot2 image={images[1]} index={1} />
       <CollageSlot3 image={images[2]} index={2} />
       <CollageSlot4 image={images[3]} index={3} />
+
+      {isComplete && (
+        <img
+          alt="완성 도장"
+          className="stage-b-journey-card-completion-stamp pointer-events-none absolute left-18.5 top-3.5 h-39.5 w-37.5 object-contain"
+          src={completionStamp}
+        />
+      )}
 
       <img alt="MCM" className="pointer-events-none absolute left-[218.7px] top-[10.8px] h-[46.8px] w-[60.911px] object-contain opacity-27 mix-blend-multiply" src={emblemWatermark} />
 

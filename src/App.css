@@ -348,6 +348,22 @@
   opacity: 0.75;
 }
 
+/* 콜라주 4칸이 다 채워졌을 때 완성 도장이 쾅 찍히는 연출.
+   사진들이 순서대로 나타난 뒤(마지막 슬롯 fade-in 기준 약 750ms) 도장이 크게 들어와 튕기며 자리잡는다. */
+@keyframes stage-b-journey-card-stamp-slam {
+  0% { opacity: 0; transform: scale(2.6) rotate(18deg); }
+  45% { opacity: 1; transform: scale(0.92) rotate(-4deg); }
+  62% { transform: scale(1.08) rotate(3deg); }
+  78% { transform: scale(0.97) rotate(-1.5deg); }
+  90% { transform: scale(1.02) rotate(0.5deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+.stage-b-journey-card-completion-stamp {
+  opacity: 0;
+  animation: stage-b-journey-card-stamp-slam 520ms cubic-bezier(0.2, 0.8, 0.3, 1) 480ms both;
+}
+
 /* 버튼이 뜨기 전에도 같은 높이를 차지해 위 요소가 밀리지 않게 한다.
    opacity로 감추면 진입 애니메이션(fill: both)이 opacity를 덮어써서 무력화된다. */
 .stage-entry-actions__placeholder {
@@ -359,6 +375,11 @@
   .stage-b-journey-card-value,
   .stage-entry-actions--reserved {
     transition: none;
+  }
+
+  .stage-b-journey-card-completion-stamp {
+    animation: none;
+    opacity: 1;
   }
 }
 
