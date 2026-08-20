@@ -10,6 +10,7 @@ import { STAGE_C_ROUTES, stageCPath } from '../../constants/stageC';
 import { mockD2Recommendations } from '../../mocks/fixtures/demoContent';
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes';
 import { useSession } from '../../features/session/useSession';
+import { setServerProduct } from '../../features/product-explore/serverProduct';
 import { useReturnToB1 } from '../../app/useReturnToB1';
 import D1VisitPurpose from './D1VisitPurpose';
 import D2ProductRecommendation, { type ProductCardData } from './D2ProductRecommendation';
@@ -17,10 +18,12 @@ import D21ProductLocationGuide from './D21ProductLocationGuide';
 
 interface SelectedProduct {
   sku: string;
+  productId?: number;
+  skuId?: number;
   image: string;
   name: string;
   description: string | string[];
-  /** sku를 모르는 API 추천이라 데모 제품으로 대체해 안내하는 중인지 */
+  /** 서버 SKU가 없는 fixture 추천을 데모 제품으로 안내하는 중인지 */
   isFallbackSku?: boolean;
 }
 
@@ -40,15 +43,17 @@ const PURPOSE_PHRASE_MAP: Record<string, string> = {
   기타: '이런 제품',
 };
 
-// API 추천의 skuId는 서버 정수 식별자이고 Stage C route는 fixture style SKU 문자열을 쓴다.
-// Live SKU mapper를 붙이기 전까지 위치 안내 진입은 데모 SKU로 폴백한다.
 function toSelectedProduct(product: ProductCardData): SelectedProduct {
+  const hasServerSku = Number.isInteger(product.skuId) && (product.skuId ?? 0) > 0
   return {
-    sku: product.sku ?? DEFAULT_PRODUCT_SKU,
+    // 라우트는 문자열 키를 쓰지만, Live mapper는 서버 제품 store로 실제 제품을 식별한다.
+    sku: hasServerSku ? `tag-${product.skuId}` : product.sku ?? DEFAULT_PRODUCT_SKU,
+    productId: product.productId,
+    skuId: product.skuId,
     image: product.image,
     name: product.name,
     description: product.description,
-    isFallbackSku: product.sku === undefined,
+    isFallbackSku: !hasServerSku && product.sku === undefined,
   };
 }
 
@@ -84,6 +89,8 @@ function useRecommendedProducts() {
       } else {
         setProducts(recommendations.slice(0, RECOMMENDATION_LIMIT).map((item) => ({
           id: String(item.productId),
+          productId: item.productId,
+          skuId: item.skuId,
           image: item.imageUrl ?? emblemImage,
           name: item.productName,
           description: item.reason ?? '',
@@ -177,9 +184,21 @@ function useEnterTaggedProduct() {
   const navigate = usePreparedNavigate();
   const { dispatch } = useSession();
 
-  return (sku: string) => {
-    dispatch({ type: SESSION_ACTIONS.recordNfcTag, sku });
-    navigate(stageCPath(STAGE_C_ROUTES.c1, sku));
+  return (product: SelectedProduct) => {
+    if (product.productId !== undefined && product.skuId !== undefined) {
+      setServerProduct({
+        id: product.productId,
+        name: product.name,
+        category: '',
+        imageUrl: product.image || null,
+        sku: product.sku,
+        skuId: product.skuId,
+      });
+      dispatch({ type: SESSION_ACTIONS.setProductId, productId: product.productId });
+      dispatch({ type: SESSION_ACTIONS.setCurrentSkuId, skuId: product.skuId });
+    }
+    dispatch({ type: SESSION_ACTIONS.recordNfcTag, sku: product.sku });
+    navigate(stageCPath(STAGE_C_ROUTES.c1, product.sku));
   };
 }
 
@@ -194,7 +213,7 @@ export function StageD21Page() {
       selectedProduct={selectedProduct}
       isFallbackProduct={selectedProduct.isFallbackSku ?? false}
       onViewOtherProducts={returnToB1}
-      onSelectProduct={() => enterTaggedProduct(selectedProduct.sku)}
+      onSelectProduct={() => enterTaggedProduct(selectedProduct)}
     />
   );
 }
@@ -233,7 +252,7 @@ export function StageD4Page() {
       selectedProduct={selectedProduct}
       isFallbackProduct={selectedProduct.isFallbackSku ?? false}
       onViewOtherProducts={returnToB1}
-      onSelectProduct={() => enterTaggedProduct(selectedProduct.sku)}
+      onSelectProduct={() => enterTaggedProduct(selectedProduct)}
     />
   );
 }

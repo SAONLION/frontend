@@ -9,8 +9,11 @@ import { mockD2Recommendations } from '../../mocks/fixtures/demoContent';
 
 export type ProductCardData = {
   id: string
-  /** fixture 추천에만 있다. API 추천은 productId만 내려와서 sku를 알 수 없다. */
+  /** fixture 추천의 화면 키. */
   sku?: string
+  /** 서버 추천에서 내려오는 실제 제품·SKU 식별자. */
+  productId?: number
+  skuId?: number
   image: string
   name: string
   description: string | string[]
