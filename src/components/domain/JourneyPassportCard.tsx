@@ -14,6 +14,29 @@ import { formatJourneyCardDate, JOURNEY_CARD_COLLAGE_SLOTS } from '../../api/jou
 // 서버도 최대 4장까지만 만든다(모델샷 1장 + 제품샷으로 채움). 슬롯 수와 일치하므로 잘리는 사진은 없다.
 type CollageSlotProps = { image?: { imageUrl: string; shotType: string }; index?: number }
 
+// 우표 가장자리의 반원 홈. 슬롯의 실제 픽셀 길이 기준으로 네 변의 간격을 맞춘다.
+const STAMP_PERFORATION_RADIUS = 4.2
+// 두 반원 사이의 빈 폭을 최소 반지름만큼 남긴다: 중심 간격 = 지름 + 반지름.
+const STAMP_PERFORATION_SPACING = STAMP_PERFORATION_RADIUS * 3
+
+type StampDimensions = { width: number; height: number }
+
+const COLLAGE_SLOT_1: StampDimensions = { width: 78.075, height: 109.541 }
+const COLLAGE_SLOT_2: StampDimensions = { width: 58.191, height: 70.178 }
+const COLLAGE_SLOT_3: StampDimensions = { width: 89.857, height: 70.174 }
+
+function getStampPerforationPositions(length: number): readonly number[] {
+  // 모서리 → 반원 시작점의 빈 공간을 반지름만큼 둔다.
+  // 따라서 첫·마지막 반원의 중심은 각각 양 끝에서 2r 떨어진다.
+  const edgeCenterOffset = STAMP_PERFORATION_RADIUS * 2
+  const usableLength = length - edgeCenterOffset * 2
+  if (usableLength <= 0) return [length / 2]
+
+  const count = Math.max(2, Math.floor(usableLength / STAMP_PERFORATION_SPACING) + 1)
+  const spacing = usableLength / (count - 1)
+  return Array.from({ length: count }, (_, index) => edgeCenterOffset + index * spacing)
+}
+
 const FAVORITE_COLOR_SWATCHES: Record<string, string> = {
   BLACK: '#242424',
   BEIGE: '#d6c3a6',
@@ -106,57 +129,94 @@ function CollagePhoto({ image, index = 0 }: CollageSlotProps) {
 }
 
 /** 제품 누끼 뒤에만 놓이는 우표 종이. SVG 마스크라 작은 카드에서도 톱니가 매끈하게 유지된다. */
-function StampBackdrop() {
+function StampBackdrop({ fill = '#fffefb', width, height }: { fill?: string } & StampDimensions) {
   const maskId = useId()
-  const perforations = [4, 12, 20, 28, 36, 44, 52, 60, 68, 76, 84, 92, 96]
+  const horizontalPerforations = getStampPerforationPositions(width)
+  const verticalPerforations = getStampPerforationPositions(height)
 
   return (
-    <svg aria-hidden="true" className="pointer-events-none absolute inset-0 size-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+    <svg aria-hidden="true" className="pointer-events-none absolute inset-0 size-full" preserveAspectRatio="none" viewBox={`0 0 ${width} ${height}`}>
       <defs>
-        <mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
-          <rect fill="white" height="100" width="100" />
-          {perforations.flatMap((position) => [
-            <rect fill="black" height="4.4" key={`top-${position}`} width="5.4" x={position - 2.7} y="0" />,
-            <rect fill="black" height="4.4" key={`bottom-${position}`} width="5.4" x={position - 2.7} y="95.6" />,
-            <rect fill="black" height="5.4" key={`left-${position}`} width="4.4" x="0" y={position - 2.7} />,
-            <rect fill="black" height="5.4" key={`right-${position}`} width="4.4" x="95.6" y={position - 2.7} />,
+        <mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="0" width={width} height={height}>
+          <rect fill="white" height={height} width={width} />
+          {horizontalPerforations.flatMap((position) => [
+            <circle cx={position} cy="0" fill="black" key={`top-${position}`} r={STAMP_PERFORATION_RADIUS} />,
+            <circle cx={position} cy={height} fill="black" key={`bottom-${position}`} r={STAMP_PERFORATION_RADIUS} />,
+          ])}
+          {verticalPerforations.flatMap((position) => [
+            <circle cx="0" cy={position} fill="black" key={`left-${position}`} r={STAMP_PERFORATION_RADIUS} />,
+            <circle cx={width} cy={position} fill="black" key={`right-${position}`} r={STAMP_PERFORATION_RADIUS} />,
           ])}
         </mask>
       </defs>
-      <rect fill="#fffefb" height="100" mask={`url(#${maskId})`} width="100" />
+      <g mask={`url(#${maskId})`}>
+        <rect fill={fill} height={height} width={width} />
+      </g>
+    </svg>
+  )
+}
+
+/** 사진 아래의 진한 림과 분리된, 우표 톱니 전체를 따르는 얇은 외곽선이다. */
+function StampOutline({ width, height }: StampDimensions) {
+  const horizontalPerforations = getStampPerforationPositions(width)
+  const verticalPerforations = getStampPerforationPositions(height)
+  const radius = STAMP_PERFORATION_RADIUS
+  const topEdge = horizontalPerforations.reduce((path, position) => `${path} H${position - radius} A${radius} ${radius} 0 0 0 ${position + radius} 0`, 'M0 0') + ` H${width}`
+  const bottomEdge = horizontalPerforations.reduce((path, position) => `${path} H${position - radius} A${radius} ${radius} 0 0 1 ${position + radius} ${height}`, `M0 ${height}`) + ` H${width}`
+  const leftEdge = verticalPerforations.reduce((path, position) => `${path} V${position - radius} A${radius} ${radius} 0 0 1 0 ${position + radius}`, 'M0 0') + ` V${height}`
+  const rightEdge = verticalPerforations.reduce((path, position) => `${path} V${position - radius} A${radius} ${radius} 0 0 0 ${width} ${position + radius}`, `M${width} 0`) + ` V${height}`
+
+  return (
+    <svg aria-hidden="true" className="pointer-events-none absolute inset-0 z-1 size-full" preserveAspectRatio="none" viewBox={`0 0 ${width} ${height}`}>
+      {[topEdge, bottomEdge, leftEdge, rightEdge].map((path) => (
+        <path
+          d={path}
+          fill="none"
+          key={path}
+          stroke="#e1dfdc"
+          strokeLinecap="butt"
+          strokeLinejoin="miter"
+          strokeWidth="0.9"
+          vectorEffect="non-scaling-stroke"
+        />
+      ))}
     </svg>
   )
 }
 
 function CollageSlot1({ image, index }: CollageSlotProps) {
   return (
-    <div className={`stage-b-journey-card-collage-slot absolute left-[23.35px] top-[62.32px] h-[109.541px] w-[78.075px] overflow-hidden${image ? '' : ' border-[0.838px] border-dashed border-[#beafad] shadow-[0px_0.856px_3.423px_0px_rgba(0,0,0,0.18)]'}`}>
-      {image && <StampBackdrop />}
+    <div className={`stage-b-journey-card-collage-slot absolute z-10 isolate left-[23.35px] top-[62.32px] h-[109.541px] w-[78.075px] overflow-hidden${image ? '' : ' border-[0.838px] border-dashed border-[#beafad] shadow-[0px_0.856px_3.423px_0px_rgba(0,0,0,0.18)]'}`}>
+      {image && <StampBackdrop {...COLLAGE_SLOT_1} />}
       <CollagePhoto image={image} index={index} />
+      {image && <StampOutline {...COLLAGE_SLOT_1} />}
     </div>
   )
 }
 
 function CollageSlot2({ image, index }: CollageSlotProps) {
   return (
-    <div className={`stage-b-journey-card-collage-slot absolute left-[86.68px] top-[25.53px] h-[70.178px] w-[58.191px] overflow-hidden${image ? '' : ' border-[0.838px] border-dashed border-[#beafad] shadow-[0px_0px_3.423px_0px_rgba(0,0,0,0.25)]'}`}>
+    <div className={`stage-b-journey-card-collage-slot absolute z-30 isolate left-[86.68px] top-[25.53px] h-[70.178px] w-[58.191px] overflow-hidden${image ? '' : ' border-[0.838px] border-dashed border-[#beafad] shadow-[0px_0px_3.423px_0px_rgba(0,0,0,0.25)]'}`}>
+      {image && <StampBackdrop {...COLLAGE_SLOT_2} fill="#e5e5e3" />}
       <CollagePhoto image={image} index={index} />
+      {image && <StampOutline {...COLLAGE_SLOT_2} />}
     </div>
   )
 }
 
 function CollageSlot3({ image, index }: CollageSlotProps) {
   return (
-    <div className={`stage-b-journey-card-collage-slot absolute left-[185.95px] top-[66.6px] h-[70.174px] w-[89.857px] overflow-hidden${image ? '' : ' border-[0.838px] border-dashed border-[#beafad] shadow-[0px_0px_3.423px_0px_rgba(0,0,0,0.13)]'}`}>
-      {image && <StampBackdrop />}
+    <div className={`stage-b-journey-card-collage-slot absolute z-20 isolate left-[185.95px] top-[66.6px] h-[70.174px] w-[89.857px] overflow-hidden${image ? '' : ' border-[0.838px] border-dashed border-[#beafad] shadow-[0px_0px_3.423px_0px_rgba(0,0,0,0.13)]'}`}>
+      {image && <StampBackdrop {...COLLAGE_SLOT_3} />}
       <CollagePhoto image={image} index={index} />
+      {image && <StampOutline {...COLLAGE_SLOT_3} />}
     </div>
   )
 }
 
 function CollageSlot4({ image, index }: CollageSlotProps) {
   return (
-    <div className={`stage-b-journey-card-collage-slot absolute left-[115.35px] top-[73px] h-[101.911px] w-[100.412px] overflow-hidden${image ? '' : ' border-[0.713px] border-dashed border-[#beafad] shadow-[0px_0px_3.423px_0px_rgba(0,0,0,0.18)]'}`}>
+    <div className={`stage-b-journey-card-collage-slot absolute z-30 isolate left-[115.35px] top-[73px] h-[101.911px] w-[100.412px] overflow-hidden${image ? '' : ' border-[0.713px] border-dashed border-[#beafad] shadow-[0px_0px_3.423px_0px_rgba(0,0,0,0.18)]'}`}>
       <CollagePhoto image={image} index={index} />
     </div>
   )
@@ -198,7 +258,7 @@ export const JourneyPassportCard = forwardRef<HTMLDivElement, JourneyPassportCar
       {isComplete && (
         <img
           alt="완성 도장"
-          className="stage-b-journey-card-completion-stamp pointer-events-none absolute left-[149.8px] top-[124.8px] h-39.5 w-37.5 object-contain"
+          className="stage-b-journey-card-completion-stamp pointer-events-none absolute z-40 left-[149.8px] top-[124.8px] h-39.5 w-37.5 object-contain"
           src={completionStamp}
         />
       )}
