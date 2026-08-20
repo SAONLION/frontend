@@ -1952,6 +1952,7 @@
   margin: 0;
   font-size: 1rem;
   line-height: 1.55;
+  white-space: pre-line;
 }
 
 .stage-c-c5-ai-content > p,
@@ -2137,10 +2138,10 @@
   padding: var(--stage-c-product-detail-image-top-space) 1rem 0.25rem;
 }
 
-/* C2-3은 설명 카드 없이 모델 컷에 집중한다. 남는 공간의 중앙에만 이미지를 놓아
-   상단 헤더와 하단 고정 액션 사이의 균형을 유지한다. */
+/* C2-3은 설명 카드 없이 모델 컷에 집중한다. 뷰포트 자체를 제한해 모델컷과
+   인디케이터가 하단 액션에 과도하게 밀착되지 않게 한다. */
 .stage-c-product-detail-shell--styling .stage-c-product-detail-media {
-  flex: 1 1 auto;
+  flex: 0 0 70dvh;
   align-items: center;
   min-height: 0;
   padding-block: 0;
@@ -2237,6 +2238,12 @@
   margin: 0 0 0 max(-9rem, -44vw);
 }
 
+/* C2-3의 모델 컷만 살짝 키운다. coverflow 카드의 이동·원근 값은 유지한다. */
+.stage-c-coverflow__card--styling img {
+  transform: scale(1.5);
+  transform-origin: center;
+}
+
 .stage-c-coverflow__card:active {
   cursor: grabbing;
 }
@@ -2268,7 +2275,7 @@
   height: min(27rem, 50dvh);
   max-height: none;
   object-fit: contain;
-  transform: scale(1.2);
+  transform: scale(1.5);
   transform-origin: center;
 }
 
@@ -2518,21 +2525,26 @@
 }
 
 .stage-c-fit-reference-facts div {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  align-items: start;
   gap: 1rem;
 }
 
 .stage-c-fit-reference-facts dt {
   color: rgb(255 255 255 / 52%);
   font-size: 0.875rem;
+  white-space: nowrap;
 }
 
 .stage-c-fit-reference-facts dd {
   margin: 0;
+  min-width: 0;
   color: var(--stage-c-text);
   font-size: 0.875rem;
   text-align: right;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
 }
 
 .stage-c-fit-reference-options--color {

@@ -88,13 +88,7 @@ export function StageCAiAnswerPage() {
 
     void Promise.all([request.completion, writingDuration]).then(([result]) => {
       if (!active || requestRef.current !== request) return
-      if (!result.resolved) {
-        dispatch({ type: SESSION_ACTIONS.recordAiAnswer, queryId: query.id, sku, topic: query.topic, resolved: false })
-        if (hasOtherStaffCall) navigate(staffPendingPath, { replace: true })
-        else requestStaff()
-        return
-      }
-      dispatch({ type: SESSION_ACTIONS.recordAiAnswer, queryId: query.id, sku, topic: query.topic, resolved: true })
+      dispatch({ type: SESSION_ACTIONS.recordAiAnswer, queryId: query.id, sku, topic: query.topic, resolved: result.resolved })
       setIsAnswerTyped(false)
       setAnswerView({ contextKey, status: 'resolved', title: result.title, lines: result.answerLines })
     }).catch(() => {
@@ -116,7 +110,7 @@ export function StageCAiAnswerPage() {
       <PreparedLink aria-label="기타 질문 닫기" className="stage-c-close-control" to={otherPath}>×</PreparedLink>
     </header>
     <div className="stage-c-c5-ai-content">
-      <h1>{`${query.text}에 대해서는\n이렇게 안내드릴 수 있어요`}</h1>
+      <h1>{`"${query.text}"에 대해서는\n이렇게 안내드릴 수 있어요`}</h1>
       <div className="stage-c-c5-answer-slot">
         <section aria-busy={view.status === 'loading'} className="stage-c-c5-answer-card" aria-label="AI 답변">
           {view.status === 'loading' && (
@@ -131,7 +125,7 @@ export function StageCAiAnswerPage() {
               loop={false}
               onSentenceComplete={() => setIsAnswerTyped(true)}
               showCursor
-              text={view.lines.join(' ')}
+              text={view.lines.join('\n')}
               typingSpeed={28}
             />
           )}

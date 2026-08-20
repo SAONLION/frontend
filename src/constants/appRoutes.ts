@@ -17,6 +17,10 @@ export function stageBRecognizingPath(sku: string, tagId?: number): string {
   return `${STAGE_B_ROUTES.recognizing}?${params.toString()}`
 }
 
+export function stageBRandomRecognizingPath(): string {
+  return `${STAGE_B_ROUTES.recognizing}?random=true`
+}
+
 export const STAGE_D_ROUTES = {
   recommend: '/stage-d/recommend',
   locationGuide: '/stage-d/location-guide',

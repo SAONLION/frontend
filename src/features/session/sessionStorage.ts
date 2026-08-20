@@ -1,6 +1,15 @@
 const SESSION_ID_STORAGE_KEY = 'tagon.sessionId'
 const PRODUCT_CONTEXT_STORAGE_KEY = 'tagon.productContext'
 
+export type StoredServerProduct = {
+  id: number
+  name: string
+  category: string
+  imageUrl: string | null
+  skuId: number
+  sku: string
+}
+
 /**
  * 서버 제품 식별자. 인터랙션 로그·착장 요청·구매 문의·직원 호출이 모두 이 값에 의존하는데
  * B2 태그 스캔에서만 채워진다. 메모리에만 두면 STAGE C에서 새로고침하거나 PWA에서 앱을
@@ -12,6 +21,29 @@ export type StoredProductContext = {
   productId: number | null
   currentSkuId: number | null
   currentSku: string | null
+  /** 새로고침 뒤 Live mapper가 제품을 재조회하는 데 쓰는 비PII 제품 요약. */
+  serverProduct: StoredServerProduct | null
+}
+
+function readStoredServerProduct(value: unknown): StoredServerProduct | null {
+  if (typeof value !== 'object' || value === null) return null
+  const product = value as Partial<StoredServerProduct>
+  if (
+    typeof product.id !== 'number'
+    || typeof product.name !== 'string'
+    || typeof product.category !== 'string'
+    || (product.imageUrl !== null && typeof product.imageUrl !== 'string')
+    || typeof product.skuId !== 'number'
+    || typeof product.sku !== 'string'
+  ) return null
+  return {
+    id: product.id,
+    name: product.name,
+    category: product.category,
+    imageUrl: product.imageUrl,
+    skuId: product.skuId,
+    sku: product.sku,
+  }
 }
 
 export function getStoredProductContext(): StoredProductContext | null {
@@ -30,6 +62,7 @@ export function getStoredProductContext(): StoredProductContext | null {
       productId: typeof value.productId === 'number' ? value.productId : null,
       currentSkuId: typeof value.currentSkuId === 'number' ? value.currentSkuId : null,
       currentSku: typeof value.currentSku === 'string' ? value.currentSku : null,
+      serverProduct: readStoredServerProduct(value.serverProduct),
     }
   } catch {
     return null
