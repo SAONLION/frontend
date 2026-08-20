@@ -89,21 +89,6 @@ function getSizeOrder(size: string): number {
   return order[normalized] ?? 100
 }
 
-/**
- * 최종 전달본의 이미지 분류 기준으로 CDN asset 09~14는 모델컷이다. 의류에는 10 이후 모델컷도
- * 있으므로 09만 보지 않는다. 전달본에서 확인된 07·08 모델컷, 09 상품컷 예외도 반영한다.
- * 현재 SKU API는 URL 배열만 주므로 이 파일명 규칙으로 일반 갤러리와 스타일링 컷을 분리한다.
- */
-function isModelImage(url: string): boolean {
-  const match = /\/products\/([^/]+)\/(\d+)-[^/]+\.webp(?:[?#].*)?$/i.exec(url)
-  if (!match) return false
-  const [, styleNumber, assetNumberText] = match
-  const assetNumber = Number(assetNumberText)
-  if (styleNumber === 'MMVGSTT03CO001' && (assetNumber === 7 || assetNumber === 8)) return true
-  if (styleNumber === 'MEZGAMM05CO001' && assetNumber === 9) return false
-  return assetNumber >= 9
-}
-
 function createLiveSizeOptions(skus: readonly LiveSkuContent[], productName: string): readonly SizeOption[] {
   const seen = new Set<string>()
   const options: SizeOption[] = []
@@ -137,8 +122,8 @@ function createLiveColorOptions(
       isSameColorSelection(option.label, detail.color) || isSameColorSelection(option.code, detail.color)
     ))
     const serverImages = useServerImages ? detail.images : []
-    const productImages = serverImages.filter((image) => !isModelImage(image))
-    const stylingImages = serverImages.filter(isModelImage)
+    const productImages = serverImages.filter((image) => image.shotType !== 'MODEL').map((image) => image.url)
+    const stylingImages = serverImages.filter((image) => image.shotType === 'MODEL').map((image) => image.url)
     const resolvedStylingImages = useServerImages
       ? stylingImages
       : stylingImages.length > 0 ? stylingImages : matched?.stylingImages ?? []
@@ -217,7 +202,7 @@ export const liveProductContentProvider: ProductContentProviderValue = {
 
     try {
       const liveContent = await fetchLiveProductContent(server.id)
-      const sampleImage = liveContent.skus.flatMap(({ detail }) => detail.images).find((url) => !isBlank(url))
+      const sampleImage = liveContent.skus.flatMap(({ detail }) => detail.images).find((image) => !isBlank(image.url))?.url
       const useServerImages = sampleImage !== undefined && await probeServerImages(sampleImage)
       const colorOptions = createLiveColorOptions(liveContent.skus, fixture?.colorOptions, useServerImages)
       const currentSku = getCurrentSkuContent(fixture, liveContent.skus, server.skuId)

@@ -79,12 +79,14 @@ export type PickupCheckResponse = { available: boolean; nextStep: string; messag
 
 // --- Sku ---
 export type SkuListItemResponse = { skuId: number; color: string; imageUrl: string }
+/** 실측(2026-08-20): 배열 원소가 URL 문자열이 아니라 shotType이 붙은 객체로 바뀌었다. */
+export type SkuImageResponse = { url: string; shotType: 'PRODUCT' | 'MODEL'; hasPerson: boolean }
 export type SkuDetailResponse = {
   skuId: number
   color: string
   /** 콤마로 구분된 선택 가능 사이즈 목록. */
   size: string
-  images: readonly string[]
+  images: readonly SkuImageResponse[]
   /** 값이 없는 제품은 null이다. */
   dimensions: string | null
   /** 값이 없는 제품은 null이다. */
