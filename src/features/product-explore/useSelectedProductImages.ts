@@ -12,7 +12,7 @@ export type SelectedProductImages = {
 }
 
 /**
- * C3-2에서 고른 컬러를 StageC 전체 화면에 반영한다.
+ * C2-3에서 고른 컬러를 StageC 전체 화면에 반영한다.
  * 선택이 없거나 그 컬러의 컷이 없으면 제품 기본 이미지로 돌아간다.
  */
 export function useSelectedProductImages(product: Product): SelectedProductImages {

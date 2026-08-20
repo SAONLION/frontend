@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router';
 import { usePreparedNavigate } from '../../app/usePreparedNavigate';
 import emblemImage from '../../assets/images/mcm-emblem.png';
 import { fetchRecommendations } from '../../api/recommendations';
+import { scanTag } from '../../api/products';
 import { getVisitPurpose, postVisitPurpose } from '../../api/visitPurpose';
 import { toVisitPurposeLabel, toVisitPurposeType } from '../../api/visitPurposeType';
 import { DEFAULT_PRODUCT_SKU, STAGE_D_ROUTES } from '../../constants/appRoutes';
@@ -12,6 +13,7 @@ import { SESSION_ACTIONS } from '../../features/session/sessionTypes';
 import { useSession } from '../../features/session/useSession';
 import { setServerProduct } from '../../features/product-explore/serverProduct';
 import { useReturnToB1 } from '../../app/useReturnToB1';
+import { clearDegraded, DEGRADATION_KEYS, markDegraded } from '../../features/degradation/degradationStore';
 import D1VisitPurpose from './D1VisitPurpose';
 import D2ProductRecommendation, { type ProductCardData } from './D2ProductRecommendation';
 import D21ProductLocationGuide from './D21ProductLocationGuide';
@@ -182,23 +184,57 @@ export function StageD2Page() {
 // 해당 SKU의 StageC 루프에 진입한다.
 function useEnterTaggedProduct() {
   const navigate = usePreparedNavigate();
-  const { dispatch } = useSession();
+  const { state, dispatch } = useSession();
+  const isEnteringRef = useRef(false)
 
   return (product: SelectedProduct) => {
-    if (product.productId !== undefined && product.skuId !== undefined) {
-      setServerProduct({
-        id: product.productId,
-        name: product.name,
-        category: '',
-        imageUrl: product.image || null,
-        sku: product.sku,
-        skuId: product.skuId,
-      });
-      dispatch({ type: SESSION_ACTIONS.setProductId, productId: product.productId });
-      dispatch({ type: SESSION_ACTIONS.setCurrentSkuId, skuId: product.skuId });
+    if (isEnteringRef.current) return
+    isEnteringRef.current = true
+
+    const enterStageC = (serverProduct?: { id: number; name: string; category: string; imageUrl: string | null }) => {
+      if (product.productId !== undefined && product.skuId !== undefined) {
+        const source = serverProduct ?? {
+          id: product.productId,
+          name: product.name,
+          category: '',
+          imageUrl: product.image || null,
+        }
+        setServerProduct({
+          ...source,
+          sku: product.sku,
+          skuId: product.skuId,
+        });
+        dispatch({ type: SESSION_ACTIONS.setProductId, productId: source.id });
+        dispatch({ type: SESSION_ACTIONS.setCurrentSkuId, skuId: product.skuId });
+      }
+      dispatch({ type: SESSION_ACTIONS.recordNfcTag, sku: product.sku });
+      navigate(stageCPath(STAGE_C_ROUTES.c1, product.sku));
     }
-    dispatch({ type: SESSION_ACTIONS.recordNfcTag, sku: product.sku });
-    navigate(stageCPath(STAGE_C_ROUTES.c1, product.sku));
+
+    if (product.skuId !== undefined && state.sessionId) {
+      // 추천 상품을 누르는 행위도 B2 NFC 스캔과 동등하게 서버 태그 이력을 남긴다.
+      // 여권 점수·최애 색상은 이 서버 이력을 기준으로 다음 여권 조회 때 갱신된다.
+      void scanTag(product.skuId, state.sessionId)
+        .then((result) => {
+          clearDegraded(DEGRADATION_KEYS.tagScan)
+          enterStageC({
+            id: result.product.id,
+            name: result.product.name,
+            category: result.product.category,
+            imageUrl: result.product.imageUrl,
+          })
+        })
+        .catch((error: unknown) => {
+          console.error('추천 상품 태그 기록에 실패했습니다.', error)
+          // 기록 실패는 탐색을 막지 않지만, 여권이 아직 갱신되지 않았음을 전역 배너로 알린다.
+          markDegraded(DEGRADATION_KEYS.tagScan)
+          enterStageC()
+        })
+      return
+    }
+
+    // 서버 SKU가 없는 fixture 추천은 기존처럼 데모 제품으로만 진입한다.
+    enterStageC()
   };
 }
 

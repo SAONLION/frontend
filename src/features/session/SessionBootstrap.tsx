@@ -10,6 +10,7 @@ import {
   setStoredProductContext,
   setStoredSessionId,
 } from './sessionStorage'
+import { getServerProduct, setServerProduct } from '../product-explore/serverProduct'
 import { SESSION_ACTIONS } from './sessionTypes'
 import { useSession } from './useSession'
 
@@ -86,6 +87,14 @@ export function SessionBootstrap({ children }: PropsWithChildren) {
       currentSkuId: stored.currentSkuId,
       currentSku: stored.currentSku,
     })
+    if (
+      stored.serverProduct
+      && stored.serverProduct.id === stored.productId
+      && stored.serverProduct.skuId === stored.currentSkuId
+      && stored.serverProduct.sku === stored.currentSku
+    ) {
+      setServerProduct(stored.serverProduct)
+    }
   }, [dispatch, state.sessionId])
 
   // 복구를 시도한 뒤부터 저장한다. 복구 전에 쓰면 빈 초기 상태가 저장된 문맥을 덮어쓴다.
@@ -93,11 +102,20 @@ export function SessionBootstrap({ children }: PropsWithChildren) {
     if (!restored.current || !state.sessionId) return
     if (state.productId === null && state.currentSkuId === null) return
 
+    const serverProduct = getServerProduct()
+    const matchingServerProduct = serverProduct
+      && serverProduct.id === state.productId
+      && serverProduct.skuId === state.currentSkuId
+      && serverProduct.sku === state.currentSku
+      ? serverProduct
+      : null
+
     setStoredProductContext({
       sessionId: state.sessionId,
       productId: state.productId,
       currentSkuId: state.currentSkuId,
       currentSku: state.currentSku,
+      serverProduct: matchingServerProduct,
     })
   }, [state.currentSku, state.currentSkuId, state.productId, state.sessionId])
 

@@ -23,6 +23,18 @@ export async function scanTag(tagId: number, sessionId: string): Promise<Product
   return data
 }
 
+/**
+ * 시연 환경의 서버 랜덤 태그 스캔.
+ * 서버가 유효 SKU를 고르고 태그 이력도 한 번만 기록한다. 이 프로젝트에서는 배포 환경에서도
+ * internal-test endpoint를 유지하기로 합의했다.
+ */
+export async function scanRandomTag(sessionId: string): Promise<ProductTagScanResponseDTO> {
+  const { data } = await apiClient.get<ProductTagScanResponseDTO>('/internal/test/products/random-tag', {
+    params: { sessionId },
+  })
+  return data
+}
+
 // GET /api/v1/products/{productId}/skus
 export async function getSkus(productId: number): Promise<readonly SkuListItemResponse[]> {
   const cached = skuListRequests.get(productId)

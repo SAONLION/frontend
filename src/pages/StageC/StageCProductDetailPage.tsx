@@ -92,7 +92,7 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
     )
   }
 
-  // C2-3은 모델 착장샷만 크게 보여준다. 나머지 제품 컷은 대표 컷과 함께 이미지 갤러리로 옮겼다.
+  // C3-2는 모델 착장샷만 크게 보여준다. 나머지 제품 컷은 대표 컷과 함께 이미지 갤러리로 옮겼다.
   const images = topic === 'styling'
     ? selectedImages.stylingImages
     : [selectedImages.imageUrl, ...selectedImages.detailImages]

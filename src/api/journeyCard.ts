@@ -2,6 +2,12 @@ import { apiClient } from './client'
 
 export type JourneyCardShotType = 'MODEL' | 'PRODUCT'
 export type JourneyCardCollageImage = { imageUrl: string; shotType: JourneyCardShotType }
+export type JourneyCardFavoriteColor = {
+  code: string
+  label: string
+  /** 해당 색상을 태그한 횟수. 카드 UI에는 노출하지 않는다. */
+  tagCount: number
+}
 
 export type JourneyCardResponse = {
   brand: string
@@ -9,6 +15,8 @@ export type JourneyCardResponse = {
   nickname: string | null
   sessionCode: string
   collageImages: readonly JourneyCardCollageImage[]
+  /** 태그 이력이 없으면 null. */
+  favoriteColor: JourneyCardFavoriteColor | null
 }
 
 // 여권 카드 콜라주 슬롯 수. 서버도 이 개수까지만 채운다.

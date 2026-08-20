@@ -9,9 +9,8 @@ export type AiAnswerRequest = {
   productId: number | null
 }
 
-export type AiAnswerResult =
-  | { resolved: true; title: string; answerLines: readonly string[] }
-  | { resolved: false; handoffMessage: string }
+/** `resolved`는 답변의 충분성 신호이며, true/false와 무관하게 answerLines는 화면에 표시한다. */
+export type AiAnswerResult = { resolved: boolean; title: string; answerLines: readonly string[] }
 
 export interface AiAnswerService {
   answer: (request: AiAnswerRequest) => Promise<AiAnswerResult>

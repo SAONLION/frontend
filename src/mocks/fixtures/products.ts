@@ -27,7 +27,7 @@ import detail03 from '../../assets/mock/stark-visetos-detail-03-new.webp'
 import detail04 from '../../assets/mock/stark-visetos-detail-04-new.webp'
 import type { Product } from '../../types/product'
 
-// C2-3 스타일링의 LOOK 문구는 카탈로그에 근거가 없다. "데일리 · 데님 + 니트" 같은 코디 제안은
+// C3-2 스타일링의 LOOK 문구는 카탈로그에 근거가 없다. "데일리 · 데님 + 니트" 같은 코디 제안은
 // 632개 상품 어디에도 없고(스타일링·코디 언급 4%는 대부분 의류 상품 자체 설명), 룩을 이미지로
 // 보여줄 모델 착장컷도 3장 이상 가진 가방이 4%뿐이다. styling을 비워 두면 화면이 착장컷 수만큼
 // `LOOK n — AI 생성 필요` 자리를 만든다.

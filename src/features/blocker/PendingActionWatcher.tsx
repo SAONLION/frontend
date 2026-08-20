@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
+import { useLocation } from 'react-router'
 import { respondToAction } from '../../api/pendingActions'
 import { BlockerSheet } from '../../components/domain/BlockerSheet'
 import { toBlockerTriggerId, toCustomerBlockerCode } from './serverBlocker'
@@ -127,7 +128,10 @@ function StaffRequestReceivedSheet({ requestLabel, onClose }: { requestLabel: st
  * `CONTENT_OFFER`로 표시하되 ruleGroup(CB5/CB6)은 세션 이벤트에 보존한다.
  */
 export function PendingActionWatcher() {
-  const { action, clear, dismiss } = usePendingActionPolling()
+  const { pathname } = useLocation()
+  // A1·A2는 온보딩에만 집중한다. 서버 개입 폴링과 시트 노출을 모두 하지 않는다.
+  const isPollingEnabled = !pathname.startsWith('/stage-a/')
+  const { action, clear, dismiss } = usePendingActionPolling(isPollingEnabled)
   const { dispatch } = useSession()
   const navigate = usePreparedNavigate()
   const recordedIds = useRef(new Set<number>())
