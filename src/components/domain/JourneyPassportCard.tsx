@@ -55,6 +55,9 @@ function CollagePhoto({ image, index = 0 }: CollageSlotProps) {
     let cancelled = false
     const element = new Image()
     element.decoding = 'async'
+    // 여권 저장 시 html2canvas가 이 S3 이미지를 캔버스로 내보낼 수 있어야 한다.
+    // 반드시 src를 넣기 전에 설정해야 CORS 요청으로 로드된다.
+    element.crossOrigin = 'anonymous'
     const reveal = () => {
       if (cancelled) return
       window.setTimeout(() => { if (!cancelled) setIsVisible(true) }, index * 110)
@@ -72,6 +75,7 @@ function CollagePhoto({ image, index = 0 }: CollageSlotProps) {
     <img
       alt=""
       className={`stage-b-journey-card-photo${isVisible ? ' stage-b-journey-card-photo--visible' : ''} size-full object-contain object-center mix-blend-multiply`}
+      crossOrigin="anonymous"
       src={image.imageUrl}
     />
   )
@@ -132,7 +136,7 @@ export const JourneyPassportCard = forwardRef<HTMLDivElement, JourneyPassportCar
 
   return (
     <div
-      className={`stage-b-journey-card${isLoaded ? ' stage-b-journey-card--loaded' : ''} relative mx-auto h-[407.7px] w-[299.7px] shrink-0 drop-shadow-[0px_3.6px_24px_rgba(0,0,0,0.93)]`}
+      className={`stage-b-journey-card${isLoaded ? ' stage-b-journey-card--loaded' : ''} relative mx-auto h-[407.7px] w-[299.7px] shrink-0`}
       ref={ref}
     >
       <img alt="" className="absolute inset-0 size-full rounded-[18px] object-cover" src={cardTexture} />

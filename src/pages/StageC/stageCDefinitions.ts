@@ -43,7 +43,7 @@ export const stageCHubDefinitions: Record<StageCHubScreenId, HubScreenDefinition
     choices: [
       { id: STAGE_C_SCREEN_IDS.c21, label: '소재 · 마감', destination: STAGE_C_SCREEN_IDS.c21 },
       { id: STAGE_C_SCREEN_IDS.c22, label: '헤리티지 · 브랜드 스토리', destination: STAGE_C_SCREEN_IDS.c22 },
-      { id: STAGE_C_SCREEN_IDS.c23, label: '스타일링 · 코디', destination: STAGE_C_SCREEN_IDS.c23 },
+      { id: STAGE_C_SCREEN_IDS.c23, label: '컬러', destination: STAGE_C_SCREEN_IDS.c23 },
     ],
     purchaseActionLabel: '구매 문의',
   },
@@ -51,7 +51,7 @@ export const stageCHubDefinitions: Record<StageCHubScreenId, HubScreenDefinition
     heading: '제품의 어떤 요소를 더 자세히 알려드릴까요?',
     choices: [
       { id: STAGE_C_SCREEN_IDS.c31, label: '사이즈 · 용량', destination: STAGE_C_SCREEN_IDS.c31 },
-      { id: STAGE_C_SCREEN_IDS.c32, label: '컬러', destination: STAGE_C_SCREEN_IDS.c32 },
+      { id: STAGE_C_SCREEN_IDS.c32, label: '스타일링 · 코디', destination: STAGE_C_SCREEN_IDS.c32 },
       { id: STAGE_C_SCREEN_IDS.c33, label: '직접 착용해보기', destination: STAGE_C_SCREEN_IDS.c33 },
     ],
     purchaseActionLabel: '구매 문의',

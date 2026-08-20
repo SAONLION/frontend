@@ -311,6 +311,13 @@
   perspective: 62.5rem;
 }
 
+/* filter: drop-shadow는 html2canvas가 자식별 그림자로 풀어 그려 저장본의 사진·텍스트를
+   과도하게 어둡게 만든다. box-shadow는 카드 경계에만 한 번 적용되어 웹과 PNG가 동일하다. */
+.stage-b-journey-card {
+  border-radius: 1.125rem;
+  box-shadow: 0 0.225rem 1.5rem rgb(0 0 0 / 52%);
+}
+
 .stage-b-journey-card-fold {
   transition:
     transform 480ms var(--motion-ease-enter),

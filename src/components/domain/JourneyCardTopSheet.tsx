@@ -110,10 +110,12 @@ export function JourneyCardTopSheet() {
       // 웹에서는 카드 바깥의 시트 색과 그림자까지 함께 보인다. 카드 본체만 캡처하면
       // 그림자가 잘리고 저장본이 다른 카드처럼 보이므로, 동일한 배경 여백을 둔 래퍼를 캡처한다.
       // html-to-image(svg foreignObject 방식)는 WebKit/Safari에서 카드 오른쪽이 잘리는 문제가 있어
-      // DOM을 직접 순회해 그리는 html2canvas를 계속 사용한다.
+      // DOM을 직접 순회해 그리는 html2canvas를 계속 사용한다. S3가 CORS를 허용하므로
+      // useCORS를 켜야 콜라주 제품 이미지를 오염 없이 PNG에 포함할 수 있다.
       const canvas = await html2canvas(cardCaptureRef.current, {
         backgroundColor: '#1e1710',
         scale: 2,
+        useCORS: true,
         imageTimeout: 15_000,
         onclone: (document) => {
           // 화면에서 이미 끝난 카드 채움 모션을 저장본에서도 같은 최종 상태로 고정한다.
