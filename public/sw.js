@@ -17,6 +17,19 @@ function isStaticAsset(request, url) {
     || url.pathname.startsWith('/models/')
 }
 
+// 응답 본문은 브라우저로 반환된 뒤 소비될 수 있다. 따라서 Cache Storage가 열린 다음이 아니라
+// 네트워크 응답을 받은 즉시 복제한다. 캐시 실패는 실제 화면 요청을 실패시키지 않는다.
+function cacheResponse(event, request, response) {
+  if (!canCache(response)) return
+
+  const cachedResponse = response.clone()
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.put(request, cachedResponse))
+      .catch(() => undefined),
+  )
+}
+
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)))
   self.skipWaiting()
@@ -43,9 +56,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          if (canCache(response)) {
-            void caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', response.clone()))
-          }
+          cacheResponse(event, '/index.html', response)
           return response
         })
         .catch(() => caches.match('/index.html')),
@@ -60,9 +71,7 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(request).then((cached) => {
       const network = fetch(request).then((response) => {
-        if (canCache(response)) {
-          void caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone()))
-        }
+        cacheResponse(event, request, response)
         return response
       })
 
