@@ -10,6 +10,6 @@ describe('App routes', () => {
   it('opens the AdminApp shell for a direct /admin visit', async () => {
     render(<App />)
 
-    expect(await screen.findByRole('heading', { name: 'SA 대시보드를 준비하고 있어요' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: '대기' })).toBeTruthy()
   })
 })
