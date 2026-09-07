@@ -4,6 +4,7 @@ import { realStaffCallService } from '../../api/staffCallService'
 import { liveProductContentProvider } from '../../api/liveProductContentProvider'
 import { realTryOnRequestService } from '../../api/tryOnRequestService'
 import { AppRoutes } from '../routes'
+import { shouldRenderDemoShell } from '../../pages/Demo/demoShellEntry'
 import { SessionBootstrap } from '../../features/session/SessionBootstrap'
 import { SessionProvider } from '../../features/session/SessionProvider'
 import { ProductContentProvider } from '../../services/product-content/ProductContentProvider'
@@ -31,6 +32,8 @@ const CosmicGoldDust = lazy(async () => {
   const module = await import('../../components/common/CosmicGoldDust')
   return { default: module.CosmicGoldDust }
 })
+
+const DemoShellPage = lazy(() => import('../../pages/Demo/DemoShellPage'))
 
 const productContentProvider = liveProductContentProvider
 const aiAnswerService = realAiAnswerService
@@ -115,6 +118,16 @@ function CustomerServiceWorker() {
 }
 
 export default function CustomerApp() {
+  // 목업 셸은 iframe으로 앱 전체를 다시 띄운다. 고객 Provider와 도슨트 캔버스가
+  // 바깥 프레임에서도 실행되지 않도록 CustomerApp 조합 전에 분기한다.
+  if (shouldRenderDemoShell(window.location.pathname)) {
+    return (
+      <Suspense fallback={null}>
+        <DemoShellPage />
+      </Suspense>
+    )
+  }
+
   return (
     <div className="app-shell">
       <CustomerServiceWorker />
