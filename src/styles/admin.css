@@ -1,0 +1,38 @@
+.admin-shell {
+  align-items: center;
+  background:
+    radial-gradient(circle at 50% 100%, rgb(120 73 10 / 32%), transparent 44%),
+    #14110d;
+  color: #f7f4ee;
+  display: flex;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 2rem;
+}
+
+.admin-shell__status {
+  border: 1px solid rgb(235 213 169 / 38%);
+  border-radius: 1rem;
+  box-shadow: 0 1.25rem 3.5rem rgb(0 0 0 / 28%);
+  max-width: 28rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.admin-shell__eyebrow {
+  color: #d8a84d;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  margin: 0 0 0.75rem;
+}
+
+.admin-shell h1 {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  margin: 0;
+}
+
+.admin-shell__status > p:last-child {
+  color: #d2cbc0;
+  margin: 0.875rem 0 0;
+}
