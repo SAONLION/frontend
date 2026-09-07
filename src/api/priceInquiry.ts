@@ -12,13 +12,13 @@ import { clearDegraded, DEGRADATION_KEYS, markDegraded } from '../features/degra
  * 화면이 "직원에게 구매 안내 요청을 보냈어요"라고 말하므로 이 호출이 빠지면 문구가 거짓이 된다.
  * 실패는 배너로 알린다.
  */
-export function requestPriceInquiry(sessionId: string | null, productId: number | null): void {
-  if (!sessionId || productId === null) {
+export function requestPriceInquiry(sessionId: string | null, skuId: number | null): void {
+  if (!sessionId || skuId === null) {
     markDegraded(DEGRADATION_KEYS.priceInquiry)
     return
   }
 
-  void createStaffCall(sessionId, { productId, reason: STAFF_CALL_REASONS.price })
+  void createStaffCall(sessionId, { sku: skuId, reason: STAFF_CALL_REASONS.price })
     .then(() => clearDegraded(DEGRADATION_KEYS.priceInquiry))
     .catch((error: unknown) => {
       console.error('가격 안내 요청 전달에 실패했습니다.', error)

@@ -81,7 +81,7 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
       if (choice.hubType === 'purchase') {
         dispatch({ type: SESSION_ACTIONS.recordPriceInquiryRequest, sku })
         // 화면이 "요청을 보냈어요"라고 알리므로 실제 직원 호출을 서버에 남긴다.
-        requestPriceInquiry(state.sessionId, state.productId)
+        requestPriceInquiry(state.sessionId, state.currentSkuId)
         navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryCompleted, sku))
         return
       }
@@ -94,7 +94,7 @@ export function StageCHubPage({ screenId }: StageCHubPageProps) {
 
     if (choice.id === STAGE_C_SCREEN_IDS.c41) {
       dispatch({ type: SESSION_ACTIONS.recordPriceInquiryRequest, sku })
-      requestPriceInquiry(state.sessionId, state.productId)
+      requestPriceInquiry(state.sessionId, state.currentSkuId)
       logInteraction(subhubType, choice.id)
       navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryCompleted, sku))
       return

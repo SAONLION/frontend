@@ -30,14 +30,13 @@ describe('realStaffCallService', () => {
 
     await expect(realStaffCallService.request({
       sessionId: 'session-1',
-      productId: 42,
-      sku: 'sku-1',
+      skuId: 42,
       type: 'info',
       onProgress,
     })).resolves.toBe('completed')
 
     expect(mocks.createStaffCall).toHaveBeenCalledWith('session-1', {
-      productId: 42,
+      sku: 42,
       reason: STAFF_CALL_REASONS.productInfo,
     })
     expect(onProgress).toHaveBeenCalledWith({ status: 'completed', displayMessage: '직원 연결이 완료됐어요.' })
@@ -48,10 +47,19 @@ describe('realStaffCallService', () => {
   it('fails before creating a request when there is no session', async () => {
     await expect(realStaffCallService.request({
       sessionId: null,
-      productId: null,
-      sku: 'sku-1',
+      skuId: null,
       type: 'other',
     })).rejects.toThrow('세션이 아직 생성되지 않았습니다.')
+
+    expect(mocks.createStaffCall).not.toHaveBeenCalled()
+  })
+
+  it('fails before creating a request when the scanned SKU is unavailable', async () => {
+    await expect(realStaffCallService.request({
+      sessionId: 'session-1',
+      skuId: null,
+      type: 'other',
+    })).rejects.toThrow('직원 호출에 필요한 제품 정보를 찾을 수 없습니다.')
 
     expect(mocks.createStaffCall).not.toHaveBeenCalled()
   })
