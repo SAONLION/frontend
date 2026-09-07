@@ -1,4 +1,6 @@
 .admin-dashboard {
+  --admin-primary: #8a5111;
+
   background:
     radial-gradient(circle at 18% 96%, rgb(127 74 8 / 35%), transparent 36rem),
     radial-gradient(circle at 82% 14%, rgb(112 83 43 / 18%), transparent 34rem),
@@ -12,23 +14,37 @@
   align-items: center;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
   margin: 0 auto clamp(2.5rem, 7vh, 5rem);
   text-align: center;
 }
 
-.admin-dashboard__emblem {
-  height: auto;
-  max-width: min(11rem, 38vw);
-  object-fit: contain;
+.admin-dashboard__docent {
+  height: clamp(9rem, 20dvh, 12rem);
+  position: relative;
+  width: min(15rem, 54vw);
 }
 
-.admin-dashboard__header p {
-  color: #d8aa55;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  margin: 0;
+.admin-dashboard__docent .stage-c-docent-layer {
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  position: absolute;
+}
+
+.admin-dashboard__docent .stage-c-docent-layer canvas {
+  height: 100% !important;
+  pointer-events: none;
+  width: 100% !important;
+}
+
+.admin-dashboard__docent .stage-c-docent-fallback {
+  align-items: center;
+  color: #d7cbbb;
+  display: flex;
+  font-size: 0.875rem;
+  height: 100%;
+  justify-content: center;
+  width: 100%;
 }
 
 .admin-dashboard__queues {
@@ -49,7 +65,7 @@
 
 .admin-queue-column > h2 {
   align-items: center;
-  background: linear-gradient(105deg, #8f510d, #b67519 53%, #8f510d);
+  background: var(--admin-primary);
   border: 1px solid rgb(252 214 147 / 37%);
   border-radius: 0.75rem;
   box-shadow: inset 0 1px rgb(255 237 199 / 24%), 0 0.625rem 1.5rem rgb(0 0 0 / 14%);
@@ -61,8 +77,7 @@
 }
 
 .admin-queue-column[data-status='completed'] > h2 {
-  background: linear-gradient(105deg, #585148, #736b60 53%, #585148);
-  border-color: rgb(255 255 255 / 28%);
+  background: var(--admin-primary);
 }
 
 .admin-queue-column__body {
