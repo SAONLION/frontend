@@ -19,9 +19,9 @@
 }
 
 .admin-dashboard__docent {
-  height: clamp(9rem, 20dvh, 12rem);
+  height: clamp(8rem, 17dvh, 10rem);
   position: relative;
-  width: min(15rem, 54vw);
+  width: min(17rem, 60vw);
 }
 
 .admin-dashboard__docent .stage-c-docent-layer {
