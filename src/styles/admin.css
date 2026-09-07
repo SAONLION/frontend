@@ -77,7 +77,8 @@
 }
 
 .admin-queue-column[data-status='completed'] > h2 {
-  background: var(--admin-primary);
+  background: linear-gradient(105deg, #585148, #736b60 53%, #585148);
+  border-color: rgb(255 255 255 / 28%);
 }
 
 .admin-queue-column__body {
