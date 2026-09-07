@@ -26,10 +26,16 @@ export function getFitSelection(
     ?? sizes.find((option) => option.code === product.fitDefaults?.sizeCode)
   const defaultColor = colors.find((option) => option.sku === product.sku)
     ?? colors.find((option) => isSameColorSelection(option.code, product.fitDefaults?.colorCode))
-  const requestedSize = search.get('size') ?? fallback.sizeCode
-  const requestedColor = search.get('color') ?? fallback.colorCode
-  const size = (requestedSize ? sizes.find((option) => option.code === requestedSize) : undefined) ?? defaultSize ?? sizes[0]
-  const color = (requestedColor ? colors.find((option) => isSameColorSelection(option.code, requestedColor)) : undefined) ?? defaultColor ?? colors[0]
+  const requestedSize = search.get('size')
+  const requestedColor = search.get('color')
+  const size = (requestedSize ? sizes.find((option) => option.code === requestedSize) : undefined)
+    ?? (fallback.sizeCode ? sizes.find((option) => option.code === fallback.sizeCode) : undefined)
+    ?? defaultSize
+    ?? sizes[0]
+  const color = (requestedColor ? colors.find((option) => isSameColorSelection(option.code, requestedColor)) : undefined)
+    ?? (fallback.colorCode ? colors.find((option) => isSameColorSelection(option.code, fallback.colorCode)) : undefined)
+    ?? defaultColor
+    ?? colors[0]
 
   return size && color ? { size, color } : null
 }
