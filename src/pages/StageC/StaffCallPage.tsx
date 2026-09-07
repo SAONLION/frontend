@@ -32,10 +32,6 @@ type PendingStaffRequest = {
   completion: Promise<'completed'>
 }
 
-// SA 대시보드가 없어 실제 응대 완료를 기다릴 수 없다. C2-1-1(대기) 화면의 텍스트 노출이
-// 끝나면 실제 응답 여부와 무관하게 이 시간만큼 뒤에 C2-1-2(완료) 화면으로 넘어간다.
-const STAFF_CALL_INFO_AUTO_COMPLETE_DELAY_MS = 1_500
-
 export function StaffCallPage({ completed = false, callType = 'info' }: StaffCallPageProps) {
   const { sku = '' } = useParams()
   const navigate = usePreparedNavigate()
@@ -78,28 +74,15 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
             sku,
             type: callType,
             completion: staffCallService.request({
-              sku,
+              skuId: state.currentSkuId,
               type: callType,
               sessionId: state.sessionId,
-              productId: state.productId,
               // 45초를 한 문구로 버티지 않도록 서버 단계 문구를 그대로 흘려보낸다.
               onProgress: ({ displayMessage }) => setProgressMessage(displayMessage || null),
             }),
           }
 
     pendingRequestRef.current = request
-
-    if (callType === 'info') {
-      // SA 대시보드가 없어 실제 응대를 기다리지 않는다. 요청 자체는 기록을 위해 그대로 보내지만,
-      // 화면 전환은 이 요청의 완료·실패와 무관하게 아래 텍스트 노출 기반 타이머가 담당한다.
-      void request.completion.then(() => clearDegraded(DEGRADATION_KEYS.staffCall)).catch((error: unknown) => {
-        console.error('직원 호출에 실패했습니다.', error)
-        markDegraded(DEGRADATION_KEYS.staffCall)
-      })
-      return () => {
-        active = false
-      }
-    }
 
     void request.completion.then(() => {
       clearDegraded(DEGRADATION_KEYS.staffCall)
@@ -119,19 +102,7 @@ export function StaffCallPage({ completed = false, callType = 'info' }: StaffCal
     return () => {
       active = false
     }
-  }, [callType, completed, completedPath, hasRequestContext, navigate, returnPath, sku, staffCallService, state.productId, state.sessionId])
-
-  // C2-1-1(대기) 화면의 텍스트 노출이 끝나면(= revealedCompletedState가 false로 잡히면)
-  // 실제 응답을 기다리지 않고 곧장 C2-1-2(완료) 화면으로 넘어간다.
-  useEffect(() => {
-    if (callType !== 'info' || completed || revealedCompletedState !== false) return
-
-    const timer = window.setTimeout(() => {
-      navigate(completedPath, { replace: true })
-    }, STAFF_CALL_INFO_AUTO_COMPLETE_DELAY_MS)
-
-    return () => window.clearTimeout(timer)
-  }, [callType, completed, completedPath, navigate, revealedCompletedState])
+  }, [callType, completed, completedPath, hasRequestContext, navigate, returnPath, sku, staffCallService, state.currentSkuId, state.sessionId])
 
   if (!hasRequestContext) {
     return (

@@ -9,10 +9,9 @@ export const MOCK_STAFF_CALL_DELAY_MS = 800
 export type StaffCallProgress = { status: string; displayMessage: string }
 
 export type StaffCallRequest = {
-  sku: string
+  skuId: number | null
   type: StaffCallType
   sessionId: string | null
-  productId: number | null
   /**
    * 폴링 중 상태가 바뀔 때마다 호출된다.
    * 이걸 쓰지 않으면 완료까지 화면이 한 문구로 멈춰 있어 진행 중인지 알 수 없다.

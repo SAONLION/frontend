@@ -36,9 +36,11 @@ export default function ShellBlockerTriggers() {
 
   const triggerCb3 = async (sessionId: string) => {
     const context = getStoredProductContext()
-    // productId는 없어도 된다 — 서버가 제품 무관 호출을 허용한다.
+    if (!context || context.currentSkuId === null) {
+      throw new ApiError(0, null, '앱에서 제품을 먼저 태그해야 한다')
+    }
     const call = await createStaffCall(sessionId, {
-      productId: context?.productId ?? undefined,
+      sku: context.currentSkuId,
       reason: STAFF_CALL_REASONS.other,
     })
     await backdateStaffCallRequestedAt(sessionId, call.callId)
