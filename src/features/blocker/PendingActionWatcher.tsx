@@ -199,8 +199,9 @@ export function PendingActionWatcher() {
         }
         if (result.actionNextStep === NEXT_STEP_VALUE_CONTENT) {
           if (!state.sessionId) throw new Error('가격 안내 직원 호출에 필요한 세션이 없습니다.')
+          if (state.currentSkuId === null) throw new Error('가격 안내 직원 호출에 필요한 제품 정보를 찾을 수 없습니다.')
           return createStaffCall(state.sessionId, {
-            productId: action.productId ?? undefined,
+            sku: state.currentSkuId,
             reason: STAFF_CALL_REASONS.price,
           }).then(() => {
             if (state.currentSku) dispatch({ type: SESSION_ACTIONS.recordSaCall, sku: state.currentSku, callType: 'info' })

@@ -13,7 +13,7 @@ function wait(ms: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, ms))
 }
 
-async function pollUntilCompleted(
+export async function waitForStaffCallCompletion(
   sessionId: string,
   callId: number,
   onProgress?: (progress: StaffCallProgress) => void,
@@ -36,14 +36,15 @@ async function pollUntilCompleted(
 }
 
 export const realStaffCallService: StaffCallService = {
-  async request({ sessionId, productId, type, onProgress }) {
+  async request({ sessionId, skuId, type, onProgress }) {
     if (!sessionId) throw new Error('세션이 아직 생성되지 않았습니다.')
+    if (skuId === null) throw new Error('직원 호출에 필요한 제품 정보를 찾을 수 없습니다.')
     const reason = type === 'info' ? STAFF_CALL_REASONS.productInfo : STAFF_CALL_REASONS.other
-    const created = await createStaffCall(sessionId, { productId: productId ?? undefined, reason })
+    const created = await createStaffCall(sessionId, { sku: skuId, reason })
     setActiveStaffCallId(created.callId)
 
     try {
-      return await pollUntilCompleted(sessionId, created.callId, onProgress)
+      return await waitForStaffCallCompletion(sessionId, created.callId, onProgress)
     } finally {
       setActiveStaffCallId(null)
     }

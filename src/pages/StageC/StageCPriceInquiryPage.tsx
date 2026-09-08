@@ -38,8 +38,8 @@ export function StageCPurchaseEntryPage() {
     if (recorded.current) return
     recorded.current = true
     dispatch({ type: SESSION_ACTIONS.recordPriceInquiryRequest, sku })
-    requestPriceInquiry(state.sessionId, state.productId)
-  }, [dispatch, sku, state.productId, state.sessionId])
+    requestPriceInquiry(state.sessionId, state.currentSkuId)
+  }, [dispatch, sku, state.currentSkuId, state.sessionId])
 
   return <Navigate replace to={stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.priceInquiryCompleted, sku)} />
 }

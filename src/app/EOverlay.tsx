@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { useLocation } from 'react-router';
 import { usePreparedNavigate } from './usePreparedNavigate';
 import { createStaffCall } from '../api/staffCalls';
+import { waitForStaffCallCompletion } from '../api/staffCallService';
 import { DEFAULT_PRODUCT_SKU, STAGE_B_ROUTES } from '../constants/appRoutes';
 import type { StaffCallType } from '../constants/events'
 import { STAFF_CALL_REASONS } from '../constants/staffCallReasons';
@@ -32,13 +33,12 @@ export default function EOverlay() {
   const { dispatch, state } = useSession();
   const navigate = usePreparedNavigate();
   const location = useLocation();
-  // B1은 제품을 다시 태그하는 화면이다. 이전 탐색에서 localStorage로 복구된 productId가
-  // 남아 있을 수 있으므로, 여기서 만든 직원 호출은 반드시 제품 무관 요청으로 보낸다.
+  // B1은 제품을 다시 태그하는 화면이라 SKU 기반 직원 호출을 만들 수 없다.
   const isOverStageB1 = location.pathname === STAGE_B_ROUTES.nfcPrompt;
   const [selectedRequests, setSelectedRequests] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
   // 요청이 서버에 닿았는지. E2 문구가 이 값을 따라간다.
-  const [delivery, setDelivery] = useState<'sending' | 'failed'>('sending');
+  const [delivery, setDelivery] = useState<'sending' | 'completed' | 'failed'>('sending');
   const [isClosing, setIsClosing] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -82,18 +82,25 @@ export default function EOverlay() {
       return;
     }
 
-    // staff-calls는 productId를 선택값으로 허용한다. B1은 직전 제품 문맥(예: 이전 태그의
-    // productId)을 붙이면 안 되고, 다른 화면은 현재 제품 문맥이 있을 때만 함께 보낸다.
-    const productId = isOverStageB1 ? undefined : state.productId ?? undefined;
+    const skuId = isOverStageB1 ? null : state.currentSkuId;
+    if (skuId === null) {
+      markDegraded(DEGRADATION_KEYS.staffCall);
+      setDelivery('failed');
+      return;
+    }
 
     setDelivery('sending');
     void createStaffCall(state.sessionId, {
-      productId,
+      sku: skuId,
       reason: STAFF_CALL_REASON_BY_LABEL[label] ?? STAFF_CALL_REASONS.other,
     })
-      .then(() => clearDegraded(DEGRADATION_KEYS.staffCall))
+      .then(async (created) => {
+        clearDegraded(DEGRADATION_KEYS.staffCall);
+        await waitForStaffCallCompletion(state.sessionId!, created.callId);
+        setDelivery('completed');
+      })
       .catch((error: unknown) => {
-        console.error('직원 호출 요청에 실패했습니다.', error);
+        console.error('직원 호출 상태를 확인하지 못했습니다.', error);
         markDegraded(DEGRADATION_KEYS.staffCall);
         setDelivery('failed');
       });

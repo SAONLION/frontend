@@ -100,9 +100,27 @@ export type SkuDetailResponse = {
 }
 
 // --- StaffCall ---
-export type StaffCallRequest = { productId?: number; reason: string }
+export type StaffCallRequest = { sku: number; reason: string }
 export type StaffCallResponse = { callId: number; status: string; requestedAt: string }
 export type StaffCallStatusResponse = { callId: number; status: string; displayMessage: string; updatedAt: string }
+
+// --- StaffCallBoard ---
+export type StaffCallBoardItem = {
+  callId: number
+  sessionId: string
+  nickname: string
+  productName: string
+  color: string
+  reason: string
+  status: string
+  requestedAt: string
+  updatedAt: string
+}
+
+export type StaffCallBoardResponse = {
+  waiting: StaffCallBoardItem[]
+  completed: StaffCallBoardItem[]
+}
 
 // --- Contact ---
 export type ContactRequest = { actionId?: number; productId?: number; email: string; contentTopic?: string }
