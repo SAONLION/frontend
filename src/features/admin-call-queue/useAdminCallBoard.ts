@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { completeStaffCall, getStaffCallBoard } from '../../api/staffCallBoard'
+import { ApiError } from '../../api/client'
 import type { StaffCallBoardItem } from '../../api/types'
 import type { AdminCallCardData, AdminQueueState } from './adminCallQueueTypes'
 
@@ -27,14 +28,15 @@ function getQueueState(calls: readonly AdminCallCardData[], snapshot: QueueSnaps
   return calls.length === 0 ? 'empty' : 'ready'
 }
 
-export function useAdminCallBoard() {
+export function useAdminCallBoard(staffToken: string | null, onAuthenticationFailed: () => void) {
   const [snapshot, setSnapshot] = useState<QueueSnapshot>({ completed: [], error: false, loading: true, waiting: [] })
   const [completingCallId, setCompletingCallId] = useState<number | null>(null)
   const mountedRef = useRef(true)
 
   const refresh = useCallback(async () => {
+    if (!staffToken) return
     try {
-      const board = await getStaffCallBoard()
+      const board = await getStaffCallBoard(staffToken)
       if (!mountedRef.current) return
       setSnapshot({
         completed: board.completed.map(toCardData),
@@ -44,14 +46,19 @@ export function useAdminCallBoard() {
       })
     } catch (error: unknown) {
       console.error('SA 호출 보드를 불러오지 못했습니다.', error)
+      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+        onAuthenticationFailed()
+        return
+      }
       if (mountedRef.current) {
         setSnapshot((current) => ({ ...current, error: true, loading: false }))
       }
     }
-  }, [])
+  }, [onAuthenticationFailed, staffToken])
 
   useEffect(() => {
     mountedRef.current = true
+    if (!staffToken) return
     void refresh()
 
     const poll = () => {
@@ -65,23 +72,27 @@ export function useAdminCallBoard() {
       window.clearInterval(intervalId)
       document.removeEventListener('visibilitychange', poll)
     }
-  }, [refresh])
+  }, [refresh, staffToken])
 
   const complete = useCallback(async (callId: number) => {
-    if (completingCallId !== null) return
+    if (!staffToken || completingCallId !== null) return
     setCompletingCallId(callId)
     try {
-      await completeStaffCall(callId)
+      await completeStaffCall(staffToken, callId)
       await refresh()
     } catch (error: unknown) {
       console.error('SA 호출 완료 처리에 실패했습니다.', error)
+      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+        onAuthenticationFailed()
+        return
+      }
       if (mountedRef.current) {
         setSnapshot((current) => ({ ...current, error: true }))
       }
     } finally {
       if (mountedRef.current) setCompletingCallId(null)
     }
-  }, [completingCallId, refresh])
+  }, [completingCallId, onAuthenticationFailed, refresh, staffToken])
 
   return {
     completed: snapshot.completed,

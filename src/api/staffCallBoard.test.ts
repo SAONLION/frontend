@@ -23,9 +23,10 @@ describe('StaffCallBoard API', () => {
     const board = { completed: [], waiting: [] }
     mocks.get.mockResolvedValue({ data: board })
 
-    await expect(getStaffCallBoard()).resolves.toEqual(board)
+    await expect(getStaffCallBoard('token-1')).resolves.toEqual(board)
 
     expect(mocks.get).toHaveBeenCalledWith('/api/v1/staff/staff-calls', {
+      headers: { 'X-Staff-Token': 'token-1' },
       params: { completedLimit: 20 },
     })
   })
@@ -34,8 +35,10 @@ describe('StaffCallBoard API', () => {
     const completed = { callId: 12, displayMessage: '완료', status: 'completed', updatedAt: '2026-09-07T18:01:10+09:00' }
     mocks.patch.mockResolvedValue({ data: completed })
 
-    await expect(completeStaffCall(12)).resolves.toEqual(completed)
+    await expect(completeStaffCall('token-1', 12)).resolves.toEqual(completed)
 
-    expect(mocks.patch).toHaveBeenCalledWith('/api/v1/staff/staff-calls/12/complete')
+    expect(mocks.patch).toHaveBeenCalledWith('/api/v1/staff/staff-calls/12/complete', undefined, {
+      headers: { 'X-Staff-Token': 'token-1' },
+    })
   })
 })
