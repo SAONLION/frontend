@@ -26,7 +26,7 @@ describe('StaffCallBoard API', () => {
     await expect(getStaffCallBoard('token-1')).resolves.toEqual(board)
 
     expect(mocks.get).toHaveBeenCalledWith('/api/v1/staff/staff-calls', {
-      headers: { 'Staff-Token': 'token-1' },
+      headers: { 'X-Staff-Token': 'token-1' },
       params: { completedLimit: 20 },
     })
   })
@@ -38,7 +38,7 @@ describe('StaffCallBoard API', () => {
     await expect(completeStaffCall('token-1', 12)).resolves.toEqual(completed)
 
     expect(mocks.patch).toHaveBeenCalledWith('/api/v1/staff/staff-calls/12/complete', undefined, {
-      headers: { 'Staff-Token': 'token-1' },
+      headers: { 'X-Staff-Token': 'token-1' },
     })
   })
 })

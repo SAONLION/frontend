@@ -2,7 +2,7 @@ import { apiClient } from './client'
 import type { StaffCallBoardResponse, StaffCallStatusResponse } from './types'
 
 function staffAuthHeaders(staffToken: string) {
-  return { 'Staff-Token': staffToken }
+  return { 'X-Staff-Token': staffToken }
 }
 
 /** 직원 태블릿의 대기·완료 호출 보드를 조회한다. */

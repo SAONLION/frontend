@@ -11,6 +11,6 @@ describe('App routes', () => {
     render(<App />)
 
     expect(await screen.findByLabelText('SA 인증')).toBeTruthy()
-    expect(screen.getByLabelText('Staff-Token')).toBeTruthy()
+    expect(screen.getByLabelText('Staff Token')).toBeTruthy()
   })
 })

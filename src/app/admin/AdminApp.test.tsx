@@ -25,13 +25,13 @@ describe('AdminApp', () => {
     expect(screen.getByLabelText('SA 도슨트')).toBeTruthy()
     expect(screen.queryByText('SA CLIENT SERVICE')).toBeNull()
     expect(screen.getByLabelText('SA 인증')).toBeTruthy()
-    expect(screen.getByLabelText('Staff-Token')).toBeTruthy()
+    expect(screen.getByLabelText('Staff Token')).toBeTruthy()
   })
 
   it('opens the queue after the operator enters a token', () => {
     render(<AdminApp />)
 
-    fireEvent.change(screen.getByLabelText('Staff-Token'), { target: { value: 'test-token' } })
+    fireEvent.change(screen.getByLabelText('Staff Token'), { target: { value: 'test-token' } })
     fireEvent.click(screen.getByRole('button', { name: '대시보드 열기' }))
 
     expect(screen.getByRole('heading', { name: '대기' })).toBeTruthy()

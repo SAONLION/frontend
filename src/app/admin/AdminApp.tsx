@@ -11,7 +11,7 @@ export default function AdminApp() {
   const [authenticationError, setAuthenticationError] = useState<string | null>(null)
   const handleAuthenticationFailure = useCallback(() => {
     setStaffToken(null)
-    setAuthenticationError('Staff-Token을 확인해 주세요.')
+    setAuthenticationError('Staff Token을 확인해 주세요.')
   }, [])
   const board = useAdminCallBoard(staffToken, handleAuthenticationFailure)
 

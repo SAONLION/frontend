@@ -18,7 +18,7 @@ export function StaffTokenGate({ errorMessage, onSubmit }: StaffTokenGateProps) 
   return (
     <section aria-label="SA 인증" className="admin-token-gate">
       <form onSubmit={submit}>
-        <label htmlFor="staff-token">Staff-Token</label>
+        <label htmlFor="staff-token">Staff Token</label>
         <input
           autoComplete="off"
           id="staff-token"
