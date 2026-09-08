@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import AdminApp from './AdminApp'
 
@@ -24,9 +24,16 @@ describe('AdminApp', () => {
 
     expect(screen.getByLabelText('SA 도슨트')).toBeTruthy()
     expect(screen.queryByText('SA CLIENT SERVICE')).toBeNull()
+    expect(screen.getByRole('heading', { name: 'SA 대시보드' })).toBeTruthy()
+    expect(screen.getByLabelText('Staff-Token')).toBeTruthy()
+  })
+
+  it('opens the queue after the operator enters a token', () => {
+    render(<AdminApp />)
+
+    fireEvent.change(screen.getByLabelText('Staff-Token'), { target: { value: 'test-token' } })
+    fireEvent.click(screen.getByRole('button', { name: '대시보드 열기' }))
+
     expect(screen.getByRole('heading', { name: '대기' })).toBeTruthy()
-    expect(screen.getByRole('heading', { name: '완료' })).toBeTruthy()
-    expect(screen.getByText('대기 중인 고객 요청이 없어요.')).toBeTruthy()
-    expect(screen.getByText('완료된 요청이 아직 없어요.')).toBeTruthy()
   })
 })

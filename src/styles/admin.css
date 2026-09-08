@@ -55,6 +55,62 @@
   max-width: 68rem;
 }
 
+.admin-token-gate {
+  background: rgb(45 34 20 / 64%);
+  border: 1px solid rgb(227 202 154 / 12%);
+  border-radius: 1rem;
+  margin: 0 auto;
+  max-width: 26rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.admin-token-gate h1 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.admin-token-gate > p {
+  color: #d7cbbb;
+  font-size: 0.875rem;
+  margin: 0.625rem 0 1.5rem;
+}
+
+.admin-token-gate form {
+  display: grid;
+  gap: 0.625rem;
+}
+
+.admin-token-gate label {
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.admin-token-gate input {
+  background: rgb(0 0 0 / 22%);
+  border: 1px solid rgb(237 219 180 / 35%);
+  border-radius: 0.5rem;
+  color: inherit;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.admin-token-gate button {
+  background: var(--admin-primary);
+  border: 0;
+  border-radius: 0.5rem;
+  color: inherit;
+  cursor: pointer;
+  font-weight: 700;
+  margin-top: 0.5rem;
+  min-height: 2.75rem;
+}
+
+.admin-token-gate__error {
+  color: #f3c1b5;
+  font-size: 0.8125rem;
+  margin: 0.25rem 0 0;
+}
+
 .admin-queue-column {
   background: rgb(45 34 20 / 64%);
   border: 1px solid rgb(227 202 154 / 5%);
