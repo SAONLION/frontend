@@ -16,9 +16,7 @@ export function StaffTokenGate({ errorMessage, onSubmit }: StaffTokenGateProps) 
   }
 
   return (
-    <section aria-labelledby="staff-token-gate-title" className="admin-token-gate">
-      <h1 id="staff-token-gate-title">SA 대시보드</h1>
-      <p>직원용 Staff-Token을 입력해 호출 보드를 확인하세요.</p>
+    <section aria-label="SA 인증" className="admin-token-gate">
       <form onSubmit={submit}>
         <label htmlFor="staff-token">Staff-Token</label>
         <input

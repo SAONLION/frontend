@@ -24,7 +24,7 @@ describe('AdminApp', () => {
 
     expect(screen.getByLabelText('SA 도슨트')).toBeTruthy()
     expect(screen.queryByText('SA CLIENT SERVICE')).toBeNull()
-    expect(screen.getByRole('heading', { name: 'SA 대시보드' })).toBeTruthy()
+    expect(screen.getByLabelText('SA 인증')).toBeTruthy()
     expect(screen.getByLabelText('Staff-Token')).toBeTruthy()
   })
 

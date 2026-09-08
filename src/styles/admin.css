@@ -57,22 +57,11 @@
 
 .admin-token-gate {
   background: rgb(45 34 20 / 64%);
-  border: 1px solid rgb(227 202 154 / 12%);
+  border: 0;
   border-radius: 1rem;
   margin: 0 auto;
   max-width: 26rem;
   padding: clamp(1.25rem, 3vw, 2rem);
-}
-
-.admin-token-gate h1 {
-  font-size: 1.25rem;
-  margin: 0;
-}
-
-.admin-token-gate > p {
-  color: #d7cbbb;
-  font-size: 0.875rem;
-  margin: 0.625rem 0 1.5rem;
 }
 
 .admin-token-gate form {
