@@ -55,7 +55,19 @@
 }
 
 .stage-external-page__content--e2 .stage-external-page__headline {
+  gap: 0.75rem;
   margin-top: 1.25rem;
+}
+
+/* E2 안내 문구는 단어 단위 리빌 중에도 시트의 가운데를 기준으로 정렬한다. */
+.stage-external-page__content--e2 .stage-external-page__headline > p {
+  align-self: stretch;
+  text-align: center;
+}
+
+.stage-external-page__content--e2 .stage-external-page__headline > p > span[aria-label] {
+  justify-content: center;
+  width: 100%;
 }
 
 .stage-external-page__content--d1 .stage-external-page__headline,
