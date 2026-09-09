@@ -16,7 +16,7 @@ export default function TextInput({ ariaLabel, value, onChange, placeholder, max
       maxLength={maxLength}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className={`h-[46px] rounded-xl bg-[rgba(217,217,217,0.38)] pl-[19px] text-[14px] font-medium leading-[1.5] text-white outline-none placeholder:text-[#d4d4d4] ${className}`}
+      className={`h-[46px] rounded-xl bg-[rgba(217,217,217,0.38)] pl-[19px] text-[16px] font-medium leading-[1.5] text-white outline-none placeholder:text-[#d4d4d4] ${className}`}
     />
   );
 }
