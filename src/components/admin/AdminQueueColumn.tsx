@@ -19,7 +19,7 @@ export function AdminQueueColumn({ calls, completingCallId, label, state, status
         {state === 'loading' && <AdminQueueSkeleton />}
         {state === 'connection-pending' && <QueueMessage message="SA 호출 연동을 준비하고 있어요." />}
         {state === 'error' && <QueueMessage actionLabel="다시 시도" message="호출 목록을 불러오지 못했어요." onAction={onRetry} />}
-        {state === 'empty' && <QueueMessage message={status === 'waiting' ? '대기 중인 고객 요청이 없어요.' : '완료된 요청이 아직 없어요.'} />}
+        {state === 'empty' && <QueueMessage message={status === 'waiting' ? '대기 중인 고객 요청이 없어요.' : status === 'completed' ? '완료된 요청이 아직 없어요.' : '응답 시간이 초과된 요청이 없어요.'} />}
         {state === 'ready' && calls.map((call) => (
           <AdminQueueCard call={call} isCompleting={completingCallId === call.callId} key={call.callId} status={status} onComplete={onComplete} />
         ))}

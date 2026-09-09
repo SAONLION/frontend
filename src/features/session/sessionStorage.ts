@@ -2,7 +2,7 @@ const SESSION_ID_STORAGE_KEY = 'tagon.sessionId'
 const PRODUCT_CONTEXT_STORAGE_KEY = 'tagon.productContext'
 const BLOCKER_EXPOSURE_STORAGE_KEY = 'tagon.blockerExposure'
 
-/** 고객에게는 CB3은 1회, 통합 콘텐츠 제안(CB5·CB6)은 2회까지 보여준다. */
+/** 고객에게는 CB3과 통합 콘텐츠 제안(CB5·CB6)을 각각 세션당 1회만 보여준다. */
 export type BlockerExposureGroup = 'CB3' | 'CB56'
 
 type StoredBlockerExposure = {
