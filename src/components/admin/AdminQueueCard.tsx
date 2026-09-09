@@ -15,13 +15,14 @@ export function AdminQueueCard({ call, isCompleting = false, status, onComplete 
     <article className="admin-queue-card">
       <div className="admin-queue-card__copy">
         <h3>{call.customerName} 님</h3>
-        {call.productName && <p>{call.productName}</p>}
-        <p>{call.requestLabel}</p>
+        {call.productName && <p>{call.productName}{call.color && <span className="admin-queue-card__color"> · {call.color}</span>}</p>}
+        <p className="admin-queue-card__reason">{call.requestReason}</p>
+        <p className="admin-queue-card__session"><span>SESSION</span> {call.sessionCode}</p>
       </div>
       {isWaiting && (
         <button
           aria-label={`${call.customerName} 님의 요청 완료 처리`}
-          className="admin-queue-card__complete"
+          className={`admin-queue-card__complete${isCompleting ? ' admin-queue-card__complete--completing' : ''}`}
           disabled={!canComplete || isCompleting}
           title={canComplete ? '요청 완료 처리' : 'SA 호출 API 연동 준비 중'}
           type="button"

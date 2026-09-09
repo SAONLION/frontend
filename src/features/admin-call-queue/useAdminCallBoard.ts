@@ -9,6 +9,7 @@ const POLL_INTERVAL_MS = 4_000
 type QueueSnapshot = {
   completed: AdminCallCardData[]
   error: boolean
+  expired: AdminCallCardData[]
   loading: boolean
   waiting: AdminCallCardData[]
 }
@@ -16,9 +17,11 @@ type QueueSnapshot = {
 function toCardData(call: StaffCallBoardItem): AdminCallCardData {
   return {
     callId: call.callId,
+    color: call.color || null,
     customerName: call.nickname,
     productName: call.productName || null,
-    requestLabel: call.color ? `${call.reason} · ${call.color}` : call.reason,
+    requestReason: call.reason,
+    sessionCode: call.sessionId.slice(-5).toUpperCase(),
   }
 }
 
@@ -29,7 +32,8 @@ function getQueueState(calls: readonly AdminCallCardData[], snapshot: QueueSnaps
 }
 
 export function useAdminCallBoard(staffToken: string | null, onAuthenticationFailed: () => void) {
-  const [snapshot, setSnapshot] = useState<QueueSnapshot>({ completed: [], error: false, loading: true, waiting: [] })
+  // `expired`는 서버 계약이 추가되기 전까지 빈 칸으로 노출한다. 이후 Swagger의 expired 배열을 여기에 연결한다.
+  const [snapshot, setSnapshot] = useState<QueueSnapshot>({ completed: [], error: false, expired: [], loading: true, waiting: [] })
   const [completingCallId, setCompletingCallId] = useState<number | null>(null)
   const mountedRef = useRef(true)
 
@@ -41,6 +45,7 @@ export function useAdminCallBoard(staffToken: string | null, onAuthenticationFai
       setSnapshot({
         completed: board.completed.map(toCardData),
         error: false,
+        expired: [],
         loading: false,
         waiting: board.waiting.map(toCardData),
       })
@@ -99,6 +104,8 @@ export function useAdminCallBoard(staffToken: string | null, onAuthenticationFai
     completedState: getQueueState(snapshot.completed, snapshot),
     completingCallId,
     complete,
+    expired: snapshot.expired,
+    expiredState: getQueueState(snapshot.expired, snapshot),
     refresh,
     waiting: snapshot.waiting,
     waitingState: getQueueState(snapshot.waiting, snapshot),

@@ -38,6 +38,7 @@ export default function AdminApp() {
           onRetry={board.refresh}
         />
         <AdminQueueColumn calls={board.completed} label="완료" state={board.completedState} status="completed" onRetry={board.refresh} />
+        <AdminQueueColumn calls={board.expired} label="응답 시간 초과" state={board.expiredState} status="expired" onRetry={board.refresh} />
       </section>}
     </main>
   )

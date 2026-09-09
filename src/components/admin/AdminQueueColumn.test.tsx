@@ -4,9 +4,11 @@ import { AdminQueueColumn } from './AdminQueueColumn'
 
 const call = {
   callId: 1,
+  color: 'Cognac',
   customerName: '고객',
   productName: '제품',
-  requestLabel: '직원 상담',
+  requestReason: '직원 상담',
+  sessionCode: 'ABCDE',
 }
 
 describe('AdminQueueColumn', () => {

@@ -15,7 +15,7 @@ const POLL_INTERVAL_MS = 5_000
 
 const MAX_EXPOSURES_BY_GROUP: Readonly<Record<BlockerExposureGroup, number>> = {
   CB3: 1,
-  CB56: 2,
+  CB56: 1,
 }
 
 function actionSignature(action: PendingActionDetailDTO): string {
@@ -27,7 +27,7 @@ function actionSignature(action: PendingActionDetailDTO): string {
 function toExposureGroup(action: PendingActionDetailDTO): BlockerExposureGroup | null {
   const code = toCustomerBlockerCode(action.blockerType, action.ruleGroup)
   if (!code) return null
-  // CB5·CB6은 고객에게 같은 콘텐츠 제안 시트(F23-1)로 노출되므로 2회 cap을 공유한다.
+  // CB5·CB6은 고객에게 같은 콘텐츠 제안 시트(F23-1)로 노출되므로 1회 cap을 공유한다.
   return code === 'CB3' ? 'CB3' : 'CB56'
 }
 
