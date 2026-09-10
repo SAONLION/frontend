@@ -1,5 +1,5 @@
 import type { PropsWithChildren, ReactNode } from 'react';
-import backgroundImage from '../../assets/images/stage-a-background.png';
+import backgroundImage from '../../assets/images/stage-a-background.webp';
 
 // StageC 상세 화면들이 공유하는 프로스티드 글래스 카드 셸. 앱 전체와 톤을
 // 맞추기 위해 dev 원본의 별도 액센트(#b87420) 대신 기존 PRIMARY_BG 계열
