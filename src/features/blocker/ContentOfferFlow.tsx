@@ -3,6 +3,7 @@ import { useLocation } from 'react-router'
 import { usePreparedNavigate } from '../../app/usePreparedNavigate'
 import { useReturnToB1 } from '../../app/useReturnToB1'
 import { createContact } from '../../api/contacts'
+import { registerPersonalizedMailRecipient } from '../email/personalizedMailStore'
 import { CONTENT_OFFER_ROUTES, SESSION_END_ROUTE } from '../../constants/appRoutes'
 import CircleButton from '../../components/common/CircleButton'
 import PrimaryButton from '../../components/common/PrimaryButton'
@@ -85,6 +86,9 @@ export function ContentOfferPage({ screen }: { screen: ContentOfferScreen }) {
         productId: productId ?? undefined,
         contentTopic: 'personalized_product_content',
       })
+      // 같은 주소로 개인화 추천 메일도 예약한다. 여권 4칸이 이미 찼으면 즉시,
+      // 아직이면 4칸이 차는 순간 발송된다.
+      registerPersonalizedMailRecipient(state.sessionId, normalizedEmail)
       dispatch({ type: SESSION_ACTIONS.recordContactOffer, blockerCode: 'CB6' })
       dispatch({ type: SESSION_ACTIONS.recordContactCaptured, channel: 'email', blockerCode: 'CB6' })
       if (state.currentSku) dispatch({ type: SESSION_ACTIONS.recordContentSent, sku: state.currentSku })

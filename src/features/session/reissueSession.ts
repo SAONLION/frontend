@@ -1,4 +1,5 @@
 import { createSession } from '../../api/session'
+import { resetPersonalizedMail } from '../email/personalizedMailStore'
 import { resetJourneyCompletion } from '../journey-card/journeyCompletionStore'
 import { resetJourneyPulse } from '../journey-card/journeyPulse'
 import { clearStoredProductContext, setStoredSessionId } from './sessionStorage'
@@ -15,5 +16,6 @@ export async function reissueSession(): Promise<string> {
   // 태그 이력이 0으로 돌아가므로 여권 알림 표식과 완성 팝업 표식도 함께 되돌린다.
   resetJourneyPulse()
   resetJourneyCompletion()
+  resetPersonalizedMail()
   return result.sessionId
 }
