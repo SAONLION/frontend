@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import backgroundImage from '../../assets/images/stage-a-background.png';
+import backgroundImage from '../../assets/images/stage-a-background.webp';
 import { DocentStage } from '../../components/domain/DocentStage';
 import ScreenHeadline from '../../components/common/ScreenHeadline';
 import SecondaryButton from '../../components/common/SecondaryButton';
