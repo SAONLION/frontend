@@ -6,6 +6,7 @@ import {
   markJourneyCompletionShown,
   setPendingJourneyCompletionCard,
 } from '../features/journey-card/journeyCompletionStore';
+import { notifyJourneyCompleted } from '../features/email/personalizedMailStore';
 import { SESSION_ACTIONS } from '../features/session/sessionTypes';
 import { useSession } from '../features/session/useSession';
 
@@ -28,6 +29,7 @@ export function useReturnToB1() {
     fetchJourneyCard(sessionId)
       .then((journeyCard) => {
         if (journeyCard.collageImages.length >= JOURNEY_CARD_COLLAGE_SLOTS) {
+          notifyJourneyCompleted(sessionId);
           setPendingJourneyCompletionCard(journeyCard);
           markJourneyCompletionShown();
           dispatch({ type: SESSION_ACTIONS.setActiveOverlay, overlay: 'journeyComplete' });

@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react'
 import html2canvas from 'html2canvas-pro'
 import { ApiError } from '../../api/client'
-import { fetchJourneyCard, type JourneyCardResponse } from '../../api/journeyCard'
+import { fetchJourneyCard, JOURNEY_CARD_COLLAGE_SLOTS, type JourneyCardResponse } from '../../api/journeyCard'
 import { clearDegraded, DEGRADATION_KEYS, markDegraded } from '../../features/degradation/degradationStore'
+import { notifyJourneyCompleted } from '../../features/email/personalizedMailStore'
 import {
   clearPendingJourneyCompletionCard,
   getPendingJourneyCompletionCard,
@@ -48,6 +49,11 @@ export function JourneyCardTopSheet() {
     fetchJourneyCard(state.sessionId)
       .then((data) => {
         if (!cancelled) setJourneyCard(data)
+        // 여권을 열어본 시점에 4칸이 차 있으면, CB6에서 예약해 둔 추천 메일 발송을 깨운다.
+        // (B1 복귀 없이 여권만 열어보는 동선을 여기서 받는다.)
+        if (data.collageImages.length >= JOURNEY_CARD_COLLAGE_SLOTS && state.sessionId) {
+          notifyJourneyCompleted(state.sessionId)
+        }
         clearDegraded(DEGRADATION_KEYS.journeyCard)
       })
       .catch((error: unknown) => {
