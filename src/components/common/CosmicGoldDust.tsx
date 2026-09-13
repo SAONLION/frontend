@@ -93,7 +93,11 @@ function DustField() {
     })
 
     return { geometry: nextGeometry, material: nextMaterial }
-  }, [gl, size.height, size.width])
+    // 뷰포트 크기는 일부러 의존성에서 뺐다. iResolution 은 아래 useFrame 이 매 프레임
+    // 갱신하므로 여기서 다시 만들 이유가 없는데, 넣어 두면 모바일에서 주소창이 접혔다
+    // 펴질 때마다 파티클 280개와 셰이더가 통째로 재생성된다(셰이더 재컴파일 포함).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gl])
 
   useEffect(() => () => {
     geometry.dispose()
