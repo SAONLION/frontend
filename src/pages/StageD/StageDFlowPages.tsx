@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router';
 import { usePreparedNavigate } from '../../app/usePreparedNavigate';
-import emblemImage from '../../assets/images/mcm-emblem.png';
+import emblemImage from '../../assets/images/mcm-emblem.webp';
 import { fetchRecommendations } from '../../api/recommendations';
 import { scanTag } from '../../api/products';
 import { getVisitPurpose, postVisitPurpose } from '../../api/visitPurpose';

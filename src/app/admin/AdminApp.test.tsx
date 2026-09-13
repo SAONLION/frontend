@@ -12,8 +12,6 @@ vi.mock('../../features/admin-call-queue/useAdminCallBoard', () => ({
     completedState: 'empty',
     completingCallId: null,
     complete: vi.fn(),
-    expired: [],
-    expiredState: 'empty',
     refresh: vi.fn(),
     waiting: [],
     waitingState: 'empty',

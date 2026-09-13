@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import backgroundImage from '../../assets/images/stage-a-background.png';
+import backgroundImage from '../../assets/images/stage-a-background.webp';
 import ScreenHeadline from '../../components/common/ScreenHeadline';
 import InfoCard from '../../components/common/InfoCard';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
