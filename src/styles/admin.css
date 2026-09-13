@@ -61,7 +61,7 @@ body:has(.admin-dashboard) {
 .admin-dashboard__queues {
   display: grid;
   gap: clamp(1rem, 2.5vw, 2rem);
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin: 0 auto;
   max-width: 68rem;
 }
@@ -128,10 +128,6 @@ body:has(.admin-dashboard) {
   background: rgb(46 43 37 / 68%);
 }
 
-.admin-queue-column[data-status='expired'] {
-  background: rgb(62 29 25 / 68%);
-}
-
 .admin-queue-column > h2 {
   align-items: center;
   background: var(--admin-primary);
@@ -147,10 +143,6 @@ body:has(.admin-dashboard) {
 
 .admin-queue-column[data-status='completed'] > h2 {
   background: linear-gradient(105deg, #585148, #736b60 53%, #585148);
-}
-
-.admin-queue-column[data-status='expired'] > h2 {
-  background: linear-gradient(105deg, #71362e, #8b4a40 53%, #71362e);
 }
 
 .admin-queue-column__body {
@@ -175,10 +167,6 @@ body:has(.admin-dashboard) {
 
 .admin-queue-column[data-status='completed'] .admin-queue-card {
   background: linear-gradient(110deg, rgb(92 87 79 / 94%), rgb(64 60 54 / 94%));
-}
-
-.admin-queue-column[data-status='expired'] .admin-queue-card {
-  background: linear-gradient(110deg, rgb(104 52 45 / 94%), rgb(73 36 32 / 94%));
 }
 
 .admin-queue-card__copy h3 {
@@ -302,10 +290,6 @@ body:has(.admin-dashboard) {
 
 @keyframes admin-skeleton-pulse {
   to { opacity: 0.52; }
-}
-
-@media (max-width: 64rem) {
-  .admin-dashboard__queues { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 46rem) {
