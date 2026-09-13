@@ -100,7 +100,12 @@ export type SkuDetailResponse = {
 }
 
 // --- StaffCall ---
-export type StaffCallRequest = { sku: number; reason: string }
+/**
+ * `sku`는 제품 문맥이 있을 때만 보낸다.
+ * B1 일반 호출은 2026-09-13 live API에서 `reason`만으로 생성되는 것을 확인했다.
+ * Swagger의 required 표기는 아직 최신 동작을 반영하지 못했다.
+ */
+export type StaffCallRequest = { sku?: number; reason: string }
 export type StaffCallResponse = { callId: number; status: string; requestedAt: string }
 export type StaffCallStatusResponse = { callId: number; status: string; displayMessage: string; updatedAt: string }
 
@@ -108,9 +113,11 @@ export type StaffCallStatusResponse = { callId: number; status: string; displayM
 export type StaffCallBoardItem = {
   callId: number
   sessionId: string
-  nickname: string
-  productName: string
-  color: string
+  nickname: string | null
+  productName: string | null
+  color: string | null
+  /** 착용 요청에는 선택 사이즈가 오며, 그 외 요청은 null이다. Swagger 갱신 전 runtime 계약을 반영한다. */
+  size?: string | null
   reason: string
   status: string
   requestedAt: string

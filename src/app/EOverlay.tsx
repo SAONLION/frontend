@@ -33,7 +33,7 @@ export default function EOverlay() {
   const { dispatch, state } = useSession();
   const navigate = usePreparedNavigate();
   const location = useLocation();
-  // B1은 제품을 다시 태그하는 화면이라 SKU 기반 직원 호출을 만들 수 없다.
+  // B1은 제품을 아직 태그하지 않았으므로 SKU 없이 일반 직원 호출을 만든다.
   const isOverStageB1 = location.pathname === STAGE_B_ROUTES.nfcPrompt;
   const [selectedRequests, setSelectedRequests] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
@@ -82,7 +82,7 @@ export default function EOverlay() {
       return;
     }
 
-    const skuId = isOverStageB1 ? null : state.currentSkuId;
+    const skuId = isOverStageB1 ? undefined : state.currentSkuId;
     if (skuId === null) {
       markDegraded(DEGRADATION_KEYS.staffCall);
       setDelivery('failed');
@@ -91,7 +91,7 @@ export default function EOverlay() {
 
     setDelivery('sending');
     void createStaffCall(state.sessionId, {
-      sku: skuId,
+      ...(skuId === undefined ? {} : { sku: skuId }),
       reason: STAFF_CALL_REASON_BY_LABEL[label] ?? STAFF_CALL_REASONS.other,
     })
       .then(async (created) => {
@@ -165,6 +165,8 @@ export default function EOverlay() {
             submitStaffCall('기타');
           }}
           onViewOtherProducts={viewOtherProducts}
+          otherLabel={isOverStageB1 ? '직원 호출하기' : undefined}
+          requestOptions={isOverStageB1 ? [] : undefined}
           sheetHandle={sheetHandle}
           sheetOffset={dragOffset}
           showViewOtherProducts={!isOverStageB1}

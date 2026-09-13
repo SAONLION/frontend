@@ -15,7 +15,7 @@ export function AdminQueueCard({ call, isCompleting = false, status, onComplete 
     <article className="admin-queue-card">
       <div className="admin-queue-card__copy">
         <h3>{call.customerName} 님</h3>
-        {call.productName && <p>{call.productName}{call.color && <span className="admin-queue-card__color"> · {call.color}</span>}</p>}
+        <p>{call.productName ?? '제품 미선택'}{call.color && <span className="admin-queue-card__color"> · {call.color}</span>}{call.size && <span className="admin-queue-card__color"> · {call.size}</span>}</p>
         <p className="admin-queue-card__reason">{call.requestReason}</p>
         <p className="admin-queue-card__session"><span>SESSION</span> {call.sessionCode}</p>
       </div>

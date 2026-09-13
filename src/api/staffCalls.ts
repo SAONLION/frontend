@@ -4,9 +4,11 @@ import type { StaffCallRequest, StaffCallResponse, StaffCallStatusResponse } fro
 // POST /api/v1/session/staff-calls
 export async function createStaffCall(
   sessionId: string,
-  input: { sku: number; reason: string },
+  input: { sku?: number; reason: string },
 ): Promise<StaffCallResponse> {
-  const body: StaffCallRequest = { sku: input.sku, reason: input.reason }
+  const body: StaffCallRequest = input.sku === undefined
+    ? { reason: input.reason }
+    : { reason: input.reason, sku: input.sku }
   const { data } = await apiClient.post<StaffCallResponse>('/api/v1/session/staff-calls', body, {
     params: { sessionId },
   })
