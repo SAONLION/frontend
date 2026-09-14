@@ -65,6 +65,19 @@
   z-index: 1;
 }
 
+/* iOS Safari의 Liquid Glass는 화면 끝에 고정된 투명 레이어를 별도 색조로
+   처리할 수 있다. 고객 앱의 배경·파티클은 문서와 함께 흐르게 해 Safari가
+   실제 페이지를 상·하단 브라우저 UI 뒤에 합성할 여지를 둔다. 데스크톱과
+   Android의 기존 fixed 연출은 유지한다. */
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 48rem) {
+    .app-shell > .ambient-bronze-background,
+    .app-shell > .cosmic-gold-dust {
+      position: absolute;
+    }
+  }
+}
+
 /* 서버 값 대신 대체 데이터로 진행 중임을 알리는 전역 배너.
    STAGE E 오버레이(z-index 50)보다 위에 두어 시트가 열려 있어도 가려지지 않게 한다. */
 .degradation-notice {
