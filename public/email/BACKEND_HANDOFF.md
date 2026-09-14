@@ -1,6 +1,6 @@
 # 개인화 추천 메일 — 백엔드 전달 사항
 
-작성일: 2026-09-12 (같은 날 발송 시점 변경 반영)
+작성일: 2026-09-15 (템플릿 문구 정리 반영)
 대상: `POST /api/v1/session/email/send`, `GET /api/v1/session/email/preview`, `GET /api/v1/session/email/content`
 
 실서버(`api.tagonai.site`)에 테스트 세션을 만들고 `/internal/test/products/random-tag`로 태그를 4번 찍은 뒤
@@ -89,6 +89,20 @@ https://api.tagonai.site/email/placeholder.png   404
 
 `{{recommendDesc1}}`, `{{recommendDesc2}}` 토큰으로 바꿨다. **치환 값을 내려주셔야 한다.**
 
+### 2-3. 본문 문구와 푸터 주소 정리
+
+디자인 시안에 들어 있던 자리표시용 본문(“뭔가 줄글” 이하 일곱 줄)을 걷어냈다. 치환 토큰이 아니라
+고정 문구였으므로 백엔드 영향은 없다.
+
+푸터 주소를 국내 매장 기준으로 바꿨다. 이전에는 미국 법인 주소가 그대로 박혀 있었다.
+
+```
+MCM Products USA, Inc. – North America    →  ㈜엠씨엠코리아 · MCM HAUS
+681 5th Avenue, New York, New York 10022  →  서울특별시 강남구 압구정로 412
+```
+
+법인 표기는 앱의 콘텐츠 제안 동의 문구에서 쓰는 `㈜엠씨엠코리아`를 따랐다. 정식 표기가 다르면 알려달라.
+
 ---
 
 ## 3. 요청 사항
@@ -107,16 +121,24 @@ https://api.tagonai.site/email/placeholder.png   404
 가능하면 `EmailSlotItem`에 `description` 필드를 추가해 `/email/content` 응답으로도 확인할 수 있게 해주시면
 프론트에서 검증하기 편하다.
 
-### 3-2. 상품 링크 (`View Item`, `자세히 보기`) — 아직 `href="#"`
+### 3-2. 상품 링크는 없앴다 — 요청 취소
 
-메일 안의 링크 6개가 전부 `href="#"`다. 클릭해도 아무 데도 가지 않는다.
+이전 문서에서 `View Item`·`자세히 보기` 링크의 URL 형태를 정해달라고 요청했는데, **그 요청은 취소한다.**
 
-- PICK `View Item` × 4
-- 추천 `자세히 보기` × 2
+앱의 상품 경로는 `/stage-c/:sku`이고 `:sku`는 SKU 코드 문자열인데 메일 슬롯이 주는 값은 숫자 `skuId`라
+변환이 필요했고, 세션 없이 진입하면 앱이 새 세션을 만들어 버리는 문제도 있었다. 이번 범위에서 다룰 일이
+아니라고 판단해 **링크 자체를 템플릿에서 걷어냈다.** PICK은 상품명만 남고, 추천 카드의 `자세히 보기`
+버튼은 자리만 남아 있다.
 
-슬롯마다 `skuId`/`productId`가 이미 있으니 상품 상세로 가는 URL을 만들 수 있을 것 같다.
-**어떤 URL 형태로 갈지 정해주시면 템플릿에 `{{pickLinkUrl1..4}}`, `{{recommendLinkUrl1..2}}` 토큰을
-추가하겠다.** 지금은 토큰이 그대로 노출되는 것을 막기 위해 `#`로 두었다.
+나중에 상품 페이지로 연결하기로 하면 그때 위 두 가지를 함께 정하면 된다.
+
+### 3-3. 수신거부·개인정보처리방침 링크를 뺐다 — 확인 필요
+
+푸터의 `Unsubscribe / Privacy Policy` 줄을 제거했다. 따라서 **`{{unsubscribeUrl}}`, `{{privacyUrl}}`
+토큰은 템플릿에 더 이상 없다.** 서버가 계속 치환을 시도해도 바꿀 대상이 없으니 동작에는 문제가 없다.
+
+다만 마케팅 메일은 정보통신망법상 수신거부 수단을 본문에 두어야 한다. 시연 범위라 뺀 것이고,
+실제 발송 계획이 생기면 되살려야 한다. 그때 토큰도 다시 넣겠다.
 
 ---
 
@@ -127,7 +149,6 @@ https://api.tagonai.site/email/placeholder.png   404
 - PICK 4칸 / 추천 2칸 모두 `productName`·`imageUrl` 정상 치환
 - 닉네임 없을 때 "고객님" 폴백
 - `{{storeName}}` → "청담 MCM HAUS"
-- `{{unsubscribeUrl}}`, `{{privacyUrl}}` 치환
 - 미치환 토큰 0개
 - 태그 이력이 4개 미만일 때 빈 슬롯 처리 (단, `placeholder.png`가 404라 1번 항목 해결 필요)
 
