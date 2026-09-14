@@ -17,10 +17,11 @@ function toCardData(call: StaffCallBoardItem): AdminCallCardData {
   return {
     callId: call.callId,
     color: call.color || null,
-    customerName: call.nickname,
+    customerName: call.nickname || '닉네임 미입력',
     productName: call.productName || null,
     requestReason: call.reason,
     sessionCode: call.sessionId.slice(-5).toUpperCase(),
+    size: call.size || null,
   }
 }
 
