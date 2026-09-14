@@ -25,11 +25,19 @@
 
 .app-shell > .ambient-bronze-background {
   position: fixed;
+  /* `100dvh`는 Safari UI가 열린 현재 가시 영역까지만 잡힌다. 배경 레이어만
+     cutout 바깥까지 확장해 상태바·주소창 아래에서도 화면의 색과 입자가 이어지게 한다.
+     실제 콘텐츠의 안전 여백은 각 화면의 padding 규칙을 그대로 사용한다. */
+  inset: calc(-1 * var(--app-safe-area-top)) calc(-1 * var(--app-safe-area-right))
+    calc(-1 * var(--app-safe-area-bottom)) calc(-1 * var(--app-safe-area-left));
+  background: var(--app-page-background);
   z-index: 0;
 }
 
 .app-shell > .cosmic-gold-dust {
   position: fixed;
+  inset: calc(-1 * var(--app-safe-area-top)) calc(-1 * var(--app-safe-area-right))
+    calc(-1 * var(--app-safe-area-bottom)) calc(-1 * var(--app-safe-area-left));
   z-index: 1;
 }
 
