@@ -117,6 +117,29 @@ function CustomerServiceWorker() {
   return null
 }
 
+function RouteScrollReset() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    const previousScrollRestoration = window.history.scrollRestoration
+    window.history.scrollRestoration = 'manual'
+
+    return () => {
+      window.history.scrollRestoration = previousScrollRestoration
+    }
+  }, [])
+
+  useLayoutEffect(() => {
+    // SPA 라우트는 문서를 다시 만들지 않으므로 이전 화면의 스크롤 위치가 남는다.
+    // 고객 흐름은 매 화면을 독립적인 시작점으로 보므로 뒤로 가기를 포함해 항상 상단에서 연다.
+    window.scrollTo(0, 0)
+    document.documentElement.scrollTop = 0
+    document.body.scrollTop = 0
+  }, [pathname])
+
+  return null
+}
+
 export default function CustomerApp() {
   // 목업 셸은 iframe으로 앱 전체를 다시 띄운다. 고객 Provider와 도슨트 캔버스가
   // 바깥 프레임에서도 실행되지 않도록 CustomerApp 조합 전에 분기한다.
@@ -131,6 +154,7 @@ export default function CustomerApp() {
   return (
     <div className="app-shell">
       <CustomerServiceWorker />
+      <RouteScrollReset />
       <LiquidGlassFilterDefinitions />
       <AmbientBronzeBackground />
       <StageAGoldDust />
