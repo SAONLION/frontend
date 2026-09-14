@@ -1,4 +1,4 @@
-import { useLayoutEffect } from 'react';
+import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router';
 import { useSession } from '../features/session/useSession';
 import { rememberNavigationTrigger } from './navigationTrigger';
@@ -9,42 +9,20 @@ import { JourneyCardTopSheet } from '../components/domain/JourneyCardTopSheet';
 import { JourneyCardTrigger } from '../components/domain/JourneyCardTrigger';
 
 function useDocumentScrollLock(isLocked: boolean) {
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!isLocked) return;
 
-    const scrollY = window.scrollY;
-    const body = document.body;
-    const root = document.documentElement;
-    const previousBodyStyles = {
-      position: body.style.position,
-      top: body.style.top,
-      right: body.style.right,
-      left: body.style.left,
-      width: body.style.width,
-      overflow: body.style.overflow,
-      overscrollBehavior: body.style.overscrollBehavior,
-    };
-    const previousRootStyles = {
-      overflow: root.style.overflow,
-      overscrollBehavior: root.style.overscrollBehavior,
-    };
+    // body를 fixed로 바꾸면 iOS Safari가 하단 Liquid Glass 아래의 페이지 합성을
+    // 중단한다. 문서 레이아웃은 그대로 두고, 시트가 열려 있는 동안만 스크롤 제스처를 막는다.
+    const preventTouchScroll = (event: TouchEvent) => event.preventDefault();
+    const preventWheelScroll = (event: WheelEvent) => event.preventDefault();
 
-    // iOS Safari는 overflow: hidden만으로 뒤 문서가 밀리는 것을 막지 못한다.
-    // body를 현재 위치에 고정해 시트 밖의 드래그가 배경 스크롤로 전달되지 않게 한다.
-    body.style.position = 'fixed';
-    body.style.top = `-${scrollY}px`;
-    body.style.right = '0';
-    body.style.left = '0';
-    body.style.width = '100%';
-    body.style.overflow = 'hidden';
-    body.style.overscrollBehavior = 'none';
-    root.style.overflow = 'hidden';
-    root.style.overscrollBehavior = 'none';
+    document.addEventListener('touchmove', preventTouchScroll, { passive: false });
+    document.addEventListener('wheel', preventWheelScroll, { passive: false });
 
     return () => {
-      Object.assign(body.style, previousBodyStyles);
-      Object.assign(root.style, previousRootStyles);
-      window.scrollTo(0, scrollY);
+      document.removeEventListener('touchmove', preventTouchScroll);
+      document.removeEventListener('wheel', preventWheelScroll);
     };
   }, [isLocked]);
 }
