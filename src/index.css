@@ -33,18 +33,18 @@
 
 :root {
   --app-viewport-height: 100svh;
-  /* 실기기에서 콘텐츠를 화면 끝까지 배치하는 시각 검증을 위해 안전 영역 여백을 쓰지 않는다. */
-  --app-safe-area-top: 0px;
-  --app-safe-area-right: 0px;
-  --app-safe-area-bottom: 0px;
-  --app-safe-area-left: 0px;
+  --app-safe-area-top: env(safe-area-inset-top, 0px);
+  --app-safe-area-right: env(safe-area-inset-right, 0px);
+  --app-safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --app-safe-area-left: env(safe-area-inset-left, 0px);
   --app-content-edge-inset: max(4.875rem, var(--app-safe-area-bottom));
+  /* Safari의 상태 영역·오버스크롤에 보이는 최상위 배경. 화면별 레이어는 이 위에 그린다. */
+  --app-page-background:
+    radial-gradient(ellipse at 50% 28%, rgb(139 85 23 / 44%) 0%, rgb(70 41 13 / 30%) 34%, transparent 66%),
+    linear-gradient(160deg, #17110a 0%, #080604 58%, #120b04 100%);
   font-family: 'Pretendard', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: #ffffff;
-  /* Matches `.app-shell`. The dark surfaces are painted by the app shell and the
-     fixed ambient background, both of which stop at the viewport, so the root
-     colour is what shows through when a momentum scroll overshoots the document. */
-  background: #15110d;
+  background: var(--app-page-background);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -64,14 +64,19 @@
 html,
 body,
 #root {
-  min-width: 320px;
   min-height: 100%;
+  min-width: 320px;
+}
+
+html {
+  background: var(--app-page-background);
 }
 
 body {
   min-height: var(--app-viewport-height);
   margin: 0;
-  background: #15110d;
+  /* 앱의 fixed 배경과 html gradient가 safe area까지 끊기지 않도록 투명하게 둔다. */
+  background: transparent;
 }
 
 button {

@@ -10,7 +10,8 @@
     inset 0 0 0.75rem rgb(255 255 255 / 7%);
   position: relative;
   min-height: var(--app-viewport-height);
-  background: #15110d;
+  /* 바탕은 html의 공통 gradient가 맡는다. 앱 셸이 단색으로 덮으면 iOS Safari 가장자리와 분리돼 보인다. */
+  background: transparent;
   isolation: isolate;
 }
 
