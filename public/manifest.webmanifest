@@ -5,8 +5,8 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#15110d",
-  "theme_color": "#15110d",
+  "background_color": "#17110a",
+  "theme_color": "#17110a",
   "icons": [
     {
       "src": "/icons/saonlion-app-icon.svg",
