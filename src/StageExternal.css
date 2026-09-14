@@ -205,7 +205,9 @@
   border: 0;
   border-radius: 1.75rem 1.75rem 0 0;
   background: #1e1710;
-  box-shadow: var(--liquid-glass-shadow, 0 -1rem 2.5rem rgb(0 0 0 / 32%));
+  /* 공통 glass shadow에는 흰색 inset highlight가 들어 있다. 시트 가장자리의
+     1px 외곽선처럼 보이지 않도록 여기서는 바깥 그림자만 사용한다. */
+  box-shadow: 0 -1rem 2.5rem rgb(0 0 0 / 32%);
   transition: translate 220ms var(--motion-ease-enter);
 }
 
@@ -370,7 +372,8 @@
   border: 0;
   border-radius: 0 0 1.75rem 1.75rem;
   background: #1e1710;
-  box-shadow: var(--liquid-glass-shadow, 0 1rem 2.5rem rgb(0 0 0 / 32%));
+  /* border 없이도 공통 inset highlight가 좌·상단 선처럼 보일 수 있어 제거한다. */
+  box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 32%);
   transition: translate 220ms var(--motion-ease-enter);
   animation: journey-sheet-enter 420ms var(--motion-ease-enter) both;
 }
