@@ -10,7 +10,7 @@
     inset 0 0 0.75rem rgb(255 255 255 / 7%);
   position: relative;
   min-height: var(--app-viewport-height);
-  background: #000;
+  background: #15110d;
   isolation: isolate;
 }
 
@@ -3190,22 +3190,4 @@
   background: rgb(54 49 42 / 74%);
   box-shadow: none;
   backdrop-filter: none;
-}
-
-/* 직원 호출 대기 중 서버가 알려주는 응대 단계 문구.
-   제목 아래에서 이 줄만 바뀌므로, 바뀔 때마다 짧게 다시 올라오게 해 변화를 알린다. */
-.stage-c-staff-call-progress {
-  margin: 0.75rem 0 0;
-  color: rgb(255 255 255 / 72%);
-  font-size: 0.875rem;
-  line-height: 1.5;
-  text-align: center;
-  animation: service-content-rise var(--motion-content-enter)
-    var(--motion-ease-enter) both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .stage-c-staff-call-progress {
-    animation: none;
-  }
 }

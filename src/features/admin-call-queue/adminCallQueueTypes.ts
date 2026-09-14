@@ -8,6 +8,7 @@ export type AdminCallCardData = {
   productName: string | null
   requestReason: string
   sessionCode: string
+  size: string | null
 }
 
 export type AdminQueueState = 'loading' | 'empty' | 'connection-pending' | 'error' | 'ready'

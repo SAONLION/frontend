@@ -118,8 +118,9 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
     navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.fitTryOn, sku))
   }
 
-  const openHeritagePurchaseRequest = () => {
-    navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.heritagePurchase, sku))
+  const requestMoreInformationFromStaff = () => {
+    dispatch({ type: SESSION_ACTIONS.recordSaCall, sku, callType: 'info' })
+    navigate(stageCPath(STAGE_C_PRODUCT_DETAIL_ROUTES.staffPending, sku))
   }
 
   return (
@@ -146,7 +147,7 @@ export function StageCProductDetailPage({ topic }: StageCProductDetailPageProps)
       )}
 
       {topic !== 'styling' && (
-        <button className="stage-c-action-button stage-c-product-detail-more-button" onClick={openHeritagePurchaseRequest} type="button">
+        <button className="stage-c-action-button stage-c-product-detail-more-button" onClick={requestMoreInformationFromStaff} type="button">
           더 자세한 내용이 궁금하다면
         </button>
       )}

@@ -9,6 +9,7 @@ const call = {
   productName: '제품',
   requestReason: '직원 상담',
   sessionCode: 'ABCDE',
+  size: null,
 }
 
 describe('AdminQueueColumn', () => {
