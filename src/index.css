@@ -38,13 +38,17 @@
   --app-safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --app-safe-area-left: env(safe-area-inset-left, 0px);
   --app-content-edge-inset: max(4.875rem, var(--app-safe-area-bottom));
+  /* Safari의 첫 진입 fallback 및 구형 theme-color가 읽는 단색 바탕.
+     실제 화면은 아래 gradient로 계속 그리되, 브라우저 UI가 흰색으로 끊기지 않게 한다. */
+  --app-page-fallback: #17110a;
   /* Safari의 상태 영역·오버스크롤에 보이는 최상위 배경. 화면별 레이어는 이 위에 그린다. */
   --app-page-background:
     radial-gradient(ellipse at 50% 28%, rgb(139 85 23 / 44%) 0%, rgb(70 41 13 / 30%) 34%, transparent 66%),
     linear-gradient(160deg, #17110a 0%, #080604 58%, #120b04 100%);
   font-family: 'Pretendard', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: #ffffff;
-  background: var(--app-page-background);
+  background-color: var(--app-page-fallback);
+  background-image: var(--app-page-background);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -69,14 +73,17 @@ body,
 }
 
 html {
-  background: var(--app-page-background);
+  background-color: var(--app-page-fallback);
+  background-image: var(--app-page-background);
 }
 
 body {
   min-height: var(--app-viewport-height);
   margin: 0;
-  /* 앱의 fixed 배경과 html gradient가 safe area까지 끊기지 않도록 투명하게 둔다. */
-  background: transparent;
+  /* Safari 26은 body의 background-color를 상·하단 브라우저 UI fallback 색으로 샘플링한다.
+     image도 함께 유지해 페이지 본문 디자인은 바꾸지 않는다. */
+  background-color: var(--app-page-fallback);
+  background-image: var(--app-page-background);
 }
 
 button {
