@@ -86,8 +86,8 @@ export function ContentOfferPage({ screen }: { screen: ContentOfferScreen }) {
         productId: productId ?? undefined,
         contentTopic: 'personalized_product_content',
       })
-      // 같은 주소로 개인화 추천 메일도 예약한다. 여권 4칸이 이미 찼으면 즉시,
-      // 아직이면 4칸이 차는 순간 발송된다.
+      // 같은 주소로 개인화 추천 메일도 곧바로 보낸다. 여권 콜라주가 덜 찼으면
+      // 그때까지 채워진 PICK만 담겨 나간다.
       registerPersonalizedMailRecipient(state.sessionId, normalizedEmail)
       dispatch({ type: SESSION_ACTIONS.recordContactOffer, blockerCode: 'CB6' })
       dispatch({ type: SESSION_ACTIONS.recordContactCaptured, channel: 'email', blockerCode: 'CB6' })

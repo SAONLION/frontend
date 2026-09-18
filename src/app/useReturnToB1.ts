@@ -6,7 +6,7 @@ import {
   markJourneyCompletionShown,
   setPendingJourneyCompletionCard,
 } from '../features/journey-card/journeyCompletionStore';
-import { notifyJourneyCompleted } from '../features/email/personalizedMailStore';
+import { retryPendingPersonalizedMail } from '../features/email/personalizedMailStore';
 import { SESSION_ACTIONS } from '../features/session/sessionTypes';
 import { useSession } from '../features/session/useSession';
 
@@ -19,6 +19,8 @@ export function useReturnToB1() {
 
   return () => {
     const sessionId = state.sessionId;
+    // 앞선 추천 메일 발송이 실패해 남아 있다면 이 복귀 지점에서 다시 시도한다.
+    if (sessionId) retryPendingPersonalizedMail(sessionId);
     // 완성 팝업은 세션당 1회다. 이미 보여줬으면 조회 없이 곧장 B1로 보낸다 —
     // 콜라주가 더 바뀌지 않으므로 다시 물을 이유가 없고, 왕복도 아낀다.
     if (!sessionId || hasShownJourneyCompletion()) {
@@ -29,7 +31,6 @@ export function useReturnToB1() {
     fetchJourneyCard(sessionId)
       .then((journeyCard) => {
         if (journeyCard.collageImages.length >= JOURNEY_CARD_COLLAGE_SLOTS) {
-          notifyJourneyCompleted(sessionId);
           setPendingJourneyCompletionCard(journeyCard);
           markJourneyCompletionShown();
           dispatch({ type: SESSION_ACTIONS.setActiveOverlay, overlay: 'journeyComplete' });
