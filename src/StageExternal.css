@@ -390,6 +390,7 @@
   --stage-top-sheet-gap: 1.25rem;
   /* .stage-c-action-button이 쓰는 변수들. 셸 밖이라 값이 없으면 모서리·색이 날아간다. */
   --stage-c-surface: rgb(217 217 217 / 16%);
+  --stage-c-surface-strong: rgb(217 217 217 / 22%);
   --stage-c-text: #ffffff;
   --stage-c-border: rgb(255 255 255 / 24%);
   --stage-c-accent: #8a5111;
@@ -432,6 +433,93 @@
 .stage-top-sheet__actions > .stage-c-action-button {
   flex: 0 0 auto;
   width: calc(50% - 0.3125rem);
+}
+
+/* 두 칸을 나란히 두면 사이 간격이 StageC 액션 바(0.625rem)와 같아진다. */
+.stage-top-sheet__actions {
+  gap: 0.625rem;
+}
+
+.stage-top-sheet__actions > .stage-c-action-button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* CB6(F2-2)에 가기 전에 여기서 바로 콘텐츠를 신청하는 입력. 시트 폭을 그대로 쓴다. */
+.stage-top-sheet__contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  width: 100%;
+  /* 액션 바로 아래에 붙여 같은 묶음으로 보이게 한다(시트 gap은 1.25rem). */
+  margin-top: calc(var(--stage-top-sheet-gap) * -1 + 0.75rem);
+}
+
+.stage-top-sheet__contact-input {
+  width: 100%;
+  min-height: 3rem;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgb(255 255 255 / 28%);
+  border-radius: 0.8rem;
+  background: rgb(217 217 217 / 38%);
+  color: #ffffff;
+  font: inherit;
+}
+
+.stage-top-sheet__contact-input::placeholder {
+  color: rgb(255 255 255 / 68%);
+}
+
+.stage-top-sheet__contact-input:focus-visible {
+  outline: 0.15rem solid #ffffff;
+  outline-offset: 0.15rem;
+}
+
+.stage-top-sheet__contact-error {
+  margin: 0;
+  color: #ffccbf;
+  font-size: 0.82rem;
+  text-align: left;
+}
+
+.stage-top-sheet__contact-consent {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin: 0;
+  color: rgb(255 255 255 / 78%);
+  font-size: 0.7rem;
+  line-height: 1.55;
+  text-align: left;
+}
+
+.stage-top-sheet__contact-consent input {
+  width: 0.82rem;
+  min-width: 0.82rem;
+  height: 0.82rem;
+  min-height: 0.82rem;
+  margin: 0.16rem 0 0;
+  accent-color: #b87420;
+}
+
+.stage-top-sheet__contact-submit {
+  width: 100%;
+}
+
+.stage-top-sheet__contact-submit:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* 신청을 마친 뒤 버튼이 비활성으로 바뀌는 이유를 한 줄로 알린다. */
+.stage-top-sheet__contact-note {
+  width: 100%;
+  margin: calc(var(--stage-top-sheet-gap) * -1 + 0.5rem) 0 0;
+  color: rgb(255 255 255 / 78%);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-align: center;
 }
 
 

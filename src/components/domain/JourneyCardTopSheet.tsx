@@ -1,19 +1,22 @@
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type FormEvent, type PointerEvent } from 'react'
 import html2canvas from 'html2canvas-pro'
 import { ApiError } from '../../api/client'
-import { fetchJourneyCard, JOURNEY_CARD_COLLAGE_SLOTS, type JourneyCardResponse } from '../../api/journeyCard'
+import { createContact } from '../../api/contacts'
+import { fetchJourneyCard, type JourneyCardResponse } from '../../api/journeyCard'
 import { clearDegraded, DEGRADATION_KEYS, markDegraded } from '../../features/degradation/degradationStore'
-import { notifyJourneyCompleted } from '../../features/email/personalizedMailStore'
+import { registerPersonalizedMailRecipient, retryPendingPersonalizedMail } from '../../features/email/personalizedMailStore'
 import {
   clearPendingJourneyCompletionCard,
   getPendingJourneyCompletionCard,
 } from '../../features/journey-card/journeyCompletionStore'
 import ScreenHeadline from '../common/ScreenHeadline'
+import { consumeBlockerExposureGroup } from '../../features/session/sessionStorage'
 import { SESSION_ACTIONS } from '../../features/session/sessionTypes'
 import { useSession } from '../../features/session/useSession'
 import { JourneyPassportCard } from './JourneyPassportCard'
 
 const CLOSE_ANIMATION_MS = 420
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 /**
  * 여권 카드 탑시트. 배경 화면을 언마운트하지 않는 비차단 시트라는 점, 손잡이를 끌어 닫는 방식,
@@ -33,6 +36,11 @@ export function JourneyCardTopSheet() {
   const [dragOffset, setDragOffset] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const [isSavingImage, setIsSavingImage] = useState(false)
+  const [isContactFormOpen, setIsContactFormOpen] = useState(false)
+  const [email, setEmail] = useState('')
+  const [hasConsent, setHasConsent] = useState(false)
+  const [isSubmittingContact, setIsSubmittingContact] = useState(false)
+  const [contactMessage, setContactMessage] = useState('')
   const closeTimerRef = useRef<number | null>(null)
   const dragStartYRef = useRef<number | null>(null)
   const dragOffsetRef = useRef(0)
@@ -46,14 +54,12 @@ export function JourneyCardTopSheet() {
     if (!state.sessionId) return
     let cancelled = false
 
+    // 앞선 추천 메일 발송이 실패해 남아 있다면 여권을 열어본 이 시점에 다시 시도한다.
+    retryPendingPersonalizedMail(state.sessionId)
+
     fetchJourneyCard(state.sessionId)
       .then((data) => {
         if (!cancelled) setJourneyCard(data)
-        // 여권을 열어본 시점에 4칸이 차 있으면, CB6에서 예약해 둔 추천 메일 발송을 깨운다.
-        // (B1 복귀 없이 여권만 열어보는 동선을 여기서 받는다.)
-        if (data.collageImages.length >= JOURNEY_CARD_COLLAGE_SLOTS && state.sessionId) {
-          notifyJourneyCompleted(state.sessionId)
-        }
         clearDegraded(DEGRADATION_KEYS.journeyCard)
       })
       .catch((error: unknown) => {
@@ -154,6 +160,52 @@ export function JourneyCardTopSheet() {
     }
   }
 
+  /**
+   * CB6(F2-2)에 도달하기 전에도 같은 콘텐츠를 받을 수 있는 경로.
+   *
+   * 저장·발송 규칙은 F2-2와 같다. 연락처를 서버에 남기고 개인화 추천 메일을 곧바로 보낸다 —
+   * 콜라주가 덜 찼으면 그때까지 채워진 PICK만 담겨 나간다.
+   */
+  const submitContact = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (isSubmittingContact) return
+    const normalizedEmail = email.trim()
+    if (!EMAIL_PATTERN.test(normalizedEmail)) {
+      setContactMessage('이메일 주소를 확인해주세요.')
+      return
+    }
+    if (!state.sessionId) {
+      setContactMessage('세션을 확인하지 못했어요. 잠시 후 다시 시도해주세요.')
+      return
+    }
+
+    setIsSubmittingContact(true)
+    setContactMessage('')
+    try {
+      await createContact(state.sessionId, {
+        email: normalizedEmail,
+        productId: state.productId ?? undefined,
+        contentTopic: 'personalized_product_content',
+      })
+      registerPersonalizedMailRecipient(state.sessionId, normalizedEmail)
+      // 고객이 먼저 신청한 경로라 '제안(contact_offer)'은 남기지 않는다. 수집 사실만 기록하면
+      // 세션 상태의 cb6Handled·contactCaptured가 함께 세워진다.
+      dispatch({ type: SESSION_ACTIONS.recordContactCaptured, channel: 'email', blockerCode: 'CB6' })
+      if (state.currentSku) dispatch({ type: SESSION_ACTIONS.recordContentSent, sku: state.currentSku })
+      // 새로고침 뒤에도 서버가 뒤늦게 보낸 CB5·CB6 제안이 다시 뜨지 않도록 노출분을 소진시킨다.
+      consumeBlockerExposureGroup(state.sessionId, 'CB56')
+      setIsContactFormOpen(false)
+      setEmail('')
+      setHasConsent(false)
+    } catch (error: unknown) {
+      console.error('콘텐츠 발송 요청에 실패했습니다.', error)
+      setContactMessage('발송 요청을 전달하지 못했어요. 잠시 후 다시 시도해주세요.')
+    } finally {
+      setIsSubmittingContact(false)
+    }
+  }
+
+  const hasRequestedContent = state.blocker.contactCaptured
   const nickname = journeyCard?.nickname || state.nickname || '고객'
 
   return (
@@ -182,7 +234,54 @@ export function JourneyCardTopSheet() {
             >
               {isSavingImage ? '저장 중…' : '이미지 저장하기'}
             </button>
+            <button
+              aria-expanded={isContactFormOpen}
+              className="stage-c-action-button"
+              disabled={hasRequestedContent}
+              onClick={() => { setIsContactFormOpen((isOpen) => !isOpen); setContactMessage('') }}
+              type="button"
+            >
+              {hasRequestedContent ? '컨텐츠 신청 완료' : '컨텐츠 받기'}
+            </button>
           </div>
+          {hasRequestedContent && (
+            <p className="stage-top-sheet__contact-note">
+              등록하신 이메일로 콘텐츠를 보내드렸어요.
+            </p>
+          )}
+          {isContactFormOpen && !hasRequestedContent && (
+            <form className="stage-top-sheet__contact-form" onSubmit={submitContact}>
+              <label className="sr-only" htmlFor="journey-card-contact-email">이메일</label>
+              <input
+                autoComplete="email"
+                className="stage-top-sheet__contact-input"
+                disabled={isSubmittingContact}
+                id="journey-card-contact-email"
+                inputMode="email"
+                placeholder="이메일"
+                type="email"
+                value={email}
+                onChange={(event) => { setEmail(event.target.value); setContactMessage('') }}
+              />
+              {contactMessage && <p className="stage-top-sheet__contact-error" role="alert">{contactMessage}</p>}
+              <label className="stage-top-sheet__contact-consent">
+                <input
+                  checked={hasConsent}
+                  disabled={isSubmittingContact}
+                  type="checkbox"
+                  onChange={(event) => setHasConsent(event.target.checked)}
+                />
+                <span>본인은 제품 관련 콘텐츠 제공을 위해 ㈜엠씨엠코리아의 개인정보처리방침에 따라 본인의 이메일 주소가 1회에 한해 수집·이용되며, 목적 달성 후 즉시 파기됨에 동의합니다.</span>
+              </label>
+              <button
+                className="stage-c-action-button stage-c-action-button--primary stage-top-sheet__contact-submit"
+                disabled={!email.trim() || !hasConsent || isSubmittingContact}
+                type="submit"
+              >
+                {isSubmittingContact ? '보내는 중…' : '콘텐츠 받기'}
+              </button>
+            </form>
+          )}
         </div>
         <span
           aria-label="위로 끌어 여권 닫기"
