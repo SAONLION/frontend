@@ -4,6 +4,7 @@ import type { PendingActionDetailDTO } from '../../api/types'
 import { isCustomerFacingBlocker, toCustomerBlockerCode } from './serverBlocker'
 import {
   getStoredBlockerExposureGroups,
+  MAX_BLOCKER_EXPOSURES_BY_GROUP,
   setStoredBlockerExposureGroups,
   type BlockerExposureGroup,
 } from '../session/sessionStorage'
@@ -12,11 +13,6 @@ import { useSession } from '../session/useSession'
 // 서버 Blocker 감지는 약 20초 주기다. 5초 폴링이면 고객 체감 지연을 거의 늘리지 않으면서
 // foreground 세션의 조회량을 분당 15회에서 12회로 낮춘다.
 const POLL_INTERVAL_MS = 5_000
-
-const MAX_EXPOSURES_BY_GROUP: Readonly<Record<BlockerExposureGroup, number>> = {
-  CB3: 1,
-  CB56: 1,
-}
 
 function actionSignature(action: PendingActionDetailDTO): string {
   // 서버가 "dismissed" 응답을 처리하지 못한 경우 동일 조건을 새 actionId로 다시 만들 수 있다.
@@ -44,6 +40,13 @@ export function usePendingActionPolling(isEnabled: boolean) {
   const exposureCounts = useRef<Map<BlockerExposureGroup, number>>(new Map())
   // 시트가 떠 있는 동안의 다음 폴링은 현재 시트를 닫거나 다른 action으로 교체하면 안 된다.
   const visibleActionId = useRef<number | null>(null)
+  // 폴링 effect를 다시 걸지 않고 최신 값을 읽기 위한 거울. 이미 연락처를 받았다면 CB5·CB6
+  // 콘텐츠 제안은 물을 것이 없다(여권 탑시트에서 미리 신청한 경우가 여기에 해당한다).
+  const hasContactCaptured = useRef(state.blocker.contactCaptured)
+
+  useEffect(() => {
+    hasContactCaptured.current = state.blocker.contactCaptured
+  }, [state.blocker.contactCaptured])
 
   // 종료 세션 복구로 새 세션을 받으면 이전 고객의 거절 상태를 물려주지 않는다.
   useEffect(() => {
@@ -74,13 +77,21 @@ export function usePendingActionPolling(isEnabled: boolean) {
             return
           }
           const exposureGroup = next ? toExposureGroup(next) : null
+          // 이 훅 바깥(여권 탑시트의 콘텐츠 신청)에서도 노출분을 소진시킬 수 있다.
+          // 띄울 후보가 있을 때만 저장소를 다시 읽어 더 큰 쪽으로 맞춘다.
+          if (exposureGroup !== null) {
+            getStoredBlockerExposureGroups(sessionId).forEach((storedCount, group) => {
+              if ((exposureCounts.current.get(group) ?? 0) < storedCount) exposureCounts.current.set(group, storedCount)
+            })
+          }
           if (
             !next
             || respondedIds.current.has(next.actionId)
             || dismissedSignatures.current.has(actionSignature(next))
             || !isCustomerFacingBlocker(next.blockerType, next.ruleGroup)
             || exposureGroup === null
-            || (exposureCounts.current.get(exposureGroup) ?? 0) >= MAX_EXPOSURES_BY_GROUP[exposureGroup]
+            || (exposureCounts.current.get(exposureGroup) ?? 0) >= MAX_BLOCKER_EXPOSURES_BY_GROUP[exposureGroup]
+            || (exposureGroup === 'CB56' && hasContactCaptured.current)
           ) {
             setAction(null)
             return

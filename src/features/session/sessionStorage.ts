@@ -5,6 +5,11 @@ const BLOCKER_EXPOSURE_STORAGE_KEY = 'tagon.blockerExposure'
 /** 고객에게는 CB3과 통합 콘텐츠 제안(CB5·CB6)을 각각 세션당 1회만 보여준다. */
 export type BlockerExposureGroup = 'CB3' | 'CB56'
 
+export const MAX_BLOCKER_EXPOSURES_BY_GROUP: Readonly<Record<BlockerExposureGroup, number>> = {
+  CB3: 1,
+  CB56: 1,
+}
+
 type StoredBlockerExposure = {
   sessionId: string
   groups: readonly BlockerExposureGroup[]
@@ -154,4 +159,16 @@ export function setStoredBlockerExposureGroups(sessionId: string, exposureCounts
   } catch {
     // ignore
   }
+}
+
+/**
+ * 남은 노출분을 모두 소진 처리한다.
+ *
+ * 고객이 스스로 콘텐츠를 신청했다면(여권 탑시트의 [컨텐츠 받기]) 서버가 뒤늦게 같은 제안을
+ * 내려보내도 다시 물을 이유가 없다. 새로고침 뒤에도 유지되도록 메모리가 아닌 저장소에 남긴다.
+ */
+export function consumeBlockerExposureGroup(sessionId: string, group: BlockerExposureGroup): void {
+  const counts = new Map(getStoredBlockerExposureGroups(sessionId))
+  counts.set(group, MAX_BLOCKER_EXPOSURES_BY_GROUP[group])
+  setStoredBlockerExposureGroups(sessionId, counts)
 }

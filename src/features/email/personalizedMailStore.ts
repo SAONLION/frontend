@@ -1,27 +1,25 @@
 import { sendPersonalizedEmail } from '../../api/email'
 
 /**
- * 개인화 추천 메일의 "받는 사람 등록"과 "발송 시점"을 잇는 저장소.
+ * 개인화 추천 메일의 "받는 사람 등록"과 "발송"을 잇는 저장소.
  *
- * 메일 주소는 CB6 블로커의 F2-2 화면에서 미리 받지만, 메일 본문의 PICK 4칸은
- * 태그 이력으로 채워지므로 **여권 콜라주 4칸이 다 찬 뒤에 보내야** 빈 칸 없이 나간다.
- * 그래서 두 사건(주소 등록, 4칸 완성)이 어느 순서로 일어나든 둘 다 갖춰진 순간
- * 정확히 한 번 발송한다. CB6이 4칸 완성 전에 뜨면 등록만 해 두었다가 완성 때 보내고,
- * 완성 후에 떴다면 등록 즉시 보낸다.
+ * 주소를 받은 순간 바로 보낸다. 메일 본문의 PICK 4칸은 태그 이력으로 채워지는데,
+ * 서버가 채워진 개수(`filledPickCount`)만큼만 넣어 보내주므로 **여권 콜라주가 덜 찼어도
+ * 고객은 콘텐츠를 받는다.** 4칸을 다 채우지 않고 매장을 떠나는 손님이 아무것도 못 받던
+ * 구멍을 막기 위한 규칙이다.
  *
- * 발송 실패 시에는 보낸 것으로 치지 않는다 — 다음 완성 관찰(여권 열람, B1 복귀)에서
- * 다시 시도한다.
+ * 세션당 한 번만 보낸다. 발송에 실패하면 보낸 것으로 치지 않고, 고객이 앱으로 돌아오는
+ * 다음 지점(여권 열람, B1 복귀)에서 다시 시도한다.
  */
 let recipientEmail: string | null = null
-let hasObservedCompletion = false
 let hasSent = false
 let isSending = false
 
 function trySend(sessionId: string): void {
-  if (!recipientEmail || !hasObservedCompletion || hasSent || isSending) return
+  if (!recipientEmail || hasSent || isSending) return
   const email = recipientEmail
   isSending = true
-  // F2-2 동의 없이는 제출 자체가 안 되므로 consentMarketing은 항상 true다.
+  // 동의 없이는 제출 자체가 안 되므로 consentMarketing은 항상 true다.
   sendPersonalizedEmail(sessionId, { email, consentMarketing: true })
     .then(() => {
       hasSent = true
@@ -34,22 +32,20 @@ function trySend(sessionId: string): void {
     })
 }
 
-/** F2-2에서 이메일 제출이 성공했을 때 호출한다. */
+/** 이메일 제출이 성공했을 때 호출한다(F2-2, 여권 탑시트의 콘텐츠 신청). */
 export function registerPersonalizedMailRecipient(sessionId: string, email: string): void {
   recipientEmail = email
   trySend(sessionId)
 }
 
-/** 여권 콜라주 4칸이 다 찬 것을 관찰한 곳(B1 복귀, 여권 탑시트)에서 호출한다. */
-export function notifyJourneyCompleted(sessionId: string): void {
-  hasObservedCompletion = true
+/** 앞선 발송이 실패해 아직 남아 있다면 다시 시도한다. 보낼 것이 없으면 아무 일도 하지 않는다. */
+export function retryPendingPersonalizedMail(sessionId: string): void {
   trySend(sessionId)
 }
 
 /** 세션이 새로 발급되면 이전 손님의 주소·발송 이력을 지운다. */
 export function resetPersonalizedMail(): void {
   recipientEmail = null
-  hasObservedCompletion = false
   hasSent = false
   isSending = false
 }
