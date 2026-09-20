@@ -17,6 +17,12 @@ import { JourneyPassportCard } from './JourneyPassportCard'
 
 const CLOSE_ANIMATION_MS = 420
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const PASSPORT_CAPTURE_SCALE = 2
+const PASSPORT_CAPTURE_PADDING_REM = 1
+
+function supportsNativeForeignObjectCapture(userAgent: string): boolean {
+  return /(?:Chrome|Chromium|CriOS|Edg|OPR)\//.test(userAgent)
+}
 
 /**
  * 여권 카드 탑시트. 배경 화면을 언마운트하지 않는 비차단 시트라는 점, 손잡이를 끌어 닫는 방식,
@@ -121,12 +127,13 @@ export function JourneyCardTopSheet() {
     try {
       // 캡처 직전에 번들 글꼴 로딩까지 기다려 웹 카드와 PNG의 글자 모양을 맞춘다.
       await document.fonts.ready
-      // html-to-image(svg foreignObject 방식)는 WebKit/Safari에서 카드 오른쪽이 잘리는 문제가 있어
-      // DOM을 직접 순회해 그리는 html2canvas를 계속 사용한다. S3가 CORS를 허용하므로
-      // useCORS를 켜야 콜라주 제품 이미지를 오염 없이 PNG에 포함할 수 있다.
+      // Chromium은 native foreignObject가 브라우저의 실제 CSS 레이아웃을 보존해 카드의
+      // 종횡비·absolute 좌표를 정확히 저장한다. WebKit은 이 방식에서 카드 오른쪽이
+      // 잘리므로 기존 Canvas 렌더러를 사용한다. S3가 CORS를 허용하므로 useCORS를 켠다.
       const canvas = await html2canvas(passportCardRef.current, {
         backgroundColor: null,
-        scale: 2,
+        scale: PASSPORT_CAPTURE_SCALE,
+        foreignObjectRendering: supportsNativeForeignObjectCapture(navigator.userAgent),
         useCORS: true,
         imageTimeout: 15_000,
         onclone: (_, clonedPassportCard) => {
@@ -149,8 +156,17 @@ export function JourneyCardTopSheet() {
           })
         },
       })
+      // 카드의 실제 캡처 범위는 유지하면서, 저장 PNG에만 사방 1rem 투명 여백을 둔다.
+      const rootFontSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
+      const padding = Math.round(rootFontSize * PASSPORT_CAPTURE_PADDING_REM * PASSPORT_CAPTURE_SCALE)
+      const paddedCanvas = document.createElement('canvas')
+      paddedCanvas.width = canvas.width + padding * 2
+      paddedCanvas.height = canvas.height + padding * 2
+      const context = paddedCanvas.getContext('2d')
+      if (!context) throw new Error('이미지 저장용 캔버스를 만들지 못했습니다.')
+      context.drawImage(canvas, padding, padding)
       const link = document.createElement('a')
-      link.href = canvas.toDataURL('image/png')
+      link.href = paddedCanvas.toDataURL('image/png')
       link.download = `MCM_passport_${journeyCard?.sessionCode ?? state.sessionId ?? 'card'}.png`
       link.click()
     } catch (error) {
