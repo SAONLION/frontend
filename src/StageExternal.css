@@ -425,6 +425,17 @@
   background: #1e1710;
 }
 
+/* 저장 전용 카드는 탑시트의 스크롤·translate 합성 레이어 밖에서 렌더한다.
+   화면에는 보이지 않지만, 실제 카드와 같은 CSS 레이아웃을 유지해 캡처 기준으로 쓴다. */
+.stage-journey-card-export-source {
+  position: fixed;
+  top: 0;
+  left: -10000px;
+  width: 299.7px;
+  height: 407.7px;
+  pointer-events: none;
+}
+
 .stage-top-sheet__headline h1 {
   font-size: clamp(1.25rem, 5.1vw, 1.5rem);
 }

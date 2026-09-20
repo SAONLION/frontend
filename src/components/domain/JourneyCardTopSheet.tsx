@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent, type PointerEvent } from 'react'
+import { createPortal } from 'react-dom'
 import html2canvas from 'html2canvas-pro'
 import { ApiError } from '../../api/client'
 import { createContact } from '../../api/contacts'
@@ -130,8 +131,7 @@ export function JourneyCardTopSheet() {
         useCORS: true,
         imageTimeout: 15_000,
         onclone: (_, clonedPassportCard) => {
-          // html2canvas-pro는 탑시트의 scrollTop까지 복제한다. 카드의 실제 경계와
-          // 부모 스크롤 좌표를 유지해야 내부 absolute 요소가 원래 자리에서 렌더된다.
+          // 캡처 카드는 탑시트 바깥 포털에 있어 부모 스크롤·합성 좌표의 영향을 받지 않는다.
           // 화면에서 이미 끝난 카드 채움 모션만 저장본에서 최종 상태로 고정한다.
           clonedPassportCard.querySelectorAll<HTMLElement>('.stage-b-journey-card-photo').forEach((element) => {
             element.style.opacity = '1'
@@ -220,6 +220,7 @@ export function JourneyCardTopSheet() {
   const nickname = journeyCard?.nickname || state.nickname || '고객'
 
   return (
+    <>
     <div className={`stage-top-sheet${isClosing ? ' stage-top-sheet--closing' : ''}`}>
       {/* 여권은 비차단 탑시트다. 바깥 화면을 가리거나 조작을 막지 않으며, 손잡이로 닫는다. */}
       <div
@@ -233,7 +234,7 @@ export function JourneyCardTopSheet() {
             variant="md"
           />
           <div className="stage-b-journey-card-capture">
-            <JourneyPassportCard journeyCard={journeyCard} ref={passportCardRef} />
+            <JourneyPassportCard journeyCard={journeyCard} />
           </div>
           <div className="stage-top-sheet__actions">
             <button
@@ -303,5 +304,12 @@ export function JourneyCardTopSheet() {
         />
       </div>
     </div>
+    {createPortal(
+      <div aria-hidden="true" className="stage-journey-card-export-source">
+        <JourneyPassportCard journeyCard={journeyCard} ref={passportCardRef} />
+      </div>,
+      document.body,
+    )}
+    </>
   )
 }
