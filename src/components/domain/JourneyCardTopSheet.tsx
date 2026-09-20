@@ -129,18 +129,20 @@ export function JourneyCardTopSheet() {
         scale: 2,
         useCORS: true,
         imageTimeout: 15_000,
-        onclone: (document) => {
-          // 화면에서 이미 끝난 카드 채움 모션을 저장본에서도 같은 최종 상태로 고정한다.
-          document.querySelectorAll<HTMLElement>('.stage-b-journey-card-photo').forEach((element) => {
+        onclone: (_, clonedPassportCard) => {
+          // html2canvas-pro는 탑시트의 scrollTop까지 복제한다. 카드의 실제 경계와
+          // 부모 스크롤 좌표를 유지해야 내부 absolute 요소가 원래 자리에서 렌더된다.
+          // 화면에서 이미 끝난 카드 채움 모션만 저장본에서 최종 상태로 고정한다.
+          clonedPassportCard.querySelectorAll<HTMLElement>('.stage-b-journey-card-photo').forEach((element) => {
             element.style.opacity = '1'
             element.style.transform = 'scale(1)'
             element.style.transition = 'none'
           })
-          document.querySelectorAll<HTMLElement>('.stage-b-journey-card-value').forEach((element) => {
+          clonedPassportCard.querySelectorAll<HTMLElement>('.stage-b-journey-card-value').forEach((element) => {
             element.style.opacity = '0.75'
             element.style.transition = 'none'
           })
-          document.querySelectorAll<HTMLElement>('.stage-b-journey-card-completion-stamp').forEach((element) => {
+          clonedPassportCard.querySelectorAll<HTMLElement>('.stage-b-journey-card-completion-stamp').forEach((element) => {
             element.style.opacity = '1'
             element.style.animation = 'none'
             element.style.transform = 'scale(1) rotate(0deg)'
