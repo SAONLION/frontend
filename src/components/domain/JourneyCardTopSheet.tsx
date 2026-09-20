@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type FormEvent, type PointerEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type FormEvent, type PointerEvent } from 'react'
 import { createPortal } from 'react-dom'
 import html2canvas from 'html2canvas-pro'
 import { ApiError } from '../../api/client'
@@ -47,6 +47,7 @@ export function JourneyCardTopSheet() {
   const dragStartYRef = useRef<number | null>(null)
   const dragOffsetRef = useRef(0)
   const passportCardRef = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => () => {
     if (closeTimerRef.current !== null) window.clearTimeout(closeTimerRef.current)
@@ -74,7 +75,7 @@ export function JourneyCardTopSheet() {
     return () => { cancelled = true }
   }, [state.sessionId])
 
-  const close = () => {
+  const close = useCallback(() => {
     if (isClosing) return
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reducedMotion) {
@@ -85,26 +86,40 @@ export function JourneyCardTopSheet() {
     closeTimerRef.current = window.setTimeout(() => {
       dispatch({ type: SESSION_ACTIONS.setActiveOverlay, overlay: null })
     }, CLOSE_ANIMATION_MS)
-  }
+  }, [dispatch, isClosing])
 
-  const startSheetDrag = (event: PointerEvent<HTMLSpanElement>) => {
+  useEffect(() => {
+    const closeOnOutsidePointerDown = (event: globalThis.PointerEvent) => {
+      if (!(event.target instanceof Node) || panelRef.current?.contains(event.target)) return
+      close()
+    }
+
+    document.addEventListener('pointerdown', closeOnOutsidePointerDown, true)
+    return () => document.removeEventListener('pointerdown', closeOnOutsidePointerDown, true)
+  }, [close])
+
+  const startSheetDrag = (event: PointerEvent<HTMLButtonElement>) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return
+    event.preventDefault()
+    event.stopPropagation()
     dragStartYRef.current = event.clientY
     setIsDragging(true)
     event.currentTarget.setPointerCapture(event.pointerId)
   }
 
-  const moveSheetDrag = (event: PointerEvent<HTMLSpanElement>) => {
+  const moveSheetDrag = (event: PointerEvent<HTMLButtonElement>) => {
     const startY = dragStartYRef.current
     if (startY === null) return
+    event.preventDefault()
     // 위로 끌 때만 따라간다. 아래로는 늘어나지 않는다.
     const nextOffset = Math.min(0, event.clientY - startY)
     dragOffsetRef.current = nextOffset
     setDragOffset(nextOffset)
   }
 
-  const endSheetDrag = (event: PointerEvent<HTMLSpanElement>) => {
+  const endSheetDrag = (event: PointerEvent<HTMLButtonElement>) => {
     if (dragStartYRef.current === null) return
+    event.preventDefault()
     dragStartYRef.current = null
     setIsDragging(false)
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
@@ -225,6 +240,7 @@ export function JourneyCardTopSheet() {
       {/* 여권은 비차단 탑시트다. 바깥 화면을 가리거나 조작을 막지 않으며, 손잡이로 닫는다. */}
       <div
         className={`stage-top-sheet__panel${isDragging ? ' stage-top-sheet__panel--dragging' : ''}`}
+        ref={panelRef}
         style={{ translate: `0 ${dragOffset}px` } as CSSProperties}
       >
         <div className="stage-top-sheet__content">
@@ -294,13 +310,14 @@ export function JourneyCardTopSheet() {
             </form>
           )}
         </div>
-        <span
+        <button
           aria-label="위로 끌어 여권 닫기"
           className="stage-top-sheet__drag-handle"
           onPointerCancel={endSheetDrag}
           onPointerDown={startSheetDrag}
           onPointerMove={moveSheetDrag}
           onPointerUp={endSheetDrag}
+          type="button"
         />
       </div>
     </div>
