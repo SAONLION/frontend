@@ -19,7 +19,12 @@ import { JourneyPassportCard } from './JourneyPassportCard'
 const CLOSE_ANIMATION_MS = 420
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const PASSPORT_CAPTURE_SCALE = 2
-const PASSPORT_CAPTURE_PADDING_REM = 1
+
+function usesPortalExportSource(userAgent: string): boolean {
+  // Safari의 Canvas 렌더러는 화면에 있는 여권 프레임을 정확히 보존한다. Chromium은
+  // 스크롤 시트 밖 포털 프레임을 써야 absolute 요소의 좌표가 흔들리지 않는다.
+  return !/AppleWebKit/.test(userAgent) || /(?:Chrome|Chromium|CriOS|Edg|OPR)\//.test(userAgent)
+}
 
 /**
  * 여권 카드 탑시트. 배경 화면을 가리거나 조작을 막지 않는 비차단 시트이며,
@@ -46,7 +51,8 @@ export function JourneyCardTopSheet() {
   const closeTimerRef = useRef<number | null>(null)
   const dragStartYRef = useRef<number | null>(null)
   const dragOffsetRef = useRef(0)
-  const passportCardRef = useRef<HTMLDivElement>(null)
+  const visibleCaptureFrameRef = useRef<HTMLDivElement>(null)
+  const portalCaptureFrameRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => () => {
@@ -133,50 +139,42 @@ export function JourneyCardTopSheet() {
   }
 
   const saveImage = async () => {
-    if (!passportCardRef.current || isSavingImage) return
+    const captureFrame = usesPortalExportSource(navigator.userAgent)
+      ? portalCaptureFrameRef.current
+      : visibleCaptureFrameRef.current
+    if (!captureFrame || isSavingImage) return
     setIsSavingImage(true)
     try {
       // 캡처 직전에 번들 글꼴 로딩까지 기다려 웹 카드와 PNG의 글자 모양을 맞춘다.
       await document.fonts.ready
-      // 동일한 Canvas 렌더러를 사용해야 Safari·Chrome 모두에서 카드 좌표가 일관된다.
-      // S3가 CORS를 허용하므로 useCORS를 켠다.
-      const canvas = await html2canvas(passportCardRef.current, {
-        backgroundColor: null,
+      // 선택된 프레임 자체가 갈색 배경과 사방 1rem 여백을 가진다. S3가 CORS를
+      // 허용하므로 useCORS를 켠다.
+      const canvas = await html2canvas(captureFrame, {
+        backgroundColor: '#1e1710',
         scale: PASSPORT_CAPTURE_SCALE,
         useCORS: true,
         imageTimeout: 15_000,
-        onclone: (_, clonedPassportCard) => {
-          // 캡처 카드는 탑시트 바깥 포털에 있어 부모 스크롤·합성 좌표의 영향을 받지 않는다.
+        onclone: (_, clonedCaptureFrame) => {
+          // Chromium은 탑시트 바깥 포털 프레임을, Safari는 화면 프레임을 사용한다.
           // 화면에서 이미 끝난 카드 채움 모션만 저장본에서 최종 상태로 고정한다.
-          clonedPassportCard.querySelectorAll<HTMLElement>('.stage-b-journey-card-photo').forEach((element) => {
+          clonedCaptureFrame.querySelectorAll<HTMLElement>('.stage-b-journey-card-photo').forEach((element) => {
             element.style.opacity = '1'
             element.style.transform = 'scale(1)'
             element.style.transition = 'none'
           })
-          clonedPassportCard.querySelectorAll<HTMLElement>('.stage-b-journey-card-value').forEach((element) => {
+          clonedCaptureFrame.querySelectorAll<HTMLElement>('.stage-b-journey-card-value').forEach((element) => {
             element.style.opacity = '0.75'
             element.style.transition = 'none'
           })
-          clonedPassportCard.querySelectorAll<HTMLElement>('.stage-b-journey-card-completion-stamp').forEach((element) => {
+          clonedCaptureFrame.querySelectorAll<HTMLElement>('.stage-b-journey-card-completion-stamp').forEach((element) => {
             element.style.opacity = '1'
             element.style.animation = 'none'
             element.style.transform = 'scale(1) rotate(0deg)'
           })
         },
       })
-      // 카드의 실제 캡처 범위는 유지하면서, 저장 PNG에만 시트 배경을 사방 1rem 포함한다.
-      const rootFontSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
-      const padding = Math.round(rootFontSize * PASSPORT_CAPTURE_PADDING_REM * PASSPORT_CAPTURE_SCALE)
-      const paddedCanvas = document.createElement('canvas')
-      paddedCanvas.width = canvas.width + padding * 2
-      paddedCanvas.height = canvas.height + padding * 2
-      const context = paddedCanvas.getContext('2d')
-      if (!context) throw new Error('이미지 저장용 캔버스를 만들지 못했습니다.')
-      context.fillStyle = '#1e1710'
-      context.fillRect(0, 0, paddedCanvas.width, paddedCanvas.height)
-      context.drawImage(canvas, padding, padding)
       const link = document.createElement('a')
-      link.href = paddedCanvas.toDataURL('image/png')
+      link.href = canvas.toDataURL('image/png')
       link.download = `MCM_passport_${journeyCard?.sessionCode ?? state.sessionId ?? 'card'}.png`
       link.click()
     } catch (error) {
@@ -249,7 +247,7 @@ export function JourneyCardTopSheet() {
             headline={`${nickname}님을 위한 여권을 저장해보세요!`}
             variant="md"
           />
-          <div className="stage-b-journey-card-capture">
+          <div className="stage-b-journey-card-capture" ref={visibleCaptureFrameRef}>
             <JourneyPassportCard journeyCard={journeyCard} />
           </div>
           <div className="stage-top-sheet__actions">
@@ -322,8 +320,8 @@ export function JourneyCardTopSheet() {
       </div>
     </div>
     {createPortal(
-      <div aria-hidden="true" className="stage-journey-card-export-source">
-        <JourneyPassportCard journeyCard={journeyCard} ref={passportCardRef} />
+      <div aria-hidden="true" className="stage-journey-card-export-source" ref={portalCaptureFrameRef}>
+        <JourneyPassportCard journeyCard={journeyCard} />
       </div>,
       document.body,
     )}
