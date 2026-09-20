@@ -99,12 +99,13 @@ export function ProductCoverflow({
               className={`stage-c-coverflow__card stage-c-coverflow__card--${variant}${isActive ? ' is-active' : ''}`}
               drag={reducedMotion ? false : 'x'}
               dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.16}
+              dragElastic={0.22}
               key={image}
               onClick={() => select(index)}
               onDragEnd={(_, info) => {
-                if (info.offset.x < -164 || info.velocity.x < -1520) select(activeIndex + 1)
-                if (info.offset.x > 164 || info.velocity.x > 1520) select(activeIndex - 1)
+                // 모바일에서 짧게 밀어도 다음 컷으로 넘길 수 있게 임계값을 낮춘다.
+                if (info.offset.x < -72 || info.velocity.x < -600) select(activeIndex + 1)
+                if (info.offset.x > 72 || info.velocity.x > 600) select(activeIndex - 1)
               }}
               style={{ zIndex: images.length - Math.abs(distance) }}
               transition={{ type: 'spring', stiffness: 220, damping: 28, mass: 0.95 }}
