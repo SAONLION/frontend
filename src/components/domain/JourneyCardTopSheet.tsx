@@ -20,14 +20,9 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const PASSPORT_CAPTURE_SCALE = 2
 const PASSPORT_CAPTURE_PADDING_REM = 1
 
-function supportsNativeForeignObjectCapture(userAgent: string): boolean {
-  return /(?:Chrome|Chromium|CriOS|Edg|OPR)\//.test(userAgent)
-}
-
 /**
- * 여권 카드 탑시트. 배경 화면을 언마운트하지 않는 비차단 시트라는 점, 손잡이를 끌어 닫는 방식,
- * 닫힘 모션까지 하단 직원 호출 시트(EOverlay)와 같은 규칙을 따른다. 방향만 위쪽이다.
- * 디자인상 닫기(X) 버튼은 두지 않는다 — 손잡이 드래그와 배경 탭으로 닫는다.
+ * 여권 카드 탑시트. 배경 화면을 가리거나 조작을 막지 않는 비차단 시트이며,
+ * 손잡이를 위로 끌어 닫는다. 닫힘 모션만 하단 직원 호출 시트(EOverlay)와 공유한다.
  */
 export function JourneyCardTopSheet() {
   const { state, dispatch } = useSession()
@@ -127,13 +122,11 @@ export function JourneyCardTopSheet() {
     try {
       // 캡처 직전에 번들 글꼴 로딩까지 기다려 웹 카드와 PNG의 글자 모양을 맞춘다.
       await document.fonts.ready
-      // Chromium은 native foreignObject가 브라우저의 실제 CSS 레이아웃을 보존해 카드의
-      // 종횡비·absolute 좌표를 정확히 저장한다. WebKit은 이 방식에서 카드 오른쪽이
-      // 잘리므로 기존 Canvas 렌더러를 사용한다. S3가 CORS를 허용하므로 useCORS를 켠다.
+      // 동일한 Canvas 렌더러를 사용해야 Safari·Chrome 모두에서 카드 좌표가 일관된다.
+      // S3가 CORS를 허용하므로 useCORS를 켠다.
       const canvas = await html2canvas(passportCardRef.current, {
         backgroundColor: null,
         scale: PASSPORT_CAPTURE_SCALE,
-        foreignObjectRendering: supportsNativeForeignObjectCapture(navigator.userAgent),
         useCORS: true,
         imageTimeout: 15_000,
         onclone: (_, clonedPassportCard) => {
@@ -156,7 +149,7 @@ export function JourneyCardTopSheet() {
           })
         },
       })
-      // 카드의 실제 캡처 범위는 유지하면서, 저장 PNG에만 사방 1rem 투명 여백을 둔다.
+      // 카드의 실제 캡처 범위는 유지하면서, 저장 PNG에만 시트 배경을 사방 1rem 포함한다.
       const rootFontSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
       const padding = Math.round(rootFontSize * PASSPORT_CAPTURE_PADDING_REM * PASSPORT_CAPTURE_SCALE)
       const paddedCanvas = document.createElement('canvas')
@@ -164,6 +157,8 @@ export function JourneyCardTopSheet() {
       paddedCanvas.height = canvas.height + padding * 2
       const context = paddedCanvas.getContext('2d')
       if (!context) throw new Error('이미지 저장용 캔버스를 만들지 못했습니다.')
+      context.fillStyle = '#1e1710'
+      context.fillRect(0, 0, paddedCanvas.width, paddedCanvas.height)
       context.drawImage(canvas, padding, padding)
       const link = document.createElement('a')
       link.href = paddedCanvas.toDataURL('image/png')
@@ -226,8 +221,7 @@ export function JourneyCardTopSheet() {
 
   return (
     <div className={`stage-top-sheet${isClosing ? ' stage-top-sheet--closing' : ''}`}>
-      {/* 뒤 화면을 덮어 어둡게 하고 그 영역의 조작을 막는다. 눌러서 닫을 수도 있다. */}
-      <button aria-label="여권 닫기" className="stage-sheet-backdrop" onClick={close} type="button" />
+      {/* 여권은 비차단 탑시트다. 바깥 화면을 가리거나 조작을 막지 않으며, 손잡이로 닫는다. */}
       <div
         className={`stage-top-sheet__panel${isDragging ? ' stage-top-sheet__panel--dragging' : ''}`}
         style={{ translate: `0 ${dragOffset}px` } as CSSProperties}
