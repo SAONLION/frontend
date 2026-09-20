@@ -36,7 +36,9 @@ export default function AppLayout() {
 
   // 여권 버튼은 StageC·StageD 화면에만 둔다.
   const showsJourneyTrigger = location.pathname.startsWith('/stage-c/') || location.pathname.startsWith('/stage-d/');
-  useDocumentScrollLock(state.activeOverlay !== null);
+  // 여권 탑시트는 배경을 보며 위쪽에서 확인하는 비차단 시트다. 열려 있는 동안에도
+  // 문서를 스크롤할 수 있어야 하므로, 조작을 완전히 막는 직원 호출·완성 팝업만 잠근다.
+  useDocumentScrollLock(state.activeOverlay === 'E' || state.activeOverlay === 'journeyComplete');
 
   return (
     <div className="relative min-h-dvh w-full" onPointerDownCapture={(event) => rememberNavigationTrigger(event.target)}>
